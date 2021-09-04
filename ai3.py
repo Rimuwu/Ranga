@@ -1,7 +1,36 @@
+# -*- coding: utf-8 -*-
 import nextcord as discord
-from nextcord.ext import commands
-import config
+from nextcord.ext import tasks, commands
+# from discord_slash import SlashCommand, SlashContext
+import requests
+from PIL import Image, ImageFont, ImageDraw, ImageOps, ImageSequence, ImageFilter
+import io
+from io import BytesIO
+import random
+from random import choice
+import asyncio
 import time
+from datetime import datetime, timedelta
+import os
+import pymongo
+import math
+from fuzzywuzzy import fuzz
+import config
+import pprint
+
+
+client = pymongo.MongoClient(config.cluster_token)
+db = client.bot
+
+users = db.users
+backs = db.bs
+servers = db.servers
+clubs = db.clubs
+frames = db.frames
+settings = db.settings
+
+peoplesCD = {}
+start_time = time.time()
 
 bot = commands.Bot(command_prefix='$')
 
