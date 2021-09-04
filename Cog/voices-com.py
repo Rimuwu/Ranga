@@ -10,7 +10,7 @@ import pymongo
 import config
 
 sys.path.append("..")
-from AI2 import functions as funs
+from ai3 import functions as funs
 
 client = pymongo.MongoClient(config.cluster_token)
 db = client.bot

@@ -10,7 +10,7 @@ import time
 import pymongo
 
 sys.path.append("..")
-from AI2 import functions as funs
+from ai3 import functions as funs
 import config
 
 

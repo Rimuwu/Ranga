@@ -13,7 +13,7 @@ from io import BytesIO
 from datetime import datetime, timedelta
 
 sys.path.append("..")
-from AI2 import functions as funs
+from ai3 import functions as funs
 import config
 
 client = pymongo.MongoClient(config.cluster_token)
