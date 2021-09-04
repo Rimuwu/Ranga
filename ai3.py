@@ -36,14 +36,17 @@ start_time = time.time()
 
 def get_prefix(client, message):
     global servers
-    prefix_server = servers.find_one({"server": message.guild.id})["prefix"]
-    return str(prefix_server)
+    try:
+        prefix_server = servers.find_one({"server": message.guild.id})["prefix"]
+        return str(prefix_server)
+    except:
+        return "+"
 
 intents = discord.Intents.default()
 intents.members = True
 # , intents = intents
 
-bot = commands.AutoShardedBot(command_prefix = get_prefix, intents = intents , shard_count = 2)
+bot = commands.Bot(command_prefix = get_prefix)
 # slash = SlashCommand(bot, sync_commands=True)
 
 
