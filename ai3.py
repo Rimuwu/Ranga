@@ -47,7 +47,7 @@ intents = discord.Intents.default()
 intents.members = True
 # , intents = intents
 
-bot = commands.Bot(command_prefix = get_prefix)
+bot = commands.AutoShardedBot(command_prefix = get_prefix, intents = intents , shard_count = 2)
 # slash = SlashCommand(bot, sync_commands=True)
 
 
