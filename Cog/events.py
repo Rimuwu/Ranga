@@ -29,7 +29,6 @@ frames = db.frames
 settings = db.settings
 
 voice_dict = {}
-start = False
 
 stat_list = ['Помоги боту в развитии, подробнее +nitro',
                "Играю с клубком...",
@@ -119,17 +118,44 @@ class MainCog(commands.Cog):
         global users
         global servers
         global clubs
-        global start
         self.bot = bot
 
 
     @commands.Cog.listener()
     async def on_ready(self):
+        global start_time
+
+        channel = self.bot.get_channel(813056001229324308)
+        ping = self.bot.latency
+        ping_emoji = "🟩🔳🔳🔳🔳"
+
+        ping_list = [
+            {"ping": 0.100000000000000, "emoji": "🟧🟩🔳🔳🔳"},
+            {"ping": 0.150000000000000, "emoji": "🟥🟧🟩🔳🔳"},
+            {"ping": 0.200000000000000, "emoji": "🟥🟥🟧🟩🔳"},
+            {"ping": 0.250000000000000, "emoji": "🟥🟥🟥🟧🟩"},
+            {"ping": 0.300000000000000, "emoji": "🟥🟥🟥🟥🟧"},
+            {"ping": 0.350000000000000, "emoji": "🟥🟥🟥🟥🟥"}]
+
+        for ping_one in ping_list:
+            if ping > ping_one["ping"]:
+                ping_emoji = ping_one["emoji"]
+                break
+
+        time2 = time.time()
+        try:
+            await channel.send(f"Бот онлайн - Серверов: {len(self.bot.guilds)} - Команд: {len(self.bot.commands)}\n{ping_emoji} `{ping * 1000:.0f}ms`\nВремя на запуск: {functions.time_end(time2 - start_time)}")
+            print(f"Бот онлайн - Серверов: {len(self.bot.guilds)} - Команд: {len(self.bot.commands)} - Время на запуск: {functions.time_end(time2 - start_time)}")
+        except Exception:
+            await channel.send(f"Бот онлайн - Серверов: {len(self.bot.guilds)} - Команд: {len(self.bot.commands)}\n{ping_emoji} `{ping * 1000:.0f}ms`")
+            print(f"Бот онлайн - Серверов: {len(self.bot.guilds)} - Команд: {len(self.bot.commands)}")
+
         self.change_stats.start()
         self.mute_check.start()
         self.income_check.start()
         self.banner_change.start()
-        start = True
+
+        funs.start(True)
 
     @tasks.loop(seconds = 3600)
     async def premium_check(self):
@@ -715,7 +741,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        if start == False:
+        if funs.start() == False:
             return
 
         server = servers.find_one({"server": member.guild.id})
@@ -1006,7 +1032,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
-        if start == False:
+        if funs.start() == False:
             return
 
         server = servers.find_one({"server": member.guild.id})
@@ -1353,7 +1379,7 @@ class MainCog(commands.Cog):
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         global voice_dict
-        if start == False:
+        if funs.start() == False:
             return
 
         rr = ['🎍', '🎋', '💫', '🌪', ' 🔥', '🌟', '⚡️', '☄️', '💥', '🌚', '🌞', '🍬', '🍭', '🍡', '🌷', '🐾', '🍹', '🍸', '🍱', '🎆', '🎭', '💎', '🎨']
@@ -1457,7 +1483,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
-        if start == False:
+        if funs.start() == False:
             return
 
 
@@ -1615,7 +1641,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
-        if start == False:
+        if funs.start() == False:
             return
 
 
@@ -1673,7 +1699,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
-        if start == False:
+        if funs.start() == False:
             return
 
 
@@ -1778,7 +1804,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_channel_update(self, before, after):
-        if start == False:
+        if funs.start() == False:
             return
 
         try:
@@ -2000,7 +2026,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel):
-        if start == False:
+        if funs.start() == False:
             return
 
         try:
@@ -2086,7 +2112,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel):
-        if start == False:
+        if funs.start() == False:
             return
 
         try:
@@ -2129,7 +2155,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_ban(self, guild, user):
-        if start == False:
+        if funs.start() == False:
             return
 
         try:
@@ -2146,7 +2172,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_unban(self, guild, user):
-        if start == False:
+        if funs.start() == False:
             return
 
         try:
@@ -2163,7 +2189,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_emojis_update(self, guild, before, after):
-        if start == False:
+        if funs.start() == False:
             return
 
         try:
@@ -2195,7 +2221,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_invite_create(self, invite):
-        if start == False:
+        if funs.start() == False:
             return
 
         try:
@@ -2218,7 +2244,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_invite_delete(self, invite):
-        if start == False:
+        if funs.start() == False:
             return
 
         try:
@@ -2236,7 +2262,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
-        if start == False:
+        if funs.start() == False:
             return
 
         try:
@@ -2258,7 +2284,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
-        if start == False:
+        if funs.start() == False:
             return
 
         try:
@@ -2278,7 +2304,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_update(self, before, after):
-        if start == False:
+        if funs.start() == False:
             return
 
         try:
@@ -2381,7 +2407,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_role_create(self, role):
-        if start == False:
+        if funs.start() == False:
             return
 
         try:
@@ -2419,7 +2445,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_role_delete(self, role):
-        if start == False:
+        if funs.start() == False:
             return
 
         try:
@@ -2437,7 +2463,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_role_update(self, before, after):
-        if start == False:
+        if funs.start() == False:
             return
 
         try:

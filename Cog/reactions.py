@@ -11,7 +11,7 @@ sys.path.append("..")
 from ai3 import functions as funs
 import config
 
-client = pymongo.MongoClient(config.cluster_token)
+client = funs.mongo_c()
 db = client.bot
 servers = db.servers
 
