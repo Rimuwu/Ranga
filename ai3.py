@@ -47,6 +47,7 @@ intents = discord.Intents.default()
 intents.members = True
 # , intents = intents
 
+# bot = commands.Bot(command_prefix = get_prefix)
 bot = commands.AutoShardedBot(command_prefix = get_prefix, intents = intents , shard_count = 2)
 # slash = SlashCommand(bot, sync_commands=True)
 
@@ -1518,6 +1519,10 @@ async def on_message(message):
 
     server = servers.find_one({"server": message.guild.id})
 
+    if server == None:
+        functions.insert_server(message.guild)
+        server = servers.find_one({"server": message.guild.id})
+
     #не выполнение команды если человек в мьюте
     try:
         mm = server['mute_members'][f"{message.author.id}"]
@@ -1532,7 +1537,7 @@ async def on_message(message):
         pass
 
     try:
-        if message.content.split()[0] == f"<@{message.guild.me.id}>":
+        if bot.mentioned_in() == True:
             await message.channel.send(f"Мурр, мой префикс тут `{server['prefix']}`")
     except Exception:
         pass
@@ -1652,19 +1657,21 @@ async def on_message(message):
         except Exception:
             pass
 
+        try:
+            if message.channel.id == server['emoji']["emoji_channel"]:
+                if server['emoji']["emojis"] != []:
+                    try:
+                        for x in server['emoji']["emojis"]:
+                            await message.add_reaction(x)
+                    except Exception:
+                        pass
+        except Exception:
+            pass
 
-        if message.channel.id == server['emoji']["emoji_channel"]:
-            if server['emoji']["emojis"] != []:
-                try:
-                    for x in server['emoji']["emojis"]:
-                        await message.add_reaction(x)
-                except Exception:
-                    pass
-
-    # if functions.user_check(message.author, message.guild, 'dcheck') != False:
-    #     if cooldown(message.author.id, message.guild.id) == True:
-    #         if len(message.content) >= 5:
-    #             await lvl(message, server)
+    if functions.user_check(message.author, message.guild, 'dcheck') != False:
+        if cooldown(message.author.id, message.guild.id) == True:
+            if len(message.content) >= 5:
+                await lvl(message, server)
 
 
 

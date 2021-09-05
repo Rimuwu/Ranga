@@ -37,7 +37,7 @@ class voice(commands.Cog):
         else:
             channel = await self.bot.fetch_channel(ctx.author.voice.channel.id)
             try:
-                channel_owner = server['private_voices'][f'{channel.id}']
+                channel_owner = server['voice']['private_voices'][f'{channel.id}']
             except Exception:
                 await ctx.send("Вы находитесь не в приватном войс канале!", delete_after = 5.0)
                 return
@@ -72,7 +72,7 @@ class voice(commands.Cog):
         else:
             channel = await self.bot.fetch_channel(ctx.author.voice.channel.id)
             try:
-                channel_owner = server['private_voices'][f'{channel.id}']
+                channel_owner = server['voice']['private_voices'][f'{channel.id}']
             except Exception:
                 await ctx.send("Вы находитесь не в приватном войс канале!", delete_after = 5.0)
                 return
@@ -107,7 +107,7 @@ class voice(commands.Cog):
         else:
             channel = await self.bot.fetch_channel(ctx.author.voice.channel.id)
             try:
-                channel_owner = server['private_voices'][f'{channel.id}']
+                channel_owner = server['voice']['private_voices'][f'{channel.id}']
             except Exception:
                 await ctx.send("Вы находитесь не в приватном войс канале!", delete_after = 5.0)
                 return
@@ -142,7 +142,7 @@ class voice(commands.Cog):
         else:
             channel = await self.bot.fetch_channel(ctx.author.voice.channel.id)
             try:
-                channel_owner = server['private_voices'][f'{channel.id}']
+                channel_owner = server['voice']['private_voices'][f'{channel.id}']
             except Exception:
                 await ctx.send("Вы находитесь не в приватном войс канале!", delete_after = 5.0)
                 return
@@ -180,7 +180,7 @@ class voice(commands.Cog):
         else:
             channel = await self.bot.fetch_channel(ctx.author.voice.channel.id)
             try:
-                channel_owner = server['private_voices'][f'{channel.id}']
+                channel_owner = server['voice']['private_voices'][f'{channel.id}']
             except Exception:
                 await ctx.send("Вы находитесь не в приватном войс канале!", delete_after = 5.0)
                 return
@@ -213,7 +213,7 @@ class voice(commands.Cog):
         else:
             channel = await self.bot.fetch_channel(ctx.author.voice.channel.id)
             try:
-                channel_owner = server['private_voices'][f'{channel.id}']
+                channel_owner = server['voice']['private_voices'][f'{channel.id}']
             except Exception:
                 await ctx.send("Вы находитесь не в приватном войс канале!", delete_after = 5.0)
                 return
@@ -250,7 +250,7 @@ class voice(commands.Cog):
         else:
             channel = await self.bot.fetch_channel(ctx.author.voice.channel.id)
             try:
-                channel_owner = server['private_voices'][f'{channel.id}']
+                channel_owner = server['voice']['private_voices'][f'{channel.id}']
             except Exception:
                 await ctx.send("Вы находитесь не в приватном войс канале!", delete_after = 5.0)
                 return
@@ -287,7 +287,7 @@ class voice(commands.Cog):
         else:
             channel = await self.bot.fetch_channel(ctx.author.voice.channel.id)
             try:
-                channel_owner = server['private_voices'][f'{channel.id}']
+                channel_owner = server['voice']['private_voices'][f'{channel.id}']
             except Exception:
                 await ctx.send("Вы находитесь не в приватном войс канале!", delete_after = 5.0)
                 return
