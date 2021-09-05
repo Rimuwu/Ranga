@@ -31,7 +31,7 @@ settings = db.settings
 
 peoplesCD = []
 start_time = time.time()
-start = True
+start = False
 
 # префикс ======================================= #
 
@@ -1482,6 +1482,9 @@ async def punishment_mod(message, server, p, reason, shield):
 @bot.event
 async def on_message(message):
     global peoplesCD
+    if start == False:
+        return
+        
     s = settings.find_one({"sid": 1})
 
     if message.author.bot == True: return
