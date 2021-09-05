@@ -29,6 +29,7 @@ frames = db.frames
 settings = db.settings
 
 voice_dict = {}
+start = False
 
 stat_list = ['Помоги боту в развитии, подробнее +nitro',
                "Играю с клубком...",
@@ -118,6 +119,7 @@ class MainCog(commands.Cog):
         global users
         global servers
         global clubs
+        global start
         self.bot = bot
 
 
@@ -127,6 +129,7 @@ class MainCog(commands.Cog):
         self.mute_check.start()
         self.income_check.start()
         self.banner_change.start()
+        start = True
 
     @tasks.loop(seconds = 3600)
     async def premium_check(self):
@@ -712,8 +715,10 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        server = servers.find_one({"server": member.guild.id})
+        if start == False:
+            return
 
+        server = servers.find_one({"server": member.guild.id})
 
         if server['send']['joinsend'] != 777777777777777777 or server['send']['joinsend'] != None:
 
@@ -1001,6 +1006,9 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
+        if start == False:
+            return
+
         server = servers.find_one({"server": member.guild.id})
 
         if server['send']['leavensend'] != 777777777777777777 or server['send']['leavensend'] != None:
@@ -1345,6 +1353,9 @@ class MainCog(commands.Cog):
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         global voice_dict
+        if start == False:
+            return
+
         rr = ['🎍', '🎋', '💫', '🌪', ' 🔥', '🌟', '⚡️', '☄️', '💥', '🌚', '🌞', '🍬', '🍭', '🍡', '🌷', '🐾', '🍹', '🍸', '🍱', '🎆', '🎭', '💎', '🎨']
         server = servers.find_one({"server": member.guild.id})
         serv = server['server']
@@ -1446,6 +1457,8 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
+        if start == False:
+            return
 
 
         async def rr(l, func, message, payload, num):
@@ -1602,6 +1615,9 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
+        if start == False:
+            return
+
 
         async def rr(l, func, message, payload, num):
             guild = self.bot.get_guild(payload.guild_id)
@@ -1657,6 +1673,9 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
+        if start == False:
+            return
+
 
         async def on_nitro_boost(booster):
             server = servers.find_one({"server": booster.guild.id})
@@ -1759,6 +1778,9 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_channel_update(self, before, after):
+        if start == False:
+            return
+
         try:
             if type(before) == discord.channel.CategoryChannel:
                 words = ["категории", 'Категория', 'была обновлена.']
@@ -1978,6 +2000,9 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel):
+        if start == False:
+            return
+
         try:
             server = servers.find_one({"server": channel.guild.id})
 
@@ -2061,6 +2086,9 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel):
+        if start == False:
+            return
+
         try:
             server = servers.find_one({"server": channel.guild.id})
 
@@ -2101,6 +2129,9 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_ban(self, guild, user):
+        if start == False:
+            return
+
         try:
             server = servers.find_one({"server": guild.id})
 
@@ -2115,6 +2146,9 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_unban(self, guild, user):
+        if start == False:
+            return
+
         try:
             server = servers.find_one({"server": guild.id})
 
@@ -2129,6 +2163,9 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_emojis_update(self, guild, before, after):
+        if start == False:
+            return
+
         try:
             server = servers.find_one({"server": guild.id})
             if server['mod']['log_channel'] != {}:
@@ -2158,6 +2195,9 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_invite_create(self, invite):
+        if start == False:
+            return
+
         try:
             server = servers.find_one({"server": invite.guild.id})
             if server['mod']['log_channel'] != {}:
@@ -2178,6 +2218,9 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_invite_delete(self, invite):
+        if start == False:
+            return
+
         try:
             server = servers.find_one({"server": invite.guild.id})
             if server['mod']['log_channel'] != {}:
@@ -2193,6 +2236,9 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
+        if start == False:
+            return
+
         try:
             server = servers.find_one({"server": before.guild.id})
             if server['mod']['log_channel'] != {}:
@@ -2212,6 +2258,9 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
+        if start == False:
+            return
+
         try:
             server = servers.find_one({"server": message.guild.id})
             if server['mod']['log_channel'] != {}:
@@ -2229,6 +2278,9 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_update(self, before, after):
+        if start == False:
+            return
+
         try:
             server = servers.find_one({"server": before.id})
 
@@ -2329,6 +2381,9 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_role_create(self, role):
+        if start == False:
+            return
+
         try:
             server = servers.find_one({"server": role.guild.id})
             if server['mod']['log_channel'] != {}:
@@ -2364,6 +2419,9 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_role_delete(self, role):
+        if start == False:
+            return
+
         try:
             server = servers.find_one({"server": role.guild.id})
             if server['mod']['log_channel'] != {}:
@@ -2379,6 +2437,9 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_role_update(self, before, after):
+        if start == False:
+            return
+
         try:
             server = servers.find_one({"server": before.guild.id})
             if server['mod']['log_channel'] != {}:

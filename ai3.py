@@ -31,6 +31,7 @@ settings = db.settings
 
 peoplesCD = {}
 start_time = time.time()
+start = False
 
 # префикс ======================================= #
 
@@ -638,7 +639,17 @@ class functions:
 
     @staticmethod
     def mongo_c():
-        return pymongo.MongoClient(config.cluster_token)
+        global client
+        return client
+
+    @staticmethod
+    def start():
+        global start
+        if start == True:
+            return True
+        else:
+            return False
+
 
 # коги ======================================= #
 
@@ -914,6 +925,7 @@ async def on_connect():
 
 @bot.event
 async def on_ready():
+    global start
     global start_time
 
     channel = bot.get_channel(813056001229324308)
@@ -921,12 +933,12 @@ async def on_ready():
     ping_emoji = "🟩🔳🔳🔳🔳"
 
     ping_list = [
-        {"ping": 0.10000000000000000, "emoji": "🟧🟩🔳🔳🔳"},
-        {"ping": 0.15000000000000000, "emoji": "🟥🟧🟩🔳🔳"},
-        {"ping": 0.20000000000000000, "emoji": "🟥🟥🟧🟩🔳"},
-        {"ping": 0.25000000000000000, "emoji": "🟥🟥🟥🟧🟩"},
-        {"ping": 0.30000000000000000, "emoji": "🟥🟥🟥🟥🟧"},
-        {"ping": 0.35000000000000000, "emoji": "🟥🟥🟥🟥🟥"}]
+        {"ping": 0.1000000000000000, "emoji": "🟧🟩🔳🔳🔳"},
+        {"ping": 0.1500000000000000, "emoji": "🟥🟧🟩🔳🔳"},
+        {"ping": 0.2000000000000000, "emoji": "🟥🟥🟧🟩🔳"},
+        {"ping": 0.2500000000000000, "emoji": "🟥🟥🟥🟧🟩"},
+        {"ping": 0.3000000000000000, "emoji": "🟥🟥🟥🟥🟧"},
+        {"ping": 0.3500000000000000, "emoji": "🟥🟥🟥🟥🟥"}]
 
     for ping_one in ping_list:
         if ping > ping_one["ping"]:
@@ -940,6 +952,8 @@ async def on_ready():
     except Exception:
         await channel.send(f"Бот онлайн - Серверов: {len(bot.guilds)} - Команд: {len(bot.commands)}\n{ping_emoji} `{ping * 1000:.0f}ms`")
         print(f"Бот онлайн - Серверов: {len(bot.guilds)} - Команд: {len(bot.commands)}")
+
+start = True
 
 
 
@@ -1516,8 +1530,10 @@ async def punishment_mod(message, server, p, reason, shield):
 
 @bot.event
 async def on_message(message):
+    global start
 
-    t1 = time.time()
+    if start == False:
+        return
 
     s = settings.find_one({"sid": 1})
 
