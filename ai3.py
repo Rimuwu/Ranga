@@ -31,7 +31,7 @@ settings = db.settings
 
 peoplesCD = {}
 start_time = time.time()
-start = False
+start = True
 
 # префикс ======================================= #
 
