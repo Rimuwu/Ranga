@@ -81,7 +81,7 @@ class mod(commands.Cog):
             ).set_thumbnail(
             url= "https://pa1.narvii.com/6392/9b4dd5ba812d32198cbd5465e0d10b46153c2208_hq.gif"))
 
-    @commands.command(usage = '-', description = 'Задержка бота.', help = 'Бот', aliases = [''])
+    @commands.command(usage = '-', description = 'Задержка бота.', help = 'Бот', aliases = ['пинг'])
     async def ping(self, ctx):
         ping = self.bot.latency
         ping_emoji = "🟩🔳🔳🔳🔳"
@@ -97,7 +97,6 @@ class mod(commands.Cog):
         for ping_one in ping_list:
             if ping > ping_one["ping"]:
                 ping_emoji = ping_one["emoji"]
-                break
 
         message = await ctx.send("Пожалуйста, подождите. . .")
         await message.edit(content = f"Понг! {ping_emoji} `{ping * 1000:.0f}ms` :ping_pong:")

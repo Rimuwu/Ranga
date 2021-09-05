@@ -8,7 +8,7 @@ import sys
 import random
 from random import choice
 import asyncio
-import time, datetime
+import time
 import os
 import pymongo
 import math
@@ -36,7 +36,7 @@ stat_list = ['Помоги боту в развитии, подробнее +nit
                "Пинг 52к + баги == IT Котик",
                "Моя любимая рыбка - карась",
                'Мошенница - Акудама SSS ранга, Награда: 100.000.000$',
-               'Чем сильнее я станавлюсь, тем сильнее мои враги...',
+               'Чем сильнее я становлюсь, тем сильнее мои враги...',
                'IT | Демон | 1.0.9',
             ]
 
@@ -140,7 +140,6 @@ class MainCog(commands.Cog):
         for ping_one in ping_list:
             if ping > ping_one["ping"]:
                 ping_emoji = ping_one["emoji"]
-                break
 
         time2 = time.time()
         try:
@@ -679,7 +678,7 @@ class MainCog(commands.Cog):
         for ping_one in ping_list:
             if ping > ping_one["ping"]:
                 ping_emoji = ping_one["emoji"]
-                break
+
         async with aiohttp.ClientSession() as session:
             await discord.Webhook.partial(826513595700346921, "pnIDKoDIlsGr9SKX9FKue-oj6nuHlolCKQJHm7RTaB7JpgBa2NEhGIMpOzA5aHs0sRBS", session=session).send(
             embed=discord.Embed(title = f'{self.bot.user.name}',description=f"Шард с ID {shard_id} успешно запущен\nПинг: {shard.latency * 1000:.0f} {ping_emoji}", color=0xFFDB8B))

@@ -29,7 +29,7 @@ clubs = db.clubs
 frames = db.frames
 settings = db.settings
 
-peoplesCD = {}
+peoplesCD = []
 start_time = time.time()
 start = True
 
@@ -47,8 +47,8 @@ intents = discord.Intents.default()
 intents.members = True
 # , intents = intents
 
-# bot = commands.Bot(command_prefix = get_prefix, intents = intents)
-bot = commands.AutoShardedBot(command_prefix = get_prefix, intents = intents , shard_count = 2)
+bot = commands.Bot(command_prefix = get_prefix, intents = intents)
+# bot = commands.Bot(command_prefix = get_prefix, intents = intents )
 # slash = SlashCommand(bot, sync_commands=True)
 
 
@@ -1086,31 +1086,11 @@ async def global_chat(message, s, server):
     except Exception:
         pass
 
-def cooldown(user_id, guild_id):
-    # Возращаем True если пользователь может получить опыт, False если у пользователя есть задержка
+async def cooldown(user_id):
     global peoplesCD
-
-    try: #проверка
-        if peoplesCD[str(guild_id)][str(user_id)] <= time.time():
-            del peoplesCD[str(guild_id)][str(user_id)]
-            return True
-        else:
-            return False
-    except Exception:
-        pass
-
-    try: #добавление при не наличии пользователя
-        peoplesCD[str(guild_id)].update({ str(user_id): int(time.time()+60) })
-        return True
-    except Exception:
-        pass
-
-    try: #добавление при не наличии пользователя и сервера
-        peoplesCD.update({ str(guild_id): {str(user_id): int(time.time()+60) } })
-        return True
-    except Exception:
-        pass
-
+    peoplesCD.append(user_id)
+    await asyncio.sleep(60)
+    peoplesCD.remove(user_id)
 
 
 async def lvl_up_image(message, main, user, server):
@@ -1501,11 +1481,7 @@ async def punishment_mod(message, server, p, reason, shield):
 
 @bot.event
 async def on_message(message):
-    global start
-
-    if start == False:
-        return
-
+    global peoplesCD
     s = settings.find_one({"sid": 1})
 
     if message.author.bot == True: return
@@ -1551,7 +1527,7 @@ async def on_message(message):
 
         await global_chat(message, s, server)
 
-    if message.channel.id != gl:
+    elif message.channel.id != gl:
 
         if message.author.id in s['black list']: return
 
@@ -1620,7 +1596,7 @@ async def on_message(message):
                         if functions.cooldown_check(message.author, message.guild, ctx.command.name, 'check') == False:
                             if functions.bd_check(message.author) == True:
                                 await bot.process_commands(message) # Выполнение команды
-                                print(ctx.command.name, '\nno_errors')
+                                print(ctx.command.name, 'no_errors')
 
                                 if ctx.command.name in server['mod']['cooldowns'].keys():
                                     functions.cooldown_check(message.author, message.guild, ctx.command.name, 'add')
@@ -1652,7 +1628,7 @@ async def on_message(message):
 
                 except Exception:
                     await bot.process_commands(message)
-                    print(ctx.command.name, '\nerror')
+                    print(ctx.command.name, 'error')
 
         except Exception:
             pass
@@ -1669,10 +1645,12 @@ async def on_message(message):
             pass
 
     # if functions.user_check(message.author, message.guild, 'dcheck') != False:
-    #     if cooldown(message.author.id, message.guild.id) == True:
+    #     if message.author.id in peoplesCD:
     #         if len(message.content) >= 5:
     #             await lvl(message, server)
-
+    #     else:
+    #         await cooldown(message.author.id)
+    #
 
 
 

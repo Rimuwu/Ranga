@@ -49,8 +49,6 @@ class info(commands.Cog):
         for ping_one in ping_list:
             if ping > ping_one["ping"]:
                 ping_emoji = ping_one["emoji"]
-                break
-
 
         b = ctx.guild.get_member(734730292484505631)
         message = await ctx.send(embed = discord.Embed(
@@ -68,7 +66,7 @@ class info(commands.Cog):
             f"Пользователей: {len(self.bot.users)}\n"
             f"Команд: {len(self.bot.commands)}\n"
                   ,inline=True).add_field(name="Библиотека", value="nextcord 2.0.0")
-                  .add_field(name="Хостинг", value="galaxygate.net").set_thumbnail(
+                  .add_field(name="Хостинг", value="heroku").set_thumbnail(
             url= b.avatar.url).add_field(name="Ссылки",
                      value=
                      f"[Botlist](https://discord.ly/it-kotik)\n"

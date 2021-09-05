@@ -1,5 +1,5 @@
-import nextcord as discord
-from nextcord.ext import tasks, commands
+import discord as discord
+from discord.ext import tasks, commands
 import sys
 import random
 from random import choice
@@ -94,7 +94,7 @@ class clubs(commands.Cog):
             if dom['flag'] == None:
                 expnc = 5 * dom['lvl'] * dom['lvl'] + 50 * dom['lvl'] + 100
 
-                emb1 = nextcord.Embed(color=0xf03e65).add_field(name = 'Описание:', value = f'{dom["bio"]}', inline = True
+                emb1 = discord.Embed(color=0xf03e65).add_field(name = 'Описание:', value = f'{dom["bio"]}', inline = True
                 ).add_field(name = 'Уровень клуба:', value = f'LvL: {dom["lvl"]}\nExp: {dom["exp"]} |  {expnc}').add_field(name = 'Владелец:', value = f'<@{dom["owner"]}>'
                 ).add_field(name = 'Дата создания:', value = f'{data}').add_field(name = 'Статус клуба:', value = f'{st}'
                 ).add_field(name = 'Участников:', value = f'{text}'
