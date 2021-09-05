@@ -47,7 +47,7 @@ intents = discord.Intents.default()
 intents.members = True
 # , intents = intents
 
-# bot = commands.Bot(command_prefix = get_prefix)
+# bot = commands.Bot(command_prefix = get_prefix, intents = intents)
 bot = commands.AutoShardedBot(command_prefix = get_prefix, intents = intents , shard_count = 2)
 # slash = SlashCommand(bot, sync_commands=True)
 
@@ -1668,10 +1668,10 @@ async def on_message(message):
         except Exception:
             pass
 
-    if functions.user_check(message.author, message.guild, 'dcheck') != False:
-        if cooldown(message.author.id, message.guild.id) == True:
-            if len(message.content) >= 5:
-                await lvl(message, server)
+    # if functions.user_check(message.author, message.guild, 'dcheck') != False:
+    #     if cooldown(message.author.id, message.guild.id) == True:
+    #         if len(message.content) >= 5:
+    #             await lvl(message, server)
 
 
 
