@@ -1479,6 +1479,16 @@ async def on_connect():
 #
 #
 #
+
+@bot.event
+async def on_message(message):
+    global start
+    if start == False:
+        return
+    else:
+        await bot.process_commands(message) # Выполнение команды
+
+
 # @bot.event
 # async def on_message(message):
 #     global peoplesCD
