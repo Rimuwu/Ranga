@@ -1479,173 +1479,173 @@ async def punishment_mod(message, server, p, reason, shield):
 
 
 
-@bot.event
-async def on_message(message):
-    global peoplesCD
-    if start == False:
-        return
-        
-    s = settings.find_one({"sid": 1})
-
-    if message.author.bot == True: return
-
-    if message.guild == None:
-        emb = discord.Embed(description = "Йоу, перейдите на сервер что бы использовать бота. \n Если у вас нету подходящего сервера, вы можете перейти на сервер поддержки бота > [Клик](https://discord.gg/cFa8K37pBa)", color=0xf03e65)
-        await message.channel.send(embed = emb)
-        return
-
-    if message.guild.id in s['bl servers']: return
-
-    server = servers.find_one({"server": message.guild.id})
-
-    if server == None:
-        functions.insert_server(message.guild)
-        server = servers.find_one({"server": message.guild.id})
-
-    #не выполнение команды если человек в мьюте
-    try:
-        mm = server['mute_members'][f"{message.author.id}"]
-
-        try:
-            await message.delete()
-        except Exception:
-            pass
-
-        return
-    except Exception:
-        pass
-
-    try:
-        if bot.mentioned_in() == True:
-            await message.channel.send(f"Мурр, мой префикс тут `{server['prefix']}`")
-    except Exception:
-        pass
-
-    try:
-        gl = server['globalchat']['channel']
-    except Exception:
-        gl = None
-
-    if message.channel.id == gl:
-
-        await global_chat(message, s, server)
-
-    elif message.channel.id != gl:
-
-        if message.author.id in s['black list']: return
-
-        try:
-            if message.channel.id in server['mod']['black_channels']: return
-        except Exception:
-            pass
-
-        # #auto mod
-        try:
-            if erver['mod']['media_channels'] != {} or server['mod']['bad_words'] != {} or server['mod']['flud_shield'] != {} or server['mod']['members_mention'] != {} or server['mod']['roles_mention'] != {}:
-
-                if server['mod']['black_channels'] == [] or message.channel.id not in server['mod']['black_channels']:
-                    if server['mod']['wlist_members'] == [] or message.author.id not in server['mod']['wlist_members']:
-                        list_roles = []
-                        for role in message.author.roles: list_roles.append(role.id)
-                        if list(set(server['mod']['wlist_roles']) & set(list_roles)) == []:
-
-                            if server['mod']['flud_shield'] != {}:
-                                if await mod_flud(message, server) == True:
-                                    try:
-                                        await punishment_mod(message, server, server['mod']['flud_shield']['punishment'], 'Auto flud warn', 'flud_shield')
-                                    except Exception:
-                                        pass
-
-                            if server['mod']['bad_words'] != {}:
-                                if mod_bad_words(message, server) == True:
-                                    try:
-                                        await punishment_mod(message, server, server['mod']['bad_words']['punishment'], 'Auto bad-words warn', 'bad_words')
-                                    except Exception:
-                                        pass
-
-                            if server['mod']['media_channels'] != {}:
-                                if message.channel.id in server['mod']['media_channels']['channels']:
-                                    if mod_media(message) == True:
-                                        try:
-                                            await punishment_mod(message, server, server['mod']['media_channels']['punishment'], 'Auto media-channel warn','media_channels')
-                                        except Exception:
-                                            pass
-
-                            if server['mod']['members_mention'] != {}:
-                                if len(message.raw_mentions) >= server['mod']['members_mention']['repetitions']:
-                                    try:
-                                        await punishment_mod(message, server, server['mod']['members_mention']['punishment'], 'Auto mention warn', 'members_mention')
-                                    except Exception:
-                                        pass
-
-                            if server['mod']['roles_mention'] != {}:
-                                if len(message.raw_role_mentions) >= server['mod']['roles_mention']['repetitions']:
-                                    try:
-                                        await punishment_mod(message, server, server['mod']['roles_mention']['punishment'], 'Auto mention warn', 'roles_mention')
-                                    except Exception:
-                                        pass
-
-        except Exception:
-            pass
-
-
-        #выполнение команды
-        ctx = await bot.get_context(message)
-        try:
-            ctx.command = bot.get_command(ctx.invoked_with.lower())
-            if ctx.command != None:
-                try:
-                    if ctx.command.name not in server['mod']['off_commands']:
-                        if functions.cooldown_check(message.author, message.guild, ctx.command.name, 'check') == False:
-                            if functions.bd_check(message.author) == True:
-                                await bot.process_commands(message) # Выполнение команды
-                                print(ctx.command.name, 'no_errors')
-
-                                if ctx.command.name in server['mod']['cooldowns'].keys():
-                                    functions.cooldown_check(message.author, message.guild, ctx.command.name, 'add')
-
-                        else:
-                            if server['mod']['cooldowns'][ctx.command.name]['type'] == 'users':
-
-                                if server['mod']['cooldowns'][ctx.command.name]['users'][str(message.author.id)] - int(time.time()) < 0:
-                                    tt = 0
-                                else:
-                                    tt = int(server['mod']['cooldowns'][ctx.command.name]['users'][str(message.author.id)] - time.time())
-
-                            elif server['mod']['cooldowns'][ctx.command.name]['type'] == 'server':
-
-                                if server['mod']['cooldowns'][ctx.command.name]['server_c'] - int(time.time()) < 0:
-                                    tt = 0
-                                else:
-                                    tt = int(server['mod']['cooldowns'][ctx.command.name]['server_c'] - time.time())
-
-                            elif server['mod']['cooldowns'][ctx.command.name]['type'] == 'roles':
-
-                                if server['mod']['cooldowns'][ctx.command.name]['role_c'] - int(time.time()) < 0:
-                                    tt = 0
-                                else:
-                                    tt = int(server['mod']['cooldowns'][ctx.command.name]['role_c'] - time.time())
-
-                            emb = discord.Embed(title = 'Режим ожидания', description = f"Включён режим ожидания, вам осталось ждать {functions.time_end(tt)}", color =server['embed_color'])
-                            await message.channel.send(embed = emb)
-
-                except Exception:
-                    await bot.process_commands(message)
-                    print(ctx.command.name, 'error')
-
-        except Exception:
-            pass
-
-        try:
-            if message.channel.id == server['emoji']["emoji_channel"]:
-                if server['emoji']["emojis"] != []:
-                    try:
-                        for x in server['emoji']["emojis"]:
-                            await message.add_reaction(x)
-                    except Exception:
-                        pass
-        except Exception:
-            pass
+# @bot.event
+# async def on_message(message):
+#     global peoplesCD
+#     if start == False:
+#         return
+#
+#     s = settings.find_one({"sid": 1})
+#
+#     if message.author.bot == True: return
+#
+#     if message.guild == None:
+#         emb = discord.Embed(description = "Йоу, перейдите на сервер что бы использовать бота. \n Если у вас нету подходящего сервера, вы можете перейти на сервер поддержки бота > [Клик](https://discord.gg/cFa8K37pBa)", color=0xf03e65)
+#         await message.channel.send(embed = emb)
+#         return
+#
+#     if message.guild.id in s['bl servers']: return
+#
+#     server = servers.find_one({"server": message.guild.id})
+#
+#     if server == None:
+#         functions.insert_server(message.guild)
+#         server = servers.find_one({"server": message.guild.id})
+#
+#     #не выполнение команды если человек в мьюте
+#     try:
+#         mm = server['mute_members'][f"{message.author.id}"]
+#
+#         try:
+#             await message.delete()
+#         except Exception:
+#             pass
+#
+#         return
+#     except Exception:
+#         pass
+#
+#     try:
+#         if bot.mentioned_in() == True:
+#             await message.channel.send(f"Мурр, мой префикс тут `{server['prefix']}`")
+#     except Exception:
+#         pass
+#
+#     try:
+#         gl = server['globalchat']['channel']
+#     except Exception:
+#         gl = None
+#
+#     if message.channel.id == gl:
+#
+#         await global_chat(message, s, server)
+#
+#     elif message.channel.id != gl:
+#
+#         if message.author.id in s['black list']: return
+#
+#         try:
+#             if message.channel.id in server['mod']['black_channels']: return
+#         except Exception:
+#             pass
+#
+#         # #auto mod
+#         try:
+#             if erver['mod']['media_channels'] != {} or server['mod']['bad_words'] != {} or server['mod']['flud_shield'] != {} or server['mod']['members_mention'] != {} or server['mod']['roles_mention'] != {}:
+#
+#                 if server['mod']['black_channels'] == [] or message.channel.id not in server['mod']['black_channels']:
+#                     if server['mod']['wlist_members'] == [] or message.author.id not in server['mod']['wlist_members']:
+#                         list_roles = []
+#                         for role in message.author.roles: list_roles.append(role.id)
+#                         if list(set(server['mod']['wlist_roles']) & set(list_roles)) == []:
+#
+#                             if server['mod']['flud_shield'] != {}:
+#                                 if await mod_flud(message, server) == True:
+#                                     try:
+#                                         await punishment_mod(message, server, server['mod']['flud_shield']['punishment'], 'Auto flud warn', 'flud_shield')
+#                                     except Exception:
+#                                         pass
+#
+#                             if server['mod']['bad_words'] != {}:
+#                                 if mod_bad_words(message, server) == True:
+#                                     try:
+#                                         await punishment_mod(message, server, server['mod']['bad_words']['punishment'], 'Auto bad-words warn', 'bad_words')
+#                                     except Exception:
+#                                         pass
+#
+#                             if server['mod']['media_channels'] != {}:
+#                                 if message.channel.id in server['mod']['media_channels']['channels']:
+#                                     if mod_media(message) == True:
+#                                         try:
+#                                             await punishment_mod(message, server, server['mod']['media_channels']['punishment'], 'Auto media-channel warn','media_channels')
+#                                         except Exception:
+#                                             pass
+#
+#                             if server['mod']['members_mention'] != {}:
+#                                 if len(message.raw_mentions) >= server['mod']['members_mention']['repetitions']:
+#                                     try:
+#                                         await punishment_mod(message, server, server['mod']['members_mention']['punishment'], 'Auto mention warn', 'members_mention')
+#                                     except Exception:
+#                                         pass
+#
+#                             if server['mod']['roles_mention'] != {}:
+#                                 if len(message.raw_role_mentions) >= server['mod']['roles_mention']['repetitions']:
+#                                     try:
+#                                         await punishment_mod(message, server, server['mod']['roles_mention']['punishment'], 'Auto mention warn', 'roles_mention')
+#                                     except Exception:
+#                                         pass
+#
+#         except Exception:
+#             pass
+#
+#
+#         #выполнение команды
+#         ctx = await bot.get_context(message)
+#         try:
+#             ctx.command = bot.get_command(ctx.invoked_with.lower())
+#             if ctx.command != None:
+#                 try:
+#                     if ctx.command.name not in server['mod']['off_commands']:
+#                         if functions.cooldown_check(message.author, message.guild, ctx.command.name, 'check') == False:
+#                             if functions.bd_check(message.author) == True:
+#                                 await bot.process_commands(message) # Выполнение команды
+#                                 print(ctx.command.name, 'no_errors')
+#
+#                                 if ctx.command.name in server['mod']['cooldowns'].keys():
+#                                     functions.cooldown_check(message.author, message.guild, ctx.command.name, 'add')
+#
+#                         else:
+#                             if server['mod']['cooldowns'][ctx.command.name]['type'] == 'users':
+#
+#                                 if server['mod']['cooldowns'][ctx.command.name]['users'][str(message.author.id)] - int(time.time()) < 0:
+#                                     tt = 0
+#                                 else:
+#                                     tt = int(server['mod']['cooldowns'][ctx.command.name]['users'][str(message.author.id)] - time.time())
+#
+#                             elif server['mod']['cooldowns'][ctx.command.name]['type'] == 'server':
+#
+#                                 if server['mod']['cooldowns'][ctx.command.name]['server_c'] - int(time.time()) < 0:
+#                                     tt = 0
+#                                 else:
+#                                     tt = int(server['mod']['cooldowns'][ctx.command.name]['server_c'] - time.time())
+#
+#                             elif server['mod']['cooldowns'][ctx.command.name]['type'] == 'roles':
+#
+#                                 if server['mod']['cooldowns'][ctx.command.name]['role_c'] - int(time.time()) < 0:
+#                                     tt = 0
+#                                 else:
+#                                     tt = int(server['mod']['cooldowns'][ctx.command.name]['role_c'] - time.time())
+#
+#                             emb = discord.Embed(title = 'Режим ожидания', description = f"Включён режим ожидания, вам осталось ждать {functions.time_end(tt)}", color =server['embed_color'])
+#                             await message.channel.send(embed = emb)
+#
+#                 except Exception:
+#                     await bot.process_commands(message)
+#                     print(ctx.command.name, 'error')
+#
+#         except Exception:
+#             pass
+#
+#         try:
+#             if message.channel.id == server['emoji']["emoji_channel"]:
+#                 if server['emoji']["emojis"] != []:
+#                     try:
+#                         for x in server['emoji']["emojis"]:
+#                             await message.add_reaction(x)
+#                     except Exception:
+#                         pass
+#         except Exception:
+#             pass
 
     # if functions.user_check(message.author, message.guild, 'dcheck') != False:
     #     if message.author.id in peoplesCD:
