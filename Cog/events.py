@@ -125,7 +125,7 @@ class MainCog(commands.Cog):
     async def on_ready(self):
         global start_time
 
-        channel = self.bot.get_channel(813056001229324308)
+        channel = self.bot.get_channel(884486606399094876)
         ping = self.bot.latency
         ping_emoji = "🟩🔳🔳🔳🔳"
 
@@ -674,13 +674,13 @@ class MainCog(commands.Cog):
                 ping_emoji = ping_one["emoji"]
 
         async with aiohttp.ClientSession() as session:
-            await discord.Webhook.partial(826513595700346921, "pnIDKoDIlsGr9SKX9FKue-oj6nuHlolCKQJHm7RTaB7JpgBa2NEhGIMpOzA5aHs0sRBS", session=session).send(
+            await discord.Webhook.partial(884487454281850942, "UXQlxzzEBD9cDCO8TbjhB6kpelrKjlJR14qk55AGr-t5s2lqQ8itCVSB2fVBA9uxqszX", session=session).send(
             embed=discord.Embed(title = f'{self.bot.user.name}',description=f"Шард с ID {shard_id} успешно запущен\nПинг: {shard.latency * 1000:.0f} {ping_emoji}", color=0xFFDB8B))
 
     @commands.Cog.listener()
     async def on_shard_disconnect(self, shard_id):
         async with aiohttp.ClientSession() as session:
-            await discord.Webhook.partial(826513600298090517, "r6BgykJmbQBjOw-91V2JUlOOHjSZ6SbHLaQO4bkHliEWI1vE2IXyfi5qVcsWoae74MwH", session=session).send(embed=discord.Embed(title = f'{self.bot.user.name}', description=f"Шард с ID {shard_id} отключён", color=0xE52B50))
+            await discord.Webhook.partial(884487454281850942, "UXQlxzzEBD9cDCO8TbjhB6kpelrKjlJR14qk55AGr-t5s2lqQ8itCVSB2fVBA9uxqszX", session=session).send(embed=discord.Embed(title = f'{self.bot.user.name}', description=f"Шард с ID {shard_id} отключён", color=0xE52B50))
 
     @tasks.loop(seconds = 15)
     async def change_stats(self):
@@ -1301,7 +1301,7 @@ class MainCog(commands.Cog):
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         normal = False
-        channel = self.bot.get_channel(813056037891473408)
+        channel = self.bot.get_channel(884486925933764649)
 
         if isinstance(error, commands.CommandNotFound):
             pass

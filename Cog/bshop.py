@@ -535,7 +535,7 @@ class bs(commands.Cog):
             if str(reaction.emoji) == '✅':
 
                 await msg.remove_reaction('✅', member)
-                channel = await self.bot.fetch_channel(880148384416153682)
+                channel = await self.bot.fetch_channel(884487110747357204)
 
                 bs = s['bs']
                 try:
