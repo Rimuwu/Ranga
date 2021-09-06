@@ -1,7 +1,7 @@
 import os
 
 # bot_token = os.environ.get('BOT_TOKEN')
-bot_token = "NzM0NzMwMjkyNDg0NTA1NjMx.XxV86A.MOqg-Ose4ZoyACVUxCgtLOm1V5I"
+bot_token = "ODQ3MDkyOTk0NjcwMDY3NzEz.YK5C1A.9uf6uVM81B422_HvSRVFyWej7i8"
 # cluster_token = os.environ.get('CLUSTER_TOKEN')
 cluster_token = "mongodb+srv://bot:12452987190076@cluster0.jy3nj.mongodb.net/<dbname>?retryWrites=true&w=majority"
 # donatepay_token = os.environ.get('DN_TOKEN')

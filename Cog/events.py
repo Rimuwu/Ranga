@@ -626,15 +626,11 @@ class MainCog(commands.Cog):
                                 response = requests.get(g['banner']['url'], stream = True)
                                 response = Image.open(io.BytesIO(response.content))
                                 img = response.convert("RGBA")
-                                img = response.resize((960, 540), Image.ANTIALIAS) # улучшение качества
+                                img = response.resize((960, 540), Image.ANTIALIAS)
 
                                 img.save(f'{serv.id}.png', format = "PNG")
                                 img = Image.open(f'{serv.id}.png')
                                 img = response.convert("RGBA")
-                                try:
-                                    os.remove(f'{serv.id}.png')
-                                except Exception:
-                                    pass
 
                                 idraw = ImageDraw.Draw(img)
                                 f1 = ImageFont.truetype("fonts/BBCT.ttf", size = 60)
@@ -644,14 +640,12 @@ class MainCog(commands.Cog):
                                 idraw.text((445 + xgps,345+ ygps), f"{mm}", font = f2)
                                 idraw.text((230 + xgps,400+ ygps), f"{ttime}", font = f1)
 
-                                try:
-                                    img.save(f'banner {serv.id} id.png')
-                                    with open(f'banner {serv.id} id.png', 'rb') as f:
-                                        icon = f.read()
-                                    await serv.edit(banner = icon)
-                                    os.remove(f'banner {serv.id} id.png')
-                                except Exception:
-                                    pass
+
+                                img.save(f'banner {serv.id} id.png')
+                                with open(f'banner {serv.id} id.png', 'rb') as f:
+                                    icon = f.read()
+                                await serv.edit(banner = icon)
+
 
                     except Exception:
                         pass

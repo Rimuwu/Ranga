@@ -31,6 +31,9 @@ class bs(commands.Cog):
 
     @commands.command(aliases=['backshop','backgrounds','bs','bgshop','bg','бс'], usage = '(number)', description = 'Покупка фонов для профиля')
     async def bshop(self,ctx, number:int = 0):
+        if await funs.command_manage(ctx) == False:
+            return
+
         bs = list(backs.find())
         d = {}
 
@@ -171,6 +174,8 @@ class bs(commands.Cog):
 
     @commands.command(usage = '-', description = 'Инвентарь фонов')
     async def back_inv(self,ctx):
+        if await funs.command_manage(ctx) == False:
+            return
 
         bs = list(backs.find())
         d = {}
@@ -279,6 +284,8 @@ class bs(commands.Cog):
 
     @commands.command(usage = '(url) [type]', description = 'Подача заявки на новый фон.', help = 'Грустные')
     async def bs_app(self, ctx, link, type = 'png'):
+        if await funs.command_manage(ctx) == False:
+            return
 
 
         try:
@@ -573,6 +580,8 @@ class bs(commands.Cog):
 
     @commands.command(hidden = True, usage = '(id) [reason]')
     async def bs_deny(self, ctx, id:int, *, reason = None):
+        if await funs.command_manage(ctx) == False:
+            return
         s = settings.find_one({"sid": 1})
         if ctx.author.id not in s['moderators']:
             await ctx.send("У вас нет прав модератора бота!")
@@ -618,6 +627,8 @@ class bs(commands.Cog):
 
     @commands.command(hidden = True, usage = '(id) (price) [type]')
     async def bs_approve(self, ctx, id:int, price:int, type = None):
+        if await funs.command_manage(ctx) == False:
+            return
         s = settings.find_one({"sid": 1})
         if ctx.author.id not in s['moderators']:
             await ctx.send("У вас нет прав модератора бота!")
