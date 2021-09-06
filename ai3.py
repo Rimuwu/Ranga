@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import nextcord as discord
 from nextcord.ext import tasks, commands
-from dislash import InteractionClient
 # from discord_slash import SlashCommand, SlashContext
 import requests
 from PIL import Image, ImageFont, ImageDraw, ImageOps, ImageSequence, ImageFilter
@@ -50,13 +49,6 @@ intents = discord.Intents.all()
 bot = commands.AutoShardedBot(command_prefix = get_prefix, intents = intents , shard_count = 2)
 # bot = commands.Bot(command_prefix = get_prefix, intents = intents )
 # slash = SlashCommand(bot, sync_commands=True)
-inter_client = dislash.InteractionClient(bot)
-
-@inter_client.user_command(name="Press me")
-async def press_me(inter):
-    # User commands are visible in user context menus
-    # They can be global or per guild, just like slash commands
-    await inter.respond("Hello there!")
 
 
 # функции ======================================= #

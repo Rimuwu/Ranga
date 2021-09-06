@@ -1,5 +1,5 @@
-import discord as discord
-from discord.ext import tasks, commands
+import nextcord as discord
+from nextcord.ext import tasks, commands
 import sys
 import random
 from random import choice

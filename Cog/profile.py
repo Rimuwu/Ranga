@@ -1,5 +1,5 @@
-import discord
-from discord.ext import tasks, commands
+import nextcord as discord
+from nextcord.ext import tasks, commands
 import requests
 from PIL import Image, ImageFont, ImageDraw, ImageOps, ImageSequence, ImageFilter
 import io

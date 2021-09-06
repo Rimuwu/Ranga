@@ -6,7 +6,6 @@ import random
 from random import choice
 import asyncio
 import time
-from Cybernator import Paginator
 import pymongo
 import pprint
 
