@@ -30,14 +30,14 @@ settings = db.settings
 
 voice_dict = {}
 
-stat_list = ['Помоги боту в развитии, подробнее +nitro',
+stat_list = [
                "Играю с клубком...",
-               'Я котик, но в душе я дракон, рррррр!',
-               "Пинг 52к + баги == IT Котик",
+               'Я волк, но в душе я дракон, рррррр!',
+               "Пинг 52к + баги == Ранга",
                "Моя любимая рыбка - карась",
                'Мошенница - Акудама SSS ранга, Награда: 100.000.000$',
                'Чем сильнее я становлюсь, тем сильнее мои враги...',
-               'IT | Демон | 1.0.9',
+               'IT | Демон | 1.?.9',
             ]
 
 async def voice_check(guild):
@@ -142,12 +142,13 @@ class MainCog(commands.Cog):
                 ping_emoji = ping_one["emoji"]
 
         time2 = time.time()
-        try:
-            await channel.send(f"Бот онлайн - Серверов: {len(self.bot.guilds)} - Команд: {len(self.bot.commands)}\n{ping_emoji} `{ping * 1000:.0f}ms`\nВремя на запуск: {functions.time_end(time2 - start_time)}")
-            print(f"Бот онлайн - Серверов: {len(self.bot.guilds)} - Команд: {len(self.bot.commands)} - Время на запуск: {functions.time_end(time2 - start_time)}")
-        except Exception:
-            await channel.send(f"Бот онлайн - Серверов: {len(self.bot.guilds)} - Команд: {len(self.bot.commands)}\n{ping_emoji} `{ping * 1000:.0f}ms`")
-            print(f"Бот онлайн - Серверов: {len(self.bot.guilds)} - Команд: {len(self.bot.commands)}")
+        # try:
+        if 1 == 1:
+            await channel.send(f"Бот {self.bot.user} онлайн - Команд: {len(self.bot.commands)}\n{ping_emoji} `{ping * 1000:.0f}ms`\nВремя на запуск: {functions.time_end(time2 - start_time)}")
+            print(f"Бот {self.bot.user} онлайн - Команд: {len(self.bot.commands)}\n{ping_emoji} `{ping * 1000:.0f}ms`\nВремя на запуск: {functions.time_end(time2 - start_time)}")
+        # except Exception:
+        #     await channel.send(f"Бот онлайн - Серверов: {len(self.bot.guilds)} - Команд: {len(self.bot.commands)}\n{ping_emoji} `{ping * 1000:.0f}ms`")
+        #     print(f"Бот онлайн - Серверов: {len(self.bot.guilds)} - Команд: {len(self.bot.commands)}")
 
         self.change_stats.start()
         self.manage_check.start()
@@ -167,32 +168,7 @@ class MainCog(commands.Cog):
             except Exception:
                 pass
 
-    @commands.Cog.listener()
-    async def on_shard_connect(self, shard_id):
-        shard = self.bot.get_shard(shard_id)
-        ping = shard.latency
-        ping_emoji = "🟩🔳🔳🔳🔳"
 
-        ping_list = [
-            {"ping": 0.10000000000000000, "emoji": "🟧🟩🔳🔳🔳"},
-            {"ping": 0.15000000000000000, "emoji": "🟥🟧🟩🔳🔳"},
-            {"ping": 0.20000000000000000, "emoji": "🟥🟥🟧🟩🔳"},
-            {"ping": 0.25000000000000000, "emoji": "🟥🟥🟥🟧🟩"},
-            {"ping": 0.30000000000000000, "emoji": "🟥🟥🟥🟥🟧"},
-            {"ping": 0.35000000000000000, "emoji": "🟥🟥🟥🟥🟥"}]
-
-        for ping_one in ping_list:
-            if ping > ping_one["ping"]:
-                ping_emoji = ping_one["emoji"]
-
-        async with aiohttp.ClientSession() as session:
-            await discord.Webhook.partial(884487454281850942, "UXQlxzzEBD9cDCO8TbjhB6kpelrKjlJR14qk55AGr-t5s2lqQ8itCVSB2fVBA9uxqszX", session=session).send(
-            embed=discord.Embed(title = f'{self.bot.user.name}',description=f"Шард с ID {shard_id} успешно запущен\nПинг: {shard.latency * 1000:.0f} {ping_emoji}", color=0xFFDB8B))
-
-    @commands.Cog.listener()
-    async def on_shard_disconnect(self, shard_id):
-        async with aiohttp.ClientSession() as session:
-            await discord.Webhook.partial(884487454281850942, "UXQlxzzEBD9cDCO8TbjhB6kpelrKjlJR14qk55AGr-t5s2lqQ8itCVSB2fVBA9uxqszX", session=session).send(embed=discord.Embed(title = f'{self.bot.user.name}', description=f"Шард с ID {shard_id} отключён", color=0xE52B50))
 
     @tasks.loop(seconds = 15)
     async def change_stats(self):

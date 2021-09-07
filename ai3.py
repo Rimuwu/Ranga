@@ -44,7 +44,7 @@ def get_prefix(client, message):
 
 intents = discord.Intents.all()
 
-bot = commands.Bot(command_prefix = get_prefix, intents = intents , shard_count = 1)
+bot = commands.Bot(command_prefix = get_prefix, intents = intents)
 # slash = SlashCommand(bot, sync_commands=True)
 
 
@@ -971,163 +971,163 @@ async def on_connect():
     await bot.change_presence( status = discord.Status.online, activity = discord.Game('Demon strating...'))
 
 
-async def global_chat(message, s, server):
-
-    async def emb(word, server):
-        embed = discord.Embed(title = f"Ошибка", description = f"Данное слово (`{word}`) запрещено в межсервереом чате!", color=0xf44a4a)
-        webhook = await bot.fetch_webhook(server['globalchat']['webhook'])
-        await webhook.send(username = "Система межсервера", avatar_url = 'https://img.icons8.com/dusk/64/000000/web-shield.png', embed=embed)
-
-    try:
-        if message.webhook_id == None:
-            if message.author.bot == True: return
-            #проверка на варны
-            try:
-                wmax = s['bl global chat'][str(message.author.id)][max(s['bl global chat'][str(message.author.id)].keys())]
-                if time.time() < wmax['time']:
-                    try:
-                        await message.delete()
-                    except Exception:
-                        pass
-                    return
-
-            except Exception:
-                pass
-            #проверка на бан в межсервере
-            try:
-                s['bl global chat'][str(message.author.id)]['ban']
-                try:
-                    await message.delete()
-                except Exception:
-                    pass
-                return
-
-            except Exception:
-                pass
-
-            if message.channel.id == server['globalchat']['channel']:
-
-                #проверка на слова
-                for word in s['off-words']:
-                    allword = ''
-                    for spw in message.content.split():
-                        allword = allword + spw
-                        if fuzz.token_sort_ratio(word,allword) > 90:
-                            await emb(word, server)
-                            await message.delete()
-                            return
-
-                        if allword.find(str(word)) != -1:
-                            await emb(word, server)
-                            await message.delete()
-                            return
-
-                        if spw.find(str(word)) != -1:
-                            await emb(word, server)
-                            await message.delete()
-                            return
-
-                #проверка на флуд
-                messages = await message.channel.history().flatten()
-                l = []
-
-                for mess in messages:
-                    if mess.author.id == message.author.id:
-                        if message.content != '':
-                            l.append(mess)
-
-                lm = []
-                counter = 0
-                m = []
-                for i in l:
-                    if counter != 3:
-                        m.append(i)
-                        lm.append(i.content)
-                        counter += 1
-
-                flud_p = 0
-                for mes in lm:
-                    if fuzz.token_sort_ratio(message.content, mes) > 80 or fuzz.ratio(message.content, mes) > 80:
-                        flud_p += 1
-
-
-                if flud_p >= 3:
-                    for i in m:
-                        try:
-                            await i.delete()
-                        except Exception:
-                            pass
-
-
-                    try:
-                        id = message.author.id
-                        reason = 'Auto flud warn'
-                        s = settings.find_one({"sid": 1})
-                        s['bl global chat'][str(id)]
-                        nw = len(s['bl global chat'][str(id)].keys())
-
-                        if nw < 3:
-                            s['bl global chat'][str(id)].update({str(nw+1):{'reason':reason,"time":time.time() + 2628000}})
-                            settings.update_one({"sid": 1},{'$set': {'bl global chat':s['bl global chat']}})
-                            await message.channel.send(f"Пользователь c id `{id}` получил варн #{nw+1}\nПо причине: Auto flud warn")
-                        else:
-                            s['bl global chat'][str(id)].update({'ban':f'{reason} | auto ban due to 3 warns'})
-                            settings.update_one({"sid": 1},{'$set': {'bl global chat':s['bl global chat']}})
-                            await message.channel.send(f"Пользователь c id `{id}` был автоматически забанен за х3 предупреждения\nПо причине: Auto flud warn")
-
-
-                    except Exception:
-                        s['bl global chat'].update({str(id):{'1':{'reason':reason,"time":time.time() + 604800}}})
-                        settings.update_one({"sid": 1},{'$set': {'bl global chat':s['bl global chat']}})
-                        await message.channel.send(f"Пользователь c id `{id}` получил варн #1\nПо причине: Auto flud warn")
-
-
-
-                try:
-                    code = int(server['global_code'])
-                except Exception:
-                    code = 0
-
-                if code == 0:
-                    guilds = servers.find({'globalchat':{'$ne':None}})
-                else:
-                    guilds = servers.find({'global_code': code})
-
-                for i in guilds:
-                    try:
-                        ccode = i['global_code']
-                        if ccode == None:
-                            ccode = 0
-                    except Exception:
-                        ccode = 0
-
-                    try:
-                        if i['server'] != server['server']:
-
-                            if code == ccode:
-                                try:
-                                    y = 0
-                                    try:
-                                        webhook = await bot.fetch_webhook(i['globalchat']['webhook'])
-                                        y = 1
-                                    except Exception:
-                                        y = 2
-
-                                    if y == 1:
-                                        await webhook.send(message.clean_content, files = [await a.to_file() for a in message.attachments], username = f"{message.author.name}#{message.author.discriminator}", avatar_url = message.author.avatar_url)
-                                except Exception:
-                                    pass
-
-                    except Exception:
-                        pass
-
-                channel = await bot.fetch_channel(865527704085856256)
-                try:
-                    await channel.send(f'Имя: {message.author.name}#{message.author.discriminator}\nID: {message.author.id}\nСервер ID: {message.author.guild.id}\nCode: {code}\nКонтент: `{message.clean_content}`', files = [await a.to_file() for a in message.attachments])
-                except Exception:
-                    pass
-    except Exception:
-        pass
+# async def global_chat(message, s, server):
+#
+#     async def emb(word, server):
+#         embed = discord.Embed(title = f"Ошибка", description = f"Данное слово (`{word}`) запрещено в межсервереом чате!", color=0xf44a4a)
+#         webhook = await bot.fetch_webhook(server['globalchat']['webhook'])
+#         await webhook.send(username = "Система межсервера", avatar_url = 'https://img.icons8.com/dusk/64/000000/web-shield.png', embed=embed)
+#
+#     try:
+#         if message.webhook_id == None:
+#             if message.author.bot == True: return
+#             #проверка на варны
+#             try:
+#                 wmax = s['bl global chat'][str(message.author.id)][max(s['bl global chat'][str(message.author.id)].keys())]
+#                 if time.time() < wmax['time']:
+#                     try:
+#                         await message.delete()
+#                     except Exception:
+#                         pass
+#                     return
+#
+#             except Exception:
+#                 pass
+#             #проверка на бан в межсервере
+#             try:
+#                 s['bl global chat'][str(message.author.id)]['ban']
+#                 try:
+#                     await message.delete()
+#                 except Exception:
+#                     pass
+#                 return
+#
+#             except Exception:
+#                 pass
+#
+#             if message.channel.id == server['globalchat']['channel']:
+#
+#                 #проверка на слова
+#                 for word in s['off-words']:
+#                     allword = ''
+#                     for spw in message.content.split():
+#                         allword = allword + spw
+#                         if fuzz.token_sort_ratio(word,allword) > 90:
+#                             await emb(word, server)
+#                             await message.delete()
+#                             return
+#
+#                         if allword.find(str(word)) != -1:
+#                             await emb(word, server)
+#                             await message.delete()
+#                             return
+#
+#                         if spw.find(str(word)) != -1:
+#                             await emb(word, server)
+#                             await message.delete()
+#                             return
+#
+#                 #проверка на флуд
+#                 messages = await message.channel.history().flatten()
+#                 l = []
+#
+#                 for mess in messages:
+#                     if mess.author.id == message.author.id:
+#                         if message.content != '':
+#                             l.append(mess)
+#
+#                 lm = []
+#                 counter = 0
+#                 m = []
+#                 for i in l:
+#                     if counter != 3:
+#                         m.append(i)
+#                         lm.append(i.content)
+#                         counter += 1
+#
+#                 flud_p = 0
+#                 for mes in lm:
+#                     if fuzz.token_sort_ratio(message.content, mes) > 80 or fuzz.ratio(message.content, mes) > 80:
+#                         flud_p += 1
+#
+#
+#                 if flud_p >= 3:
+#                     for i in m:
+#                         try:
+#                             await i.delete()
+#                         except Exception:
+#                             pass
+#
+#
+#                     try:
+#                         id = message.author.id
+#                         reason = 'Auto flud warn'
+#                         s = settings.find_one({"sid": 1})
+#                         s['bl global chat'][str(id)]
+#                         nw = len(s['bl global chat'][str(id)].keys())
+#
+#                         if nw < 3:
+#                             s['bl global chat'][str(id)].update({str(nw+1):{'reason':reason,"time":time.time() + 2628000}})
+#                             settings.update_one({"sid": 1},{'$set': {'bl global chat':s['bl global chat']}})
+#                             await message.channel.send(f"Пользователь c id `{id}` получил варн #{nw+1}\nПо причине: Auto flud warn")
+#                         else:
+#                             s['bl global chat'][str(id)].update({'ban':f'{reason} | auto ban due to 3 warns'})
+#                             settings.update_one({"sid": 1},{'$set': {'bl global chat':s['bl global chat']}})
+#                             await message.channel.send(f"Пользователь c id `{id}` был автоматически забанен за х3 предупреждения\nПо причине: Auto flud warn")
+#
+#
+#                     except Exception:
+#                         s['bl global chat'].update({str(id):{'1':{'reason':reason,"time":time.time() + 604800}}})
+#                         settings.update_one({"sid": 1},{'$set': {'bl global chat':s['bl global chat']}})
+#                         await message.channel.send(f"Пользователь c id `{id}` получил варн #1\nПо причине: Auto flud warn")
+#
+#
+#
+#                 try:
+#                     code = int(server['global_code'])
+#                 except Exception:
+#                     code = 0
+#
+#                 if code == 0:
+#                     guilds = servers.find({'globalchat':{'$ne':None}})
+#                 else:
+#                     guilds = servers.find({'global_code': code})
+#
+#                 for i in guilds:
+#                     try:
+#                         ccode = i['global_code']
+#                         if ccode == None:
+#                             ccode = 0
+#                     except Exception:
+#                         ccode = 0
+#
+#                     try:
+#                         if i['server'] != server['server']:
+#
+#                             if code == ccode:
+#                                 try:
+#                                     y = 0
+#                                     try:
+#                                         webhook = await bot.fetch_webhook(i['globalchat']['webhook'])
+#                                         y = 1
+#                                     except Exception:
+#                                         y = 2
+#
+#                                     if y == 1:
+#                                         await webhook.send(message.clean_content, files = [await a.to_file() for a in message.attachments], username = f"{message.author.name}#{message.author.discriminator}", avatar_url = message.author.avatar_url)
+#                                 except Exception:
+#                                     pass
+#
+#                     except Exception:
+#                         pass
+#
+#                 channel = await bot.fetch_channel(865527704085856256)
+#                 try:
+#                     await channel.send(f'Имя: {message.author.name}#{message.author.discriminator}\nID: {message.author.id}\nСервер ID: {message.author.guild.id}\nCode: {code}\nКонтент: `{message.clean_content}`', files = [await a.to_file() for a in message.attachments])
+#                 except Exception:
+#                     pass
+#     except Exception:
+#         pass
 
 async def cooldown(user_id):
     global peoplesCD
@@ -1555,7 +1555,7 @@ async def on_message(message):
 
     try:
         if bot.mentioned_in() == True:
-            await message.channel.send(f"Мурр, мой префикс тут `{server['prefix']}`")
+            await message.channel.send(f"Гав! Мой префикс `{server['prefix']}`")
     except Exception:
         pass
 
@@ -1564,126 +1564,121 @@ async def on_message(message):
     except Exception:
         gl = None
 
-    if message.channel.id == gl:
 
-        await global_chat(message, s, server)
+    if message.author.id in s['black list']: return
 
-    elif message.channel.id != gl:
+    try:
+        if message.channel.id in server['mod']['black_channels']: return
+    except Exception:
+        pass
 
-        if message.author.id in s['black list']: return
+    # #auto mod
+    try:
+        if erver['mod']['media_channels'] != {} or server['mod']['bad_words'] != {} or server['mod']['flud_shield'] != {} or server['mod']['members_mention'] != {} or server['mod']['roles_mention'] != {}:
 
-        try:
-            if message.channel.id in server['mod']['black_channels']: return
-        except Exception:
-            pass
+            if server['mod']['black_channels'] == [] or message.channel.id not in server['mod']['black_channels']:
+                if server['mod']['wlist_members'] == [] or message.author.id not in server['mod']['wlist_members']:
+                    list_roles = []
+                    for role in message.author.roles: list_roles.append(role.id)
+                    if list(set(server['mod']['wlist_roles']) & set(list_roles)) == []:
 
-        # #auto mod
-        try:
-            if erver['mod']['media_channels'] != {} or server['mod']['bad_words'] != {} or server['mod']['flud_shield'] != {} or server['mod']['members_mention'] != {} or server['mod']['roles_mention'] != {}:
+                        if server['mod']['flud_shield'] != {}:
+                            if await mod_flud(message, server) == True:
+                                try:
+                                    await punishment_mod(message, server, server['mod']['flud_shield']['punishment'], 'Auto flud warn', 'flud_shield')
+                                except Exception:
+                                    pass
 
-                if server['mod']['black_channels'] == [] or message.channel.id not in server['mod']['black_channels']:
-                    if server['mod']['wlist_members'] == [] or message.author.id not in server['mod']['wlist_members']:
-                        list_roles = []
-                        for role in message.author.roles: list_roles.append(role.id)
-                        if list(set(server['mod']['wlist_roles']) & set(list_roles)) == []:
+                        if server['mod']['bad_words'] != {}:
+                            if mod_bad_words(message, server) == True:
+                                try:
+                                    await punishment_mod(message, server, server['mod']['bad_words']['punishment'], 'Auto bad-words warn', 'bad_words')
+                                except Exception:
+                                    pass
 
-                            if server['mod']['flud_shield'] != {}:
-                                if await mod_flud(message, server) == True:
+                        if server['mod']['media_channels'] != {}:
+                            if message.channel.id in server['mod']['media_channels']['channels']:
+                                if mod_media(message) == True:
                                     try:
-                                        await punishment_mod(message, server, server['mod']['flud_shield']['punishment'], 'Auto flud warn', 'flud_shield')
+                                        await punishment_mod(message, server, server['mod']['media_channels']['punishment'], 'Auto media-channel warn','media_channels')
                                     except Exception:
                                         pass
 
-                            if server['mod']['bad_words'] != {}:
-                                if mod_bad_words(message, server) == True:
-                                    try:
-                                        await punishment_mod(message, server, server['mod']['bad_words']['punishment'], 'Auto bad-words warn', 'bad_words')
-                                    except Exception:
-                                        pass
+                        if server['mod']['members_mention'] != {}:
+                            if len(message.raw_mentions) >= server['mod']['members_mention']['repetitions']:
+                                try:
+                                    await punishment_mod(message, server, server['mod']['members_mention']['punishment'], 'Auto mention warn', 'members_mention')
+                                except Exception:
+                                    pass
 
-                            if server['mod']['media_channels'] != {}:
-                                if message.channel.id in server['mod']['media_channels']['channels']:
-                                    if mod_media(message) == True:
-                                        try:
-                                            await punishment_mod(message, server, server['mod']['media_channels']['punishment'], 'Auto media-channel warn','media_channels')
-                                        except Exception:
-                                            pass
+                        if server['mod']['roles_mention'] != {}:
+                            if len(message.raw_role_mentions) >= server['mod']['roles_mention']['repetitions']:
+                                try:
+                                    await punishment_mod(message, server, server['mod']['roles_mention']['punishment'], 'Auto mention warn', 'roles_mention')
+                                except Exception:
+                                    pass
 
-                            if server['mod']['members_mention'] != {}:
-                                if len(message.raw_mentions) >= server['mod']['members_mention']['repetitions']:
-                                    try:
-                                        await punishment_mod(message, server, server['mod']['members_mention']['punishment'], 'Auto mention warn', 'members_mention')
-                                    except Exception:
-                                        pass
-
-                            if server['mod']['roles_mention'] != {}:
-                                if len(message.raw_role_mentions) >= server['mod']['roles_mention']['repetitions']:
-                                    try:
-                                        await punishment_mod(message, server, server['mod']['roles_mention']['punishment'], 'Auto mention warn', 'roles_mention')
-                                    except Exception:
-                                        pass
-
-        except Exception:
-            pass
+    except Exception:
+        pass
 
 
-        #выполнение команды
-        ctx = await bot.get_context(message)
-        try:
-            ctx.command = bot.get_command(ctx.invoked_with.lower())
-            if ctx.command != None:
+    #выполнение команды
+    ctx = await bot.get_context(message)
+    try:
+        ctx.command = bot.get_command(ctx.invoked_with.lower())
+        if ctx.command != None:
+            try:
+                if ctx.command.name not in server['mod']['off_commands']:
+                    if functions.cooldown_check(message.author, message.guild, ctx.command.name, 'check') == False:
+                        if functions.bd_check(message.author) == True:
+                            await bot.process_commands(message) # Выполнение команды
+                            print(ctx.command.name, 'no_errors')
+
+                            if ctx.command.name in server['mod']['cooldowns'].keys():
+                                functions.cooldown_check(message.author, message.guild, ctx.command.name, 'add')
+
+                    else:
+                        if server['mod']['cooldowns'][ctx.command.name]['type'] == 'users':
+
+                            if server['mod']['cooldowns'][ctx.command.name]['users'][str(message.author.id)] - int(time.time()) < 0:
+                                tt = 0
+                            else:
+                                tt = int(server['mod']['cooldowns'][ctx.command.name]['users'][str(message.author.id)] - time.time())
+
+                        elif server['mod']['cooldowns'][ctx.command.name]['type'] == 'server':
+
+                            if server['mod']['cooldowns'][ctx.command.name]['server_c'] - int(time.time()) < 0:
+                                tt = 0
+                            else:
+                                tt = int(server['mod']['cooldowns'][ctx.command.name]['server_c'] - time.time())
+
+                        elif server['mod']['cooldowns'][ctx.command.name]['type'] == 'roles':
+
+                            if server['mod']['cooldowns'][ctx.command.name]['role_c'] - int(time.time()) < 0:
+                                tt = 0
+                            else:
+                                tt = int(server['mod']['cooldowns'][ctx.command.name]['role_c'] - time.time())
+
+                        emb = discord.Embed(title = 'Режим ожидания', description = f"Включён режим ожидания, вам осталось ждать {functions.time_end(tt)}", color =server['embed_color'])
+                        await message.channel.send(embed = emb)
+
+            except Exception:
+                await bot.process_commands(message)
+                print(ctx.command.name, 'error')
+
+    except Exception:
+        pass
+
+    try:
+        if message.channel.id == server['emoji']["emoji_channel"]:
+            if server['emoji']["emojis"] != []:
                 try:
-                    if ctx.command.name not in server['mod']['off_commands']:
-                        if functions.cooldown_check(message.author, message.guild, ctx.command.name, 'check') == False:
-                            if functions.bd_check(message.author) == True:
-                                await bot.process_commands(message) # Выполнение команды
-                                print(ctx.command.name, 'no_errors')
-
-                                if ctx.command.name in server['mod']['cooldowns'].keys():
-                                    functions.cooldown_check(message.author, message.guild, ctx.command.name, 'add')
-
-                        else:
-                            if server['mod']['cooldowns'][ctx.command.name]['type'] == 'users':
-
-                                if server['mod']['cooldowns'][ctx.command.name]['users'][str(message.author.id)] - int(time.time()) < 0:
-                                    tt = 0
-                                else:
-                                    tt = int(server['mod']['cooldowns'][ctx.command.name]['users'][str(message.author.id)] - time.time())
-
-                            elif server['mod']['cooldowns'][ctx.command.name]['type'] == 'server':
-
-                                if server['mod']['cooldowns'][ctx.command.name]['server_c'] - int(time.time()) < 0:
-                                    tt = 0
-                                else:
-                                    tt = int(server['mod']['cooldowns'][ctx.command.name]['server_c'] - time.time())
-
-                            elif server['mod']['cooldowns'][ctx.command.name]['type'] == 'roles':
-
-                                if server['mod']['cooldowns'][ctx.command.name]['role_c'] - int(time.time()) < 0:
-                                    tt = 0
-                                else:
-                                    tt = int(server['mod']['cooldowns'][ctx.command.name]['role_c'] - time.time())
-
-                            emb = discord.Embed(title = 'Режим ожидания', description = f"Включён режим ожидания, вам осталось ждать {functions.time_end(tt)}", color =server['embed_color'])
-                            await message.channel.send(embed = emb)
-
+                    for x in server['emoji']["emojis"]:
+                        await message.add_reaction(x)
                 except Exception:
-                    await bot.process_commands(message)
-                    print(ctx.command.name, 'error')
-
-        except Exception:
-            pass
-
-        try:
-            if message.channel.id == server['emoji']["emoji_channel"]:
-                if server['emoji']["emojis"] != []:
-                    try:
-                        for x in server['emoji']["emojis"]:
-                            await message.add_reaction(x)
-                    except Exception:
-                        pass
-        except Exception:
-            pass
+                    pass
+    except Exception:
+        pass
 
     if functions.user_check(message.author, message.guild, 'dcheck') != False:
         if message.author.id in peoplesCD:
