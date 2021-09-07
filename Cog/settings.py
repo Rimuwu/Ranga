@@ -261,7 +261,7 @@ class settings(commands.Cog):
 
         server = servers.find_one({'server':ctx.guild.id})
         a = server['upsend_sett']
-        a.update({"up_message": message})
+        a.update({"image_url": url})
 
         if type == 'png' or type == 'gif':
             a.update({"type":type })

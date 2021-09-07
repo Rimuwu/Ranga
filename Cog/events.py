@@ -143,13 +143,10 @@ class MainCog(commands.Cog):
                 ping_emoji = ping_one["emoji"]
 
         time2 = time.time()
-        # try:
-        if 1 == 1:
-            await channel.send(f"Бот {self.bot.user} онлайн - Команд: {len(self.bot.commands)}\n{ping_emoji} `{ping * 1000:.0f}ms`\nВремя на запуск: {funs.time_end(time2 - start_time)}")
-            print(f"Бот {self.bot.user} онлайн - Команд: {len(self.bot.commands)}\n{ping_emoji} `{ping * 1000:.0f}ms`\nВремя на запуск: {funs.time_end(time2 - start_time)}")
-        # except Exception:
-        #     await channel.send(f"Бот онлайн - Серверов: {len(self.bot.guilds)} - Команд: {len(self.bot.commands)}\n{ping_emoji} `{ping * 1000:.0f}ms`")
-        #     print(f"Бот онлайн - Серверов: {len(self.bot.guilds)} - Команд: {len(self.bot.commands)}")
+
+        await channel.send(f"Бот {self.bot.user} онлайн - Команд: {len(self.bot.commands)}\n{ping_emoji} `{ping * 1000:.0f}ms`\nВремя на запуск: {funs.time_end(time2 - start_time)}")
+        print(f"Бот {self.bot.user} онлайн - Команд: {len(self.bot.commands)}\n{ping_emoji} {ping * 1000:.0f}ms\nВремя на запуск: {funs.time_end(time2 - start_time)}")
+
 
         self.change_stats.start()
         self.manage_check.start()

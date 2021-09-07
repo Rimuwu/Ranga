@@ -17,6 +17,7 @@ import math
 from fuzzywuzzy import fuzz
 import config
 import pprint
+import os
 
 
 client = pymongo.MongoClient(config.cluster_token)
@@ -29,7 +30,7 @@ clubs = db.clubs
 frames = db.frames
 settings = db.settings
 
-peoplesCD = []
+peoplesCD = {}
 start_time = time.time()
 
 # префикс ======================================= #
@@ -701,20 +702,16 @@ class functions:
 # коги ======================================= #
 
 bot.remove_command( "help" )
-bot.load_extension("Cog.events")
 
-bot.load_extension("Cog.rpg")
-bot.load_extension("Cog.help")
-bot.load_extension("Cog.info")
-bot.load_extension("Cog.clubs")
-bot.load_extension("Cog.bshop")
-bot.load_extension("Cog.remain")
-bot.load_extension("Cog.profile")
-bot.load_extension("Cog.economy")
-bot.load_extension("Cog.settings")
-bot.load_extension("Cog.reactions")
-bot.load_extension("Cog.voices-com")
-bot.load_extension("Cog.moderation")
+for filename in os.listdir("./Cog"):
+    if filename.endswith(".py"):
+        try:
+            bot.load_extension(f"Cog.{filename[:-3]}")
+        except:
+            print(f"Unable to load {filename[:-3]}")
+    else:
+        if os.path.isfile(filename):
+            print(f"Unable to load {filename[:-3]}")
 
 
 # slash ====================================== #
@@ -1129,14 +1126,76 @@ async def on_connect():
 #     except Exception:
 #         pass
 
-async def cooldown(user_id):
+def cooldown(user_id, guild_id):
+    # Возращаем True если пользователь может получить опыт, False если у пользователя есть задержка
     global peoplesCD
-    peoplesCD.append(user_id)
-    await asyncio.sleep(60)
-    peoplesCD.remove(user_id)
+
+    try: #проверка
+        if peoplesCD[str(guild_id)][str(user_id)] <= time.time():
+            peoplesCD[str(guild_id)].pop(str(user_id))
+            return True
+        else:
+            return False
+    except Exception:
+        pass
+
+    try: #добавление при не наличии пользователя
+        peoplesCD[str(guild_id)].update({ str(user_id): int(time.time()+60) })
+        return True
+    except Exception:
+        pass
+
+    try: #добавление при не наличии пользователя и сервера
+        peoplesCD.update({ str(guild_id): {str(user_id): int(time.time()+60) } })
+        return True
+    except Exception:
+        pass
 
 
 async def lvl_up_image(message, main, user, server):
+
+    server = servers.find_one({"server": message.guild.id})
+    user = functions.user_check(message.author, message.guild)
+    main = users.find_one({"userid": message.author.id})
+
+    upitems = server["upsend_sett"]['upitems']
+    UpSend = server["upsend_sett"]['upsend']
+    ust = server["upsend_sett"]
+    lvl = user['lvl']
+
+    try:
+        mr = upitems[str(lvl)]['money']
+    except Exception:
+        mr = 0
+        lv = lvl
+        while mr == 0:
+            lv -= 1
+            if lv != 0:
+                try:
+                    mr += upitems[str(lv)]['money']
+                except:
+                    pass
+            if lv <= 0:
+                mr = 350
+
+
+
+    bal = random.randint(int(mr - mr / 100 * 50), mr)
+
+    functions.user_update(message.author.id, message.guild, "xp", 0)
+    functions.user_update(message.author.id, message.guild, "lvl", user['lvl']+1)
+
+    functions.user_update(message.author.id, message.guild, "money", user['money']+bal)
+
+    try:
+        for i in upitems[str(lvl+1)]['items']:
+            user['inv'].append(server['items'][str(i)])
+        functions.user_update(message.author.id, message.guild, "inv", user['inv'])
+    except Exception:
+        pass
+
+    if UpSend == 777777777777777771 or UpSend == None:
+        return
 
     def trans_paste(fg_img,bg_img,alpha=10,box=(0,0)):
         fg_img_trans = Image.new("RGBA",fg_img.size)
@@ -1160,50 +1219,6 @@ async def lvl_up_image(message, main, user, server):
             im = im.crop((0, (h - w) / 2, w, (h + w) / 2))
 
         return im.resize(s, Image.ANTIALIAS)
-
-
-    server = servers.find_one({"server": message.guild.id})
-    user = functions.user_check(message.author, message.guild)
-    main = users.find_one({"userid": message.author.id})
-
-    upitems = server["upsend_sett"]['upitems']
-    UpSend = server["upsend_sett"]['upsend']
-    ust = server["upsend_sett"]
-    lvl = user['lvl']
-
-    if UpSend == 777777777777777771 or UpSend == None:
-        return
-
-    try:
-        mr = upitems[str(lvl)]['money']
-    except Exception:
-        mr = 0
-        lv = lvl
-        while mr == 0:
-            lv -= 1
-            if lv != 0:
-                try:
-                    mr += upitems[str(lv)]['money']
-                except:
-                    pass
-            else:
-                mr = 350
-
-
-    bal = random.randint(int(mr - mr / 100 * 50), mr)
-
-    functions.user_update(message.author.id, message.guild, "xp", 0)
-    functions.user_update(message.author.id, message.guild, "lvl", user['lvl']+1)
-
-    functions.user_update(message.author.id, message.guild, "money", user['money']+bal)
-
-    try:
-        for i in upitems[str(lvl+1)]['items']:
-            user['inv'].append(server['items'][str(i)])
-        functions.user_update(message.author.id, message.guild, "inv", user['inv'])
-    except Exception:
-        pass
-
 
     member = message.author
 
@@ -1378,11 +1393,12 @@ async def lvl(message, server):
                 clubs.update_one({'name': main['guild']}, {'$set':{"exp": 0}})
                 clubs.update_one({'name': main['guild']}, {'$inc':{"lvl": 1}})
 
-    if expn <= expii:
-        try:
+    if expn <= user['xp']:
+        # try:
+        if 1 == 1:
             await lvl_up_image(message, main, user, server)
-        except Exception:
-            pass
+        # except Exception:
+        #     pass
 
     return True
 
@@ -1681,280 +1697,10 @@ async def on_message(message):
         pass
 
     if functions.user_check(message.author, message.guild, 'dcheck') != False:
-        if message.author.id in peoplesCD:
+        if cooldown(message.author.id, message.guild.id ) == True:
             if len(message.content) >= 5:
                 await lvl(message, server)
-        else:
-            await cooldown(message.author.id)
 
-
-
-
-
-# async def timer():
-#     await asyncio.sleep(10)
-#     headers = {'Authorization': config.sdk_token}
-#     while True:
-#         r = requests.post('https://api.server-discord.com/v2/bots/734730292484505631/stats', data={'shards':bot.shard_count or 1, 'servers':len(bot.guilds)}, headers=headers)
-#         await asyncio.sleep(1800)
-#
-#
-# bot.loop.create_task(timer())
-
-#
-# @bot.command()
-# async def ty(ctx):
-#     global servers
-#     if ctx.author.id != 323512096350535680:
-#         return
-#
-#     a = 0
-#     b = 0
-#     for i in servers.find({}):
-#         print(b, a, servers.count())
-#         try:
-#             i = i['server']
-#             print(i)
-#             b += 1
-#
-#             server = servers.find_one({"server": i})
-#
-#             try:
-#                 del server['roles']
-#             except:
-#                 pass
-#
-#             server.update({ "upsend_sett": {'emb_st': False,
-#                                             'up_message': None,
-#                                             "upitems":{},
-#                                             "upsend": server['upsend'],
-#                                             'image_url': None,
-#                                             'type': 'png',
-#                                            },
-#             })
-#             try:
-#                 del server['upsend']
-#             except:
-#                 pass
-#             try:
-#                 del server['uproles']
-#             except:
-#                 pass
-#
-#             server.update({ 'voice': {'voice_category': server['voice_category'],
-#                                       'voice_channel': server['voice_channel'],
-#                                       'private_voices': server['private_voices'],
-#                                       'randomc_channel': None,
-#                                       'rc_bl_channels': None
-#                      }, })
-#
-#             try:
-#                 del server['voice_channel']
-#             except:
-#                 pass
-#             try:
-#                 del server['voice_category']
-#             except:
-#                 pass
-#             try:
-#                 del server['private_voices']
-#             except:
-#                 pass
-#
-#             server.update({ 'emoji': {'emoji_channel': None,
-#                                       'emojis': []
-#                      }, })
-#
-#             server.update({ 'mod': {'black_channels': server['black_channels'], #в каналах бот не работает
-#                                     'off_commands': [], # не отвечает на команды
-#                                     'cooldowns': {
-#
-#                                                     'daily': {
-#                                                         'type': 'users',
-#                                                         'time': 86400,
-#                                                         'users': {},
-#                                                              },
-#
-#                                     }, #ожидания на команды
-#                                     'admin_roles': [], #роли с право настраивать модерировать
-#                                     'warns': server['warns'], #варны
-#                                     'muterole': None, #роль мьюта
-#                                     'punishments_warns': server['punishments_warns'], #наказания за варны
-#
-#                                     'flud_shield': {}, #защита от флуда
-#                                     'bad_words': {}, #защита от слов
-#                                     'media_channels': {}, #канал в которых не может быть текста
-#                                     'members_mention': {}, #отслеживание упоминаний пользовталей
-#                                     'roles_mention': {}, #отслеживание упоминаний ролей
-#                                     'wlist_roles': [], #роли на которые не реагирует автомод
-#                                     'wlist_members': [], #пользователи на которых не реагирует автомод
-#                                     'log_channel': {}, #канал логирования
-#                                     'delete_command': None, #настройка удаления команды после использования
-#
-#                                    },
-#                         })
-#             try:
-#                 del server['muterole']
-#             except:
-#                 pass
-#             try:
-#                 del server['warns']
-#             except:
-#                 pass
-#             try:
-#                 del server['black_channels']
-#             except:
-#                 pass
-#             try:
-#                 del server['admin_roles']
-#             except:
-#                 pass
-#             try:
-#                 del server['punishments_warns']
-#             except:
-#                 pass
-#
-#             server.update({ 'boost':{    'send': server['boost']['send'],
-#                                          'description': server['boost']['description'],
-#                                          'footer':server['boost']['footer'],
-#                                          'url': server['boost']['url'],
-#                                          'reward': [],
-#                                     },
-#                         })
-#
-#             server.update({ 'economy': { 'currency': "<:pokecoin:780356652359745537>",
-#                                          'start_money': 0,
-#                                          'gl_shop': {},
-#                                          'daily_reward': {},
-#                                          'lvl_xp': 20,
-#                                          'games': {
-#
-#                                                     'blackjack': {
-#                                                         'mini': 100,
-#                                                         'max': 10000,
-#                                                         'percent': 1.25,
-#                                                         },
-#
-#                                                     'slots': {
-#                                                         'mini': 100,
-#                                                         'max': 10000,
-#                                                         'percent': 3.0,
-#                                                         },
-#
-#                                                     'chance': {
-#                                                         'mini': 100,
-#                                                         'max': 10000,
-#                                                         },
-#                                                   },
-#                                        }, })
-#
-#             server.update({ 'users': {}, 'save_users': {}, 'roles_income': {}, 'races': {}, 'items': {} })
-#
-#             try:
-#                 pr = server['premium']
-#             except:
-#                 pr = False
-#
-#             server.update({ 'premium': pr })
-#
-#             server.update({ 'embed_color': 0xf03e65, 'banner_status': False })
-#
-#             server.update({ 'pizza_board': {'channel':None,
-#                                             'messages': {},
-#                            }, })
-#
-#             server.update({ 'tickets': {}, })
-#
-#             server.update({ 'save': {'name_save': False,
-#                                      'roles_save': False,
-#                                      'date_save': False,
-#                     }, })
-#
-#             server.update({ 'voice_reward': {}, })
-#
-#
-#
-#
-#             servers.delete_one({"server": i})
-#             servers.insert_one(server)
-#             a += 1
-#         except:
-#             pass
-#
-#     await ctx.send('Завершенно!')
-#
-# @bot.command()
-# async def ty2(ctx):
-#     global users
-#     if ctx.author.id != 323512096350535680:
-#         return
-#
-#     a = 0
-#     b = 0
-#     for i in users.find({}):
-#         print(b, a,  users.count())
-#         try:
-#             i = i['userid']
-#             print(i)
-#             b += 1
-#
-#             user = users.find_one({"userid": i})
-#
-#             del user['lvl'], user['xp'], user['+rep'], user['-rep']
-#
-#             user.update({ 'frame': None, 'frames_inv': [], 'rep': [[],[]], 'global_inv': {}})
-#
-#             users.delete_one({"userid": i})
-#             users.insert_one(user)
-#             a += 1
-#         except:
-#             pass
-#
-#     await ctx.send('Завершенно!')
-
-    # backs.update_many({}, {"$set": {'alpha_panel': [153, 153] }})
-    # backs.update_many({}, {"$set": {'panel_color': [ [0,0,0], [0,0,0] ] }})
-    # servers.update_many({}, {"$set": {'emoji': {'emoji_channel': None, 'emojis': []} }})
-
-    # for i in servers.find({"private_voices": []}):
-    #     print(i)
-    #     server = servers.find_one({"server": i["server"]})
-    #
-    #     servers.update_one({"server": i["server"]}, {"$set": {"private_voices":{} }})
-#         servers.update_one({"server": i["server"]}, {"$unset": {"lea_text":"","nam_fill_l":"","wel_fill_l":'','el_fill_l':''}})
-#         servers.update_one({"server": i["server"]}, {"$unset": {"join_position_avatar":"","leave_position_avatar":"","avatar_join_url":'','avatar_leave_url':'','joinsend':'','leavensend':''}})
-#
-#         wel_text = server['wel_text']
-#         nam_fill = server['nam_fill']
-#         wel_fill = server['wel_fill']
-#         el_fill = server['el_fill']
-#
-#         a = {}
-#         a.update({"wel_text": server['wel_text']})
-#         a.update({"nam_fill": server['nam_fill']})
-#         a.update({"wel_fill": server['wel_fill']})
-#         a.update({"el_fill":  server['el_fill']})
-#
-#         servers.update_one({"server": i["server"]}, {"$set": {"welcome": a}})
-#
-#         a = {}
-#         a.update({"lea_text": server['lea_text']})
-#         a.update({"nam_fill_l": server['nam_fill_l']})
-#         a.update({"wel_fill_l": server['wel_fill_l']})
-#         a.update({"el_fill_l":  server['el_fill_l']})
-#
-#         servers.update_one({"server": i["server"]}, {"$set": {"goodbye": a}})
-#
-#         a = {}
-#         a.update({"join_position_avatar": server['join_position_avatar']})
-#         a.update({"leave_position_avatar": server['leave_position_avatar']})
-#         a.update({"avatar_join_url": server['avatar_join_url']})
-#         a.update({"avatar_leave_url":  server['avatar_leave_url']})
-#         a.update({"joinsend":  server['joinsend']})
-#         a.update({"leavensend":  server['leavensend']})
-#
-#         servers.update_one({"server": i["server"]}, {"$set": {"send": a}})
-#     print(1)
 
 #============================================конец=================================================================#
 bot.run(config.bot_token)
