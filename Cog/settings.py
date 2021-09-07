@@ -281,13 +281,17 @@ class settings(commands.Cog):
             await ctx.send("У вас недостаточно прав для использования этой команды!")
             return
 
-        if description == None:
+        print(message)
+
+        if message == () or message == 'text':
             await ctx.send(funs.text_replase("text"))
             return
 
-        if len(description) > 1000:
+        if len(message) > 1000:
             await ctx.send(f'Сообщение не может быть более 1000-ти символов')
             return
+
+        message = ' '.join(message)
 
         await ctx.send(funs.text_replase(message, ctx.author))
         await ctx.send(f'Сообщение от ващего имение которое быдет выслано при повышении уровня установлено!')
