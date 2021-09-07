@@ -1300,7 +1300,6 @@ async def lvl_up_image(message, main, user, server):
     fg_img = im
     alpha = trans_paste(fg_img, bg_img, 1.0, (10, 10, 210, 210))
 
-    alpha.show()
 
     if ust['type'] == "png":
 
@@ -1339,7 +1338,7 @@ async def lvl_up_image(message, main, user, server):
         ul = 'gif'
 
 
-    up_text = server['upsend_sett']['up_message']
+    up_text = funs.text_replase(server['upsend_sett']['up_message'])
     if up_text == None:
         up_text = f'<@{message.author.id}>'
 
