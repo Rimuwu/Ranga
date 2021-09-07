@@ -29,6 +29,7 @@ frames = db.frames
 settings = db.settings
 
 voice_dict = {}
+start_time = time.time()
 
 stat_list = [
                "Играю с клубком...",
