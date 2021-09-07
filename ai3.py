@@ -705,10 +705,8 @@ bot.remove_command( "help" )
 
 for filename in os.listdir("./Cog"):
     if filename.endswith(".py"):
-        try:
-            bot.load_extension(f"Cog.{filename[:-3]}")
-        except:
-            print(f"Unable to load {filename[:-3]}")
+        bot.load_extension(f"Cog.{filename[:-3]}")
+
     else:
         if os.path.isfile(filename):
             print(f"Unable to load {filename[:-3]}")
@@ -743,7 +741,7 @@ for filename in os.listdir("./Cog"):
 #             await channel.set_permissions(ctx.guild.default_role, connect=False)
 #             emb = discord.Embed(description = 'Канал был закрыт для подключения пользователей!', color=0xf03e65)
 #
-#         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar_url))
+#         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
 #         message = await ctx.reply(embed = emb, delete_after = 5.0)
 #
 # @slash.slash(name = 'unlock',description="Открыть приватный канал для всех или для определённого пользователя")
@@ -773,7 +771,7 @@ for filename in os.listdir("./Cog"):
 #             await channel.set_permissions(ctx.guild.default_role, connect=True)
 #             emb = discord.Embed(description = 'Канал был открыт для подключения пользователей!', color=0xf03e65)
 #
-#         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar_url))
+#         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
 #         message = await ctx.send(embed = emb, delete_after = 5.0)
 #
 # @slash.slash(name = 'hide',description="Скрыть приватный канал для всех или для определённого пользователя")
@@ -803,7 +801,7 @@ for filename in os.listdir("./Cog"):
 #             await channel.set_permissions(ctx.guild.default_role, view_channel=False)
 #             emb = discord.Embed(description = 'Канал был закрыт для просмотра пользователей!', color=0xf03e65)
 #
-#         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar_url))
+#         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
 #         message = await ctx.send(embed = emb, delete_after = 5.0)
 #
 # @slash.slash(name = 'unhide',description="Показать приватный канал для всех или для определённого пользователя")
@@ -833,7 +831,7 @@ for filename in os.listdir("./Cog"):
 #             await channel.set_permissions(ctx.guild.default_role, view_channel=True)
 #             emb = discord.Embed(description = 'Канал был открыт для просмотра пользователей!', color=0xf03e65)
 #
-#         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar_url))
+#         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
 #         message = await ctx.send(embed = emb, delete_after = 5.0)
 #
 # @slash.slash(name = 'kick',description="Выганть пользователя из приватного канала")
@@ -861,7 +859,7 @@ for filename in os.listdir("./Cog"):
 #         await member.move_to(channel=None, reason="Пользователь кикнут создателем приватного войса")
 #         emb = discord.Embed(description = f'{member.mention} был исключён из войса!', color=0xf03e65)
 #
-#         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar_url))
+#         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
 #         message = await ctx.send(embed = emb, delete_after = 5.0)
 #
 # @slash.slash(name = 'owner',description="Передать управление войсом пользователю")
@@ -891,7 +889,7 @@ for filename in os.listdir("./Cog"):
 #         servers.update_one({'server': ctx.guild.id},{'$set': {'voice': {'private_voices': v} }})
 #         emb = discord.Embed(description = f'{member.mention} теперь создатель войса!', color=0xf03e65)
 #
-#         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar_url))
+#         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
 #         message = await ctx.send(embed = emb, delete_after = 5.0)
 #
 # @slash.slash(name = 'limit',description="Установить лимит приватного войс-канала")
@@ -921,7 +919,7 @@ for filename in os.listdir("./Cog"):
 #         emb = discord.Embed(description = f'Лимит канала был установлен на {limit}!', color=0xf03e65)
 #         await channel.edit(user_limit = limit ,reason="Настройка лимита приватного войса")
 #
-#         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar_url))
+#         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
 #         message = await ctx.send(embed = emb, delete_after = 5.0)
 #
 # @slash.slash(name = 'name',description="Переименовать приватный войс-канал")
@@ -958,7 +956,7 @@ for filename in os.listdir("./Cog"):
 #         emb = discord.Embed(description = f'Название канала было изменено на  {name}!', color=0xf03e65)
 #         await channel.edit(name = name ,reason="Настройка названия приватного войса")
 #
-#         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar_url))
+#         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
 #         message = await ctx.send(embed = emb, delete_after = 5.0)
 
 # event ====================================== #
@@ -1111,7 +1109,7 @@ async def on_connect():
 #                                         y = 2
 #
 #                                     if y == 1:
-#                                         await webhook.send(message.clean_content, files = [await a.to_file() for a in message.attachments], username = f"{message.author.name}#{message.author.discriminator}", avatar_url = message.author.avatar_url)
+#                                         await webhook.send(message.clean_content, files = [await a.to_file() for a in message.attachments], username = f"{message.author.name}#{message.author.discriminator}", avatar_url = message.author.avatar.url)
 #                                 except Exception:
 #                                     pass
 #
@@ -1197,6 +1195,8 @@ async def lvl_up_image(message, main, user, server):
     if UpSend == 777777777777777771 or UpSend == None:
         return
 
+    print(11)
+
     def trans_paste(fg_img,bg_img,alpha=10,box=(0,0)):
         fg_img_trans = Image.new("RGBA",fg_img.size)
         fg_img_trans = Image.blend(fg_img_trans,fg_img,alpha)
@@ -1277,13 +1277,13 @@ async def lvl_up_image(message, main, user, server):
 
 
     try:
-        url = str(member.avatar_url)
+        url = str(member.avatar.url)
         response1 = requests.get(url, stream = True)
         response1 = Image.open(io.BytesIO(response1.content))
 
     except Exception:
         byteImgIO = io.BytesIO()
-        url = str(member.avatar_url)[:-9]
+        url = str(member.avatar.url)[:-9]
         response = requests.get(url, stream = True)
         response.raw.decode_content = True
         response1 = Image.open(response.raw)
