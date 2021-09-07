@@ -31,7 +31,6 @@ settings = db.settings
 
 peoplesCD = []
 start_time = time.time()
-start = False
 
 # префикс ======================================= #
 
@@ -44,10 +43,8 @@ def get_prefix(client, message):
         return "+"
 
 intents = discord.Intents.all()
-# , intents = intents
 
-bot = commands.AutoShardedBot(command_prefix = get_prefix, intents = intents , shard_count = 2)
-# bot = commands.Bot(command_prefix = get_prefix, intents = intents )
+bot = commands.Bot(command_prefix = get_prefix, intents = intents , shard_count = 1)
 # slash = SlashCommand(bot, sync_commands=True)
 
 
@@ -641,17 +638,6 @@ class functions:
     def mongo_c():
         global client
         return client
-
-    @staticmethod
-    def start(arg = None):
-        global start
-        if arg == None:
-            if start == True:
-                return True
-            else:
-                return False
-        else:
-            start = arg
 
     @staticmethod
     async def command_manage(ctx):
@@ -1537,22 +1523,19 @@ async def punishment_mod(message, server, p, reason, shield):
 
 @bot.event
 async def on_message(message):
-    global start
-    if start == False:
-        return
-    else:
-        if message.author.bot == True: return
-        if message.guild == None:
-            emb = discord.Embed(description = "Йоу, перейдите на сервер что бы использовать бота. \n Если у вас нету подходящего сервера, вы можете перейти на сервер поддержки бота > [Клик](https://discord.gg/cFa8K37pBa)", color=0xf03e65)
-            await message.channel.send(embed = emb)
-            return
-        try:
-            if bot.mentioned_in() == True:
-                await message.channel.send(f"Мурр, мой префикс тут `{message.prefix}`")
-        except Exception:
-            pass
 
-        await bot.process_commands(message) # Выполнение команды
+    if message.author.bot == True: return
+    if message.guild == None:
+        emb = discord.Embed(description = "Йоу, перейдите на сервер что бы использовать бота. \n Если у вас нету подходящего сервера, вы можете перейти на сервер поддержки бота > [Клик](https://discord.gg/cFa8K37pBa)", color=0xf03e65)
+        await message.channel.send(embed = emb)
+        return
+    try:
+        if bot.mentioned_in() == True:
+            await message.channel.send(f"Мурр, мой префикс тут `{message.prefix}`")
+    except Exception:
+        pass
+
+    await bot.process_commands(message) # Выполнение команды
 
 
 # @bot.event

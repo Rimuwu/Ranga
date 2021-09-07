@@ -150,11 +150,7 @@ class MainCog(commands.Cog):
             print(f"Бот онлайн - Серверов: {len(self.bot.guilds)} - Команд: {len(self.bot.commands)}")
 
         self.change_stats.start()
-        self.mute_check.start()
-        self.income_check.start()
-        self.banner_change.start()
-
-        funs.start(True)
+        self.manage_check.start()
 
     @tasks.loop(seconds = 3600)
     async def premium_check(self):
@@ -171,12 +167,77 @@ class MainCog(commands.Cog):
             except Exception:
                 pass
 
-    @tasks.loop(seconds = 1)
-    async def banner_change(self):
-        global servers
-        # otl= await self.bot.fetch_channel(870282291648266240)
+    @commands.Cog.listener()
+    async def on_shard_connect(self, shard_id):
+        shard = self.bot.get_shard(shard_id)
+        ping = shard.latency
+        ping_emoji = "🟩🔳🔳🔳🔳"
+
+        ping_list = [
+            {"ping": 0.10000000000000000, "emoji": "🟧🟩🔳🔳🔳"},
+            {"ping": 0.15000000000000000, "emoji": "🟥🟧🟩🔳🔳"},
+            {"ping": 0.20000000000000000, "emoji": "🟥🟥🟧🟩🔳"},
+            {"ping": 0.25000000000000000, "emoji": "🟥🟥🟥🟧🟩"},
+            {"ping": 0.30000000000000000, "emoji": "🟥🟥🟥🟥🟧"},
+            {"ping": 0.35000000000000000, "emoji": "🟥🟥🟥🟥🟥"}]
+
+        for ping_one in ping_list:
+            if ping > ping_one["ping"]:
+                ping_emoji = ping_one["emoji"]
+
+        async with aiohttp.ClientSession() as session:
+            await discord.Webhook.partial(884487454281850942, "UXQlxzzEBD9cDCO8TbjhB6kpelrKjlJR14qk55AGr-t5s2lqQ8itCVSB2fVBA9uxqszX", session=session).send(
+            embed=discord.Embed(title = f'{self.bot.user.name}',description=f"Шард с ID {shard_id} успешно запущен\nПинг: {shard.latency * 1000:.0f} {ping_emoji}", color=0xFFDB8B))
+
+    @commands.Cog.listener()
+    async def on_shard_disconnect(self, shard_id):
+        async with aiohttp.ClientSession() as session:
+            await discord.Webhook.partial(884487454281850942, "UXQlxzzEBD9cDCO8TbjhB6kpelrKjlJR14qk55AGr-t5s2lqQ8itCVSB2fVBA9uxqszX", session=session).send(embed=discord.Embed(title = f'{self.bot.user.name}', description=f"Шард с ID {shard_id} отключён", color=0xE52B50))
+
+    @tasks.loop(seconds = 15)
+    async def change_stats(self):
+        global stats
+        await self.bot.change_presence( status = discord.Status.online, activity = discord.Game(name = random.choice(stat_list)))
+
+    @tasks.loop(seconds=1)
+    async def manage_check(self):
         if time.strftime('%S') == '00':
-            time1 = time.time()
+
+            m_t = time.time()
+            guilds = servers.find({ "mute_members": { '$ne':{} } })
+            for server in guilds:
+                for member in server['mute_members']:
+                    if int(time.time()) >= server['mute_members'][member]:
+                        a = server['mute_members'].copy()
+                        a.pop(member)
+                        servers.update_one({'server':server['server']},{'$set': {'mute_members':a}})
+                        try:
+                            await self.bot.get_guild(server['server']).get_member(int(member)).remove_roles(self.bot.get_guild(server['server']).get_role(int(server['mod']['muterole'])))
+                        except Exception:
+                            pass
+
+            m_t = int(time.time() - m_t)
+
+            i_t = time.time()
+            guilds = servers.find({ "roles_income": {"$exists": True} })
+            for server in guilds:
+                guild = self.bot.get_guild(server['server'])
+                if guild != None:
+                    for r_i in server['roles_income']:
+                        r = server['roles_income'][r_i]
+                        if int(time.time()) >= int(r['time']):
+                            role = guild.get_role(int(r_i))
+                            for member in role.members:
+                                user = funs.user_check(member, guild)
+                                if user != False:
+                                    funs.user_update(member.id, guild, 'money', int(user['money'] + r['money']))
+
+                            server['roles_income'][r_i].update({'time': time.time() + r['cooldown'] })
+                            servers.update_one({'server':server['server']},{'$set': {'roles_income': server['roles_income'] }})
+
+            i_t = int(time.time() - i_t)
+
+            b_t = time.time()
             guilds = servers.find({ "banner_status": True })
 
             def trans_paste(fg_img,bg_img,alpha=10,box=(0,0)):
@@ -611,131 +672,18 @@ class MainCog(commands.Cog):
                                 except Exception:
                                     pass
 
-                            if g['banner']['met'] == 'fukk':
-
-                                xgps = 0
-                                ygps = 0
-
-                                ms = 0
-                                for i in serv.voice_channels:
-                                    ms += len(i.members)
-
-                                mm = serv.member_count
-
-                                pl = Image.new('RGBA', (960, 540), (38, 32, 48))
-                                response = requests.get(g['banner']['url'], stream = True)
-                                response = Image.open(io.BytesIO(response.content))
-                                img = response.convert("RGBA")
-                                img = response.resize((960, 540), Image.ANTIALIAS)
-
-                                img.save(f'{serv.id}.png', format = "PNG")
-                                img = Image.open(f'{serv.id}.png')
-                                img = response.convert("RGBA")
-
-                                idraw = ImageDraw.Draw(img)
-                                f1 = ImageFont.truetype("fonts/BBCT.ttf", size = 60)
-                                f2 = ImageFont.truetype("fonts/BBCT.ttf", size = 50)
-
-                                idraw.text((580 + xgps,400+ ygps), f"{ms}", font = f1)
-                                idraw.text((445 + xgps,345+ ygps), f"{mm}", font = f2)
-                                idraw.text((230 + xgps,400+ ygps), f"{ttime}", font = f1)
-
-
-                                img.save(f'banner {serv.id} id.png')
-                                with open(f'banner {serv.id} id.png', 'rb') as f:
-                                    icon = f.read()
-                                await serv.edit(banner = icon)
-
-
                     except Exception:
                         pass
 
-            time2 = time.time()
-            channel = await self.bot.fetch_channel(862300835836854272)
-            await channel.send(f'Время затраченное на смену баннеров: {funs.time_end(time2 - time1)}')
+            b_t = int(time.time() - b_t)
 
-
-    @commands.Cog.listener()
-    async def on_shard_connect(self, shard_id):
-        shard = self.bot.get_shard(shard_id)
-        ping = shard.latency
-        ping_emoji = "🟩🔳🔳🔳🔳"
-
-        ping_list = [
-            {"ping": 0.10000000000000000, "emoji": "🟧🟩🔳🔳🔳"},
-            {"ping": 0.15000000000000000, "emoji": "🟥🟧🟩🔳🔳"},
-            {"ping": 0.20000000000000000, "emoji": "🟥🟥🟧🟩🔳"},
-            {"ping": 0.25000000000000000, "emoji": "🟥🟥🟥🟧🟩"},
-            {"ping": 0.30000000000000000, "emoji": "🟥🟥🟥🟥🟧"},
-            {"ping": 0.35000000000000000, "emoji": "🟥🟥🟥🟥🟥"}]
-
-        for ping_one in ping_list:
-            if ping > ping_one["ping"]:
-                ping_emoji = ping_one["emoji"]
-
-        async with aiohttp.ClientSession() as session:
-            await discord.Webhook.partial(884487454281850942, "UXQlxzzEBD9cDCO8TbjhB6kpelrKjlJR14qk55AGr-t5s2lqQ8itCVSB2fVBA9uxqszX", session=session).send(
-            embed=discord.Embed(title = f'{self.bot.user.name}',description=f"Шард с ID {shard_id} успешно запущен\nПинг: {shard.latency * 1000:.0f} {ping_emoji}", color=0xFFDB8B))
-
-    @commands.Cog.listener()
-    async def on_shard_disconnect(self, shard_id):
-        async with aiohttp.ClientSession() as session:
-            await discord.Webhook.partial(884487454281850942, "UXQlxzzEBD9cDCO8TbjhB6kpelrKjlJR14qk55AGr-t5s2lqQ8itCVSB2fVBA9uxqszX", session=session).send(embed=discord.Embed(title = f'{self.bot.user.name}', description=f"Шард с ID {shard_id} отключён", color=0xE52B50))
-
-    @tasks.loop(seconds = 15)
-    async def change_stats(self):
-        global stats
-        await self.bot.change_presence( status = discord.Status.online, activity = discord.Game(name = random.choice(stat_list)))
-
-    @tasks.loop(seconds=1)
-    async def mute_check(self):
-        if time.strftime('%S') == '00':
-            time1 = time.time()
-            guilds = servers.find({ "mute_members": { '$ne':{} } })
-            for server in guilds:
-                for member in server['mute_members']:
-                    if int(time.time()) >= server['mute_members'][member]:
-                        a = server['mute_members'].copy()
-                        a.pop(member)
-                        servers.update_one({'server':server['server']},{'$set': {'mute_members':a}})
-                        try:
-                            await self.bot.get_guild(server['server']).get_member(int(member)).remove_roles(self.bot.get_guild(server['server']).get_role(int(server['mod']['muterole'])))
-                        except Exception:
-                            pass
-
-            time2 = time.time()
-            channel = await self.bot.fetch_channel(862300835836854272)
-            await channel.send(f'Время затраченное на проверку мьютов: {funs.time_end(time2 - time1)}')
-
-    @tasks.loop(seconds=60)
-    async def income_check(self):
-        time1 = time.time()
-        guilds = servers.find({ "roles_income": {"$exists": True} })
-        for server in guilds:
-            guild = self.bot.get_guild(server['server'])
-            if guild != None:
-                for r_i in server['roles_income']:
-                    r = server['roles_income'][r_i]
-                    if int(time.time()) >= int(r['time']):
-                        role = guild.get_role(int(r_i))
-                        for member in role.members:
-                            user = funs.user_check(member, guild)
-                            if user != False:
-                                funs.user_update(member.id, guild, 'money', int(user['money'] + r['money']))
-
-                        server['roles_income'][r_i].update({'time': time.time() + r['cooldown'] })
-                        servers.update_one({'server':server['server']},{'$set': {'roles_income': server['roles_income'] }})
-
-
-        time2 = time.time()
-        channel = await self.bot.fetch_channel(862300835836854272)
-        await channel.send(f'Время затраченное на проверку ролей дохода: {funs.time_end(time2 - time1)}')
+            channel = await self.bot.fetch_channel(884499936476024913)
+            emb = discord.Embed(description=f"Проверка мьютов: {funs.time_end(m_t)}\nПроверка ролей дохода: {funs.time_end(i_t)}\nУстановка баннера: {funs.time_end(b_t)}", color=0xE52B50)
+            await channel.send(embed = emb)
 
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        if funs.start() == False:
-            return
 
         server = servers.find_one({"server": member.guild.id})
 
@@ -1025,9 +973,6 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
-        if funs.start() == False:
-            return
-
         server = servers.find_one({"server": member.guild.id})
 
         if server['send']['leavensend'] != 777777777777777777 or server['send']['leavensend'] != None:
@@ -1372,8 +1317,6 @@ class MainCog(commands.Cog):
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         global voice_dict
-        if funs.start() == False:
-            return
 
         rr = ['🎍', '🎋', '💫', '🌪', ' 🔥', '🌟', '⚡️', '☄️', '💥', '🌚', '🌞', '🍬', '🍭', '🍡', '🌷', '🐾', '🍹', '🍸', '🍱', '🎆', '🎭', '💎', '🎨']
         server = servers.find_one({"server": member.guild.id})
@@ -1476,8 +1419,6 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
-        if funs.start() == False:
-            return
 
 
         async def rr(l, func, message, payload, num):
@@ -1634,9 +1575,6 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
-        if funs.start() == False:
-            return
-
 
         async def rr(l, func, message, payload, num):
             guild = self.bot.get_guild(payload.guild_id)
@@ -1692,9 +1630,6 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
-        if funs.start() == False:
-            return
-
 
         async def on_nitro_boost(booster):
             server = servers.find_one({"server": booster.guild.id})
@@ -1797,8 +1732,6 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_channel_update(self, before, after):
-        if funs.start() == False:
-            return
 
         try:
             if type(before) == discord.channel.CategoryChannel:
@@ -2019,8 +1952,6 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel):
-        if funs.start() == False:
-            return
 
         try:
             server = servers.find_one({"server": channel.guild.id})
@@ -2105,8 +2036,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel):
-        if funs.start() == False:
-            return
+
 
         try:
             server = servers.find_one({"server": channel.guild.id})
@@ -2148,9 +2078,6 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_ban(self, guild, user):
-        if funs.start() == False:
-            return
-
         try:
             server = servers.find_one({"server": guild.id})
 
@@ -2165,8 +2092,6 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_unban(self, guild, user):
-        if funs.start() == False:
-            return
 
         try:
             server = servers.find_one({"server": guild.id})
@@ -2182,8 +2107,6 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_emojis_update(self, guild, before, after):
-        if funs.start() == False:
-            return
 
         try:
             server = servers.find_one({"server": guild.id})
@@ -2214,8 +2137,6 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_invite_create(self, invite):
-        if funs.start() == False:
-            return
 
         try:
             server = servers.find_one({"server": invite.guild.id})
@@ -2237,8 +2158,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_invite_delete(self, invite):
-        if funs.start() == False:
-            return
+
 
         try:
             server = servers.find_one({"server": invite.guild.id})
@@ -2255,8 +2175,6 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
-        if funs.start() == False:
-            return
 
         try:
             server = servers.find_one({"server": before.guild.id})
@@ -2277,8 +2195,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
-        if funs.start() == False:
-            return
+
 
         try:
             server = servers.find_one({"server": message.guild.id})
@@ -2297,8 +2214,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_update(self, before, after):
-        if funs.start() == False:
-            return
+
 
         try:
             server = servers.find_one({"server": before.id})
@@ -2400,8 +2316,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_role_create(self, role):
-        if funs.start() == False:
-            return
+
 
         try:
             server = servers.find_one({"server": role.guild.id})
@@ -2438,8 +2353,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_role_delete(self, role):
-        if funs.start() == False:
-            return
+
 
         try:
             server = servers.find_one({"server": role.guild.id})
@@ -2456,8 +2370,7 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_role_update(self, before, after):
-        if funs.start() == False:
-            return
+
 
         try:
             server = servers.find_one({"server": before.guild.id})
