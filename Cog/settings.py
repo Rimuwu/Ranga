@@ -3279,7 +3279,7 @@ class settings(commands.Cog):
                 await msg.add_reaction(x)
             await reackt()
 
-    @commands.command(usage = '(#channel) (category) (message)', description = 'Настроить систему тикетов.', help = 'Другие системы')
+    @commands.command(usage = '[#channel] [category] [message]', description = 'Настроить систему тикетов.', help = 'Другие системы')
     async def set_tickets(self, ctx, channel:discord.TextChannel = None, category:int = None, *, message = None):
         global servers
         if funs.roles_check(ctx.author, ctx.guild.id) == False:
@@ -3290,7 +3290,7 @@ class settings(commands.Cog):
 
         if category == None:
             overwrites = {
-                    guild.default_role: discord.PermissionOverwrite(view_channel=False, send_messages=False)
+                    ctx.guild.default_role: discord.PermissionOverwrite(view_channel=False, send_messages=False)
                          }
             cat = await ctx.guild.create_category('Tickets', overwrites = overwrites)
             category = cat.id
