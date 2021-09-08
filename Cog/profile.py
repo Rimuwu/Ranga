@@ -78,7 +78,6 @@ class profile(commands.Cog):
             member = ctx.author
 
         user = funs.user_check(member, ctx.guild)
-        print(user)
         main = users.find_one({"userid": member.id})
         server = servers.find_one({"server": ctx.guild.id})
 

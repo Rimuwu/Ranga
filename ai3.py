@@ -640,65 +640,6 @@ class functions:
         global client
         return client
 
-    @staticmethod
-    async def command_manage(ctx):
-        message = ctx
-
-        s = settings.find_one({"sid": 1})
-
-        if message.guild.id in s['bl servers']: return False
-
-        server = servers.find_one({"server": message.guild.id})
-
-        if server == None:
-            functions.insert_server(message.guild)
-            server = servers.find_one({"server": message.guild.id})
-
-        try:
-            if ctx.command.name not in server['mod']['off_commands']:
-                if functions.cooldown_check(message.author, message.guild, ctx.command.name, 'check') == False:
-                    if functions.bd_check(message.author) == True:
-                        await bot.process_commands(message) # Выполнение команды
-                        print(ctx.command.name, 'no_errors')
-
-                        if ctx.command.name in server['mod']['cooldowns'].keys():
-                            functions.cooldown_check(message.author, message.guild, ctx.command.name, 'add')
-
-                        return True
-
-                else:
-                    if server['mod']['cooldowns'][ctx.command.name]['type'] == 'users':
-
-                        if server['mod']['cooldowns'][ctx.command.name]['users'][str(message.author.id)] - int(time.time()) < 0:
-                            tt = 0
-                        else:
-                            tt = int(server['mod']['cooldowns'][ctx.command.name]['users'][str(message.author.id)] - time.time())
-
-                    elif server['mod']['cooldowns'][ctx.command.name]['type'] == 'server':
-
-                        if server['mod']['cooldowns'][ctx.command.name]['server_c'] - int(time.time()) < 0:
-                            tt = 0
-                        else:
-                            tt = int(server['mod']['cooldowns'][ctx.command.name]['server_c'] - time.time())
-
-                    elif server['mod']['cooldowns'][ctx.command.name]['type'] == 'roles':
-
-                        if server['mod']['cooldowns'][ctx.command.name]['role_c'] - int(time.time()) < 0:
-                            tt = 0
-                        else:
-                            tt = int(server['mod']['cooldowns'][ctx.command.name]['role_c'] - time.time())
-
-                    emb = discord.Embed(title = 'Режим ожидания', description = f"Включён режим ожидания, вам осталось ждать {functions.time_end(tt)}", color =server['embed_color'])
-                    await message.channel.send(embed = emb)
-
-                    return False
-
-        except Exception:
-            await bot.process_commands(message)
-            print(ctx.command.name, 'error')
-            return True
-
-
 # коги ======================================= #
 
 bot.remove_command( "help" )

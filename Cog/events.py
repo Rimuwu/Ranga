@@ -1185,37 +1185,11 @@ class MainCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_join(self,guild):
-
-        member = guild.get_member(guild.owner_id)
-        b = guild.get_member(734730292484505631)
-
         funs.insert_server(guild)
-        try:
-
-            message = await member.send(embed = discord.Embed(
-                title=f"Ня, я зашёл на {guild.name}", description="Ня, я новый бот на вашем сервере, и звать меня IT Котик!\nКоманда для помощи +help", color=0xf03e65).add_field(
-                name="Префикс", value=f"+").add_field(
-                name="Если что то не так",value=f"+complaint - команда отправит репорт на сервер разработчика, который зайдёт на сервер и будет рад узнать об ошибке").add_field(
-                name="Повторное приглашение", value=f"Если вам нужно пригласить бота повторно, вы можете сделать это нажав [сюда](https://discordapp.com/oauth2/authorize?client_id=734730292484505631&scope=bot&permissions=8)").set_thumbnail(
-                url= b.avatar.url))
-        except Exception:
-            pass
-
-        chan = self.bot.get_channel(813055964257058837)
-        emb = discord.Embed(title=f"Бот присоединился к {guild.name}", description=f"Пользователей: {len(guild.members)}\n Создатель: {guild.owner}\n ID: {guild.id}", color=0x8cee7c)
-        emb.set_footer(text="Теперь бот на " + str(len(self.bot.guilds))+ " серверах")
-        emb.set_thumbnail(url= guild.icon.url)
-        await chan.send(embed=emb)
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
         servers.delete_one({"server": guild.id})
-        channel = self.bot.get_channel(813055964257058837)
-        emb = discord.Embed(title="Бот вышел с " + guild.name, description=f"Пользователей: {len(guild.members)}\n Создатель: {guild.owner}\n ID: {guild.id}", color=0xf03e65)
-        emb.set_footer(text="Теперь бот на " + str(len(self.bot.guilds))+ " серверах")
-        emb.set_thumbnail(url= guild.icon.url)
-        await channel.send(embed=emb)
-
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):

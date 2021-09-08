@@ -31,12 +31,9 @@ class bs(commands.Cog):
 
     @commands.command(aliases=['backshop','backgrounds','bs','bgshop','bg','бс'], usage = '(number)', description = 'Покупка фонов для профиля')
     async def bshop(self,ctx, number:int = 0):
-        if await funs.command_manage(ctx) == False:
-            return
 
         bs = list(backs.find())
         d = {}
-
 
         solutions = ['◀', '▶', '🛒', '❌']
         member = ctx.author
@@ -174,8 +171,6 @@ class bs(commands.Cog):
 
     @commands.command(usage = '-', description = 'Инвентарь фонов')
     async def back_inv(self,ctx):
-        if await funs.command_manage(ctx) == False:
-            return
 
         bs = list(backs.find())
         d = {}
@@ -284,9 +279,6 @@ class bs(commands.Cog):
 
     @commands.command(usage = '(url) [type]', description = 'Подача заявки на новый фон.', help = 'Грустные')
     async def bs_app(self, ctx, link, type = 'png'):
-        if await funs.command_manage(ctx) == False:
-            return
-
 
         try:
             emb = discord.Embed(description = "-", color=0xf03e65)
@@ -350,11 +342,7 @@ class bs(commands.Cog):
             image = image.resize((image.size[0] * pixel_size, image.size[1] * pixel_size), Image.NEAREST)
             return image
 
-        t = dict(sorted(server['users'].items(),key=lambda x: x[1]['money'], reverse=True))
-        topmn = list(t.keys()).index(str(member.id)) +1
-
-        t = dict(sorted(server['users'].items(),key=lambda x: x[1]['lvl'], reverse=True))
-        toplvl = list(t.keys()).index(str(member.id)) +1
+        t = '?'
 
         alpha = Image.open('elements/alpha.png')
 
@@ -462,11 +450,11 @@ class bs(commands.Cog):
 
         idraw.text((315,360), f"{name}#{tag}", font = headline)
 
-        idraw.text((60,348), f"{user['money']} #{topmn}", font = para)
+        idraw.text((60,348), f"{user['money']} #{t}", font = para)
         idraw.text((260,50), f"{len(main['rep'][0])}", font = para)
         idraw.text((260,90), str(len(main['rep'][1])), font = para)
         idraw.text((505,282), f"{user['xp']}  |  {expn}" , font = para)
-        idraw.text((60,298), f"{user['lvl']} #{toplvl}" , font = para)      #55,265
+        idraw.text((60,298), f"{user['lvl']} #{t}" , font = para)      #55,265
 
 
         if type == "png":
@@ -580,8 +568,6 @@ class bs(commands.Cog):
 
     @commands.command(hidden = True, usage = '(id) [reason]')
     async def bs_deny(self, ctx, id:int, *, reason = None):
-        if await funs.command_manage(ctx) == False:
-            return
         s = settings.find_one({"sid": 1})
         if ctx.author.id not in s['moderators']:
             await ctx.send("У вас нет прав модератора бота!")
@@ -627,8 +613,7 @@ class bs(commands.Cog):
 
     @commands.command(hidden = True, usage = '(id) (price) [type]')
     async def bs_approve(self, ctx, id:int, price:int, type = None):
-        if await funs.command_manage(ctx) == False:
-            return
+
         s = settings.find_one({"sid": 1})
         if ctx.author.id not in s['moderators']:
             await ctx.send("У вас нет прав модератора бота!")
@@ -656,7 +641,7 @@ class bs(commands.Cog):
         if type == None:
             type = bs['type']
 
-        channel = self.bot.get_channel(880148384416153682)
+        channel = self.bot.get_channel(884487110747357204)
         mid = await channel.fetch_message(bs['message'])
         await mid.clear_reactions()
 
