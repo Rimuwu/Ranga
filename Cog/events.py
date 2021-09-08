@@ -1457,17 +1457,36 @@ class MainCog(commands.Cog):
                                     msg = await channel.send(f'{member.mention}',embed = emb)
                                     await msg.add_reaction("✅")
                                     server['tickets']['t_n'] = server['tickets']['t_n']+1
-                                    server['tickets']['tick'].update({ str(msg.id): member.id})
+                                    server['tickets']['tick'].update({ str(msg.id): {'member': member.id, 'status': 'open'} })
                                     servers.update_one({'server': guild.id},{"$set": {'tickets': server['tickets'] }})
 
                         else:
                             try:
-                                ms = server['tickets']['tick'][str(message.id)]
-                                if str(emoji) == '✅':
-                                    if member.id == ms:
+                                m = server['tickets']['tick'][str(message.id)]
+                                if m['status'] == 'open':
+                                    ms = ms['member']
+                                    if str(emoji) == '✅':
+                                        if member.id == ms or funs.roles_check(member, guild.id) == True:
+                                            await message.delete()
+                                            emb = discord.Embed(title = f'Тикет закрыт', description = f'Удалить канал: 🧨\nОставь историю: 🎫', color= server['embed_color'] )
+                                            msg = await message.channel.send(embed = emb)
+
+                                            server['tickets']['tick'].update({ str(msg.id): {'status': 'close'} })
+                                            del server['tickets']['tick'][str(message.id)]
+
+                                            servers.update_one({'server': guild.id},{"$set": {'tickets': server['tickets'] }})
+
+
+                                if m['status'] == 'close':
+                                    if str(emoji) == '🧨':
                                         await message.channel.delete(reason = 'ticket remove')
-                                        del server['tickets']['tick'][str(message.id)]
-                                        servers.update_one({'server': guild.id},{"$set": {'tickets': server['tickets'] }})
+
+                                    elif str(emoji) == '🎫':
+                                        await message.delete()
+
+                                    del server['tickets']['tick'][str(message.id)]
+                                    servers.update_one({'server': guild.id},{"$set": {'tickets': server['tickets'] }})
+
 
                             except Exception:
                                 pass
