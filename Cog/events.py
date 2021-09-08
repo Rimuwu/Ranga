@@ -32,7 +32,7 @@ voice_dict = {}
 start_time = time.time()
 
 stat_list = [
-               "Играю с клубком...",
+               "Играю с твоей душой...",
                'Я волк, но в душе я дракон, рррррр!',
                "Пинг 52к + баги == Ранга",
                "Моя любимая рыбка - карась",
@@ -1464,12 +1464,14 @@ class MainCog(commands.Cog):
                             try:
                                 m = server['tickets']['tick'][str(message.id)]
                                 if m['status'] == 'open':
-                                    ms = ms['member']
+                                    ms = m['member']
                                     if str(emoji) == '✅':
                                         if member.id == ms or funs.roles_check(member, guild.id) == True:
                                             await message.delete()
-                                            emb = discord.Embed(title = f'Тикет закрыт', description = f'Удалить канал: 🧨\nОставь историю: 🎫', color= server['embed_color'] )
+                                            emb = discord.Embed(title = f'Тикет закрыт', description = f'Удалить канал > 🧨\nСохранить историю > 📜', color= server['embed_color'] )
                                             msg = await message.channel.send(embed = emb)
+                                            await msg.add_reaction("🧨")
+                                            await msg.add_reaction("📜")
 
                                             server['tickets']['tick'].update({ str(msg.id): {'status': 'close'} })
                                             del server['tickets']['tick'][str(message.id)]
