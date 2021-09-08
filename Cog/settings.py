@@ -294,7 +294,7 @@ class settings(commands.Cog):
         message = ' '.join(message)
 
         await ctx.send(funs.text_replase(message, ctx.author))
-        await ctx.send(f'Сообщение от ващего имение которое быдет выслано при повышении уровня установлено!')
+        await ctx.send(f'Сообщение от ващего имение которое будет выслано при повышении уровня установлено!')
 
         server = servers.find_one({'server':ctx.guild.id})
         a = server['upsend_sett']

@@ -1195,7 +1195,6 @@ async def lvl_up_image(message, main, user, server):
     if UpSend == 777777777777777771 or UpSend == None:
         return
 
-    print(11)
 
     def trans_paste(fg_img,bg_img,alpha=10,box=(0,0)):
         fg_img_trans = Image.new("RGBA",fg_img.size)
@@ -1219,6 +1218,7 @@ async def lvl_up_image(message, main, user, server):
             im = im.crop((0, (h - w) / 2, w, (h + w) / 2))
 
         return im.resize(s, Image.ANTIALIAS)
+
 
     member = message.author
 
@@ -1250,6 +1250,7 @@ async def lvl_up_image(message, main, user, server):
         response = requests.get(url, stream=True)
         response.raw.decode_content = True
         img = Image.open(response.raw)
+
 
     mask = Image.new('L', (720, 217))
     bar = Image.new('RGB', (720, 217))
@@ -1338,7 +1339,7 @@ async def lvl_up_image(message, main, user, server):
         ul = 'gif'
 
 
-    up_text = funs.text_replase(server['upsend_sett']['up_message'])
+    up_text = functions.text_replase(server['upsend_sett']['up_message'], message.author)
     if up_text == None:
         up_text = f'<@{message.author.id}>'
 
