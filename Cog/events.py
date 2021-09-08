@@ -1483,7 +1483,7 @@ class MainCog(commands.Cog):
                                     if str(emoji) == '🧨':
                                         await message.channel.delete(reason = 'ticket remove')
 
-                                    elif str(emoji) == '🎫':
+                                    elif str(emoji) == '📜':
                                         await message.delete()
 
                                     del server['tickets']['tick'][str(message.id)]
