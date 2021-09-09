@@ -2730,9 +2730,15 @@ class settings(commands.Cog):
             await ctx.send("У вас недостаточно прав для использования этой команды!")
             return
 
+        l = ["ban", "kick", "warn", "message", "delete-all", "delete", "role-add", "role-remove"]
+
+        if punishment == ():
+            await ctx.send(f"Выберите из этого списка: {', '.join(l)}")
+            return
+
         pun = []
         for i in punishment:
-            if i in ["ban", "kick", "warn", "message", "delete-all", "delete", "role-add", "role-remove"]:
+            if i in l:
                 pun.append(i)
         if pun != []:
             server = servers.find_one({'server':ctx.guild.id})
@@ -2886,9 +2892,15 @@ class settings(commands.Cog):
             await ctx.send("У вас недостаточно прав для использования этой команды!")
             return
 
+        l = ["ban", "kick", "warn", "message", "delete-all", "delete", "role-add", "role-remove"]
+
+        if punishment == ():
+            await ctx.send(f"Выберите из этого списка: {', '.join(l)}")
+            return
+
         pun = []
         for i in punishment:
-            if i in ["ban", "kick", "warn", "message", "delete-all", "delete", "role-add", "role-remove"]:
+            if i in l:
                 pun.append(i)
         if pun != []:
             server = servers.find_one({'server':ctx.guild.id})
