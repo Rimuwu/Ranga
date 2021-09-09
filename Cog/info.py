@@ -30,8 +30,6 @@ class info(commands.Cog):
 
     @commands.command(aliases=['bot', 'invite'], usage = '-', description = 'Информация о боте.')
     async def info(self,ctx):
-        sett = settings.find_one({"sid": 1})
-        news = sett['News']
         server = servers.find_one({"server": ctx.guild.id})
 
         ping = self.bot.latency
@@ -56,7 +54,7 @@ class info(commands.Cog):
         message = await ctx.send(embed = discord.Embed(
             title="Ранга",
             description=f"Я Ранга! По велению Римуру-доно, я прибыл сюда что бы наблюдать за этим местом!\n\nЯ кастомный для семьи серверов AW, к ним относятся: [{s1}](https://discord.gg/VyDc2e4HYE), [{s2}](https://discord.gg/9X5pkqmB3X)",
-            color=server['embed_color']).add_field(
+            color=0x34cb2c).add_field(
             name="Префикс",
             value=f"{ctx.prefix}").add_field(
             name="Разработчик",
