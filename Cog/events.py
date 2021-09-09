@@ -1448,19 +1448,23 @@ class MainCog(commands.Cog):
                                     await message.remove_reaction('💬', member)
                                 else:
                                     await message.remove_reaction('💬', member)
-                                    emb = discord.Embed(title = f'Управление', description = f'Если вы хотите закрыть билет, нажмите ✅', color= server['embed_color'] )
                                     category = await self.bot.fetch_channel(server['tickets']['category'])
-                                    overwrites = {
-                                                guild.default_role: discord.PermissionOverwrite(view_channel=False),
-                                                guild.me: discord.PermissionOverwrite(read_messages=True, manage_messages=True),
-                                                payload.member: discord.PermissionOverwrite(read_messages=True, send_messages=True),
-                                                }
-                                    channel = await guild.create_text_channel(name=f"ticket {server['tickets']['t_n']+1}", category = category,  overwrites=overwrites, reason = "ticket create")
-                                    msg = await channel.send(f'{member.mention}',embed = emb)
-                                    await msg.add_reaction("✅")
-                                    server['tickets']['t_n'] = server['tickets']['t_n']+1
-                                    server['tickets']['tick'].update({ str(msg.id): {'member': member.id, 'status': 'open'} })
-                                    servers.update_one({'server': guild.id},{"$set": {'tickets': server['tickets'] }})
+                                    if len(category.text_channels) == 50:
+                                        await member.send(f'🌌 Галактика чем то недовольна!\nВ данный момент активно 50 тикетов, пожалуйста подождите и попробуйте позже ещё раз!\nЕсли у вас серьёзная преблема, обратитесь к администрации!')
+
+                                    if len(category.text_channels) < 50:
+                                        emb = discord.Embed(title = f'Управление', description = f'Если вы хотите закрыть билет, нажмите ✅', color= server['embed_color'] )
+                                        overwrites = {
+                                                    guild.default_role: discord.PermissionOverwrite(view_channel=False),
+                                                    guild.me: discord.PermissionOverwrite(read_messages=True, manage_messages=True),
+                                                    payload.member: discord.PermissionOverwrite(read_messages=True, send_messages=True),
+                                                    }
+                                        channel = await guild.create_text_channel(name=f"ticket {server['tickets']['t_n']+1}", category = category,  overwrites=overwrites, reason = "ticket create")
+                                        msg = await channel.send(f'{member.mention}',embed = emb)
+                                        await msg.add_reaction("✅")
+                                        server['tickets']['t_n'] = server['tickets']['t_n']+1
+                                        server['tickets']['tick'].update({ str(msg.id): {'member': member.id, 'status': 'open'} })
+                                        servers.update_one({'server': guild.id},{"$set": {'tickets': server['tickets'] }})
 
                         else:
                             # try:
