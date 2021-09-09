@@ -611,8 +611,8 @@ class bs(commands.Cog):
         await ctx.send(f"Фон {id} отклонён пользователем {ctx.author}")
 
 
-    @commands.command(hidden = True, usage = '(id) (price) [type]')
-    async def bs_approve(self, ctx, id:int, price:int, type = None):
+    @commands.command(hidden = True, usage = '(id) (price) [type] [display]')
+    async def bs_approve(self, ctx, id:int, price:int, type = None, display = '1'):
 
         s = settings.find_one({"sid": 1})
         if ctx.author.id not in s['moderators']:
@@ -630,14 +630,18 @@ class bs(commands.Cog):
             return
 
         if price < 0:
-            if type not in ['gif', 'png']:
-                await ctx.send("Цена не может быть меньше чем 0!")
-                return
+            await ctx.send("Цена не может быть меньше чем 0!")
+            return
 
         if type != None:
             if type not in ['gif', 'png']:
                 await ctx.send("Такого типа не существует!")
                 return
+
+        if display not in ['1', '0']:
+            await ctx.send("Такого типа не существует! (1/0)")
+            return
+
         if type == None:
             type = bs['type']
 
