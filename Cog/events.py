@@ -1557,7 +1557,10 @@ class MainCog(commands.Cog):
                                         emb.add_field(name = 'Ссылка', value = f'[Прыг!]({message.jump_url})')
 
                                         pzz_mes = await pizz_channel.send(f"<:n_pizza:871093811626000414> {message.reactions[r_l].count} ➜ {message.channel.mention}", embed = emb)
-                                        server['pizza_board']['messages'].update({str(message.id): {'m_id': pzz_mes.id}})
+                                        try:
+                                            server['pizza_board']['messages'].update({str(message.id): {'m_id': pzz_mes.id}})
+                                        except:
+                                            server['pizza_board'].update({'messages': {str(message.id): {'m_id': pzz_mes.id}}})
                                         servers.update_one({"server": payload.guild_id}, {"$set": {"pizza_board": server['pizza_board']}})
 
         except Exception:
