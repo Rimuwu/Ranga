@@ -53,7 +53,7 @@ class info(commands.Cog):
         b = ctx.guild.me
         message = await ctx.send(embed = discord.Embed(
             title="Ранга",
-            description=f"Я Ранга! По велению Римуру-доно, я прибыл сюда что бы наблюдать за этим местом!\n\nЯ кастомный для семьи серверов AW, к ним относятся: [{s1}](https://discord.gg/VyDc2e4HYE), [{s2}](https://discord.gg/9X5pkqmB3X)",
+            description=f"Я Ранга! По велению Римуру-доно, я прибыл что бы наблюдать за этим местом!\n\nЯ кастомный бот для семьи серверов AW, к ним относятся: [{s1}](https://discord.gg/VyDc2e4HYE), [{s2}](https://discord.gg/9X5pkqmB3X)",
             color=0x34cb2c).add_field(
             name="Префикс",
             value=f"{ctx.prefix}").add_field(
