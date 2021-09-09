@@ -49,7 +49,7 @@ class info(commands.Cog):
 
 
         s1 = self.bot.get_guild(601124004224434357)
-        s1 = self.bot.get_guild(792687533792034827)
+        s2 = self.bot.get_guild(792687533792034827)
         b = ctx.guild.me
         message = await ctx.send(embed = discord.Embed(
             title="Ранга",
