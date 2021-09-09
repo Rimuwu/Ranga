@@ -583,7 +583,7 @@ class bs(commands.Cog):
             await ctx.send("Фон уже был принят\отклонён!")
             return
 
-        channel = self.bot.get_channel(880148384416153682)
+        channel = self.bot.get_channel(884487110747357204)
         mid = await channel.fetch_message(bs['message'])
         await mid.clear_reactions()
 
