@@ -2617,7 +2617,7 @@ class settings(commands.Cog):
         emb.add_field(name = 'punishment (*str)', value = f'Через пробел укажите наказания из этого списка - ( ban, kick, warn, role-add, role-remove, message, delete-all, delete, role-add, role-remove )\nПример: warn message delete-all')
         await ctx.send(embed = emb)
 
-    @commands.command(usage = '(repetions) (punishments)', description = 'Настройка защиты от флуда.', help = 'Настройка авто-модерации')
+    @commands.command(usage = '(repetitions) (punishments)', description = 'Настройка защиты от флуда.', help = 'Настройка авто-модерации')
     async def set_flud(self, ctx, repetitions:int, *punishment:str):
         global servers
         if funs.roles_check(ctx.author, ctx.guild.id) == False:
@@ -2742,7 +2742,7 @@ class settings(commands.Cog):
                 pun.append(i)
         if pun != []:
             server = servers.find_one({'server':ctx.guild.id})
-            server['mod']['bad_words'].update({'repetitions': repetitions, 'punishment': pun,})
+            server['mod']['bad_words'].update({'punishment': pun,})
             servers.update_one({'server':ctx.guild.id},{'$set':{'mod': server["mod"] }})
 
             if 'message' in pun:
@@ -2904,7 +2904,7 @@ class settings(commands.Cog):
                 pun.append(i)
         if pun != []:
             server = servers.find_one({'server':ctx.guild.id})
-            server['mod']['media_channels'].update({'repetitions': repetitions, 'punishment': pun,})
+            server['mod']['media_channels'].update({'punishment': pun})
             servers.update_one({'server':ctx.guild.id},{'$set':{'mod': server["mod"] }})
 
             if 'message' in pun:
