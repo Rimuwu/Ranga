@@ -49,10 +49,13 @@ class info(commands.Cog):
             if ping > ping_one["ping"]:
                 ping_emoji = ping_one["emoji"]
 
-        b = ctx.guild.get_member(734730292484505631)
+
+        s1 = self.bot.get_guild(601124004224434357)
+        s1 = self.bot.get_guild(792687533792034827)
+        b = ctx.guild.me
         message = await ctx.send(embed = discord.Embed(
-            title="IT Котик",
-            description="IT Котик это развлекательный, многофункциональный бот для лампового провождения времени.",
+            title="Ранга",
+            description=f"Я Ранга! По велению Римуру-доно, я прибыл сюда что бы наблюдать за этим местом!\n\nЯ кастомный для семьи серверов AW, к ним относятся: [{s1}](https://discord.gg/VyDc2e4HYE), [{s2}](https://discord.gg/9X5pkqmB3X)",
             color=server['embed_color']).add_field(
             name="Префикс",
             value=f"{ctx.prefix}").add_field(
@@ -61,27 +64,11 @@ class info(commands.Cog):
             name="Пинг:",
             value=f"{ping_emoji} `{ping * 1000:.0f}ms`").add_field(
             name="Статистика:",
-            value=f"Серверов: {str(len(self.bot.guilds))}\n"
-            f"Пользователей: {len(self.bot.users)}\n"
+            value=f"Пользователей: {len(self.bot.users)}\n"
             f"Команд: {len(self.bot.commands)}\n"
                   ,inline=True).add_field(name="Библиотека", value="nextcord 2.0.0")
                   .add_field(name="Хостинг", value="heroku").set_thumbnail(
-            url= b.avatar.url).add_field(name="Ссылки",
-                     value=
-                     f"[Botlist](https://discord.ly/it-kotik)\n"
-                     f"[Bots.discord](https://bots.server-discord.com/734730292484505631)\n"
-                     f"[Discord.bots.gg](https://discord.bots.gg/bots/734730292484505631)\n"
-                     ).add_field(name="Ссылки",
-                     value=
-                     f"[Server](https://discord.gg/cFa8K37pBa)\n"
-                     f"[Boticord](https://boticord.top/bot/734730292484505631)\n"
-                     f"[Botlist.space](https://botlist.space/bot/734730292484505631)\n"
-                     f"[top-bots.xyz](https://top-bots.xyz/bot/734730292484505631)").add_field(
-                    name="Ссылки",
-                    value="[Пригласить](https://discordapp.com/oauth2/authorize?client_id=734730292484505631&scope=bot&permissions=8)\n"
-                    '[На дошик](https://www.donationalerts.com/r/as1aw)').add_field(
-
-            name = "Последние новости", value = f"\n{news[0]}\n{news[1]}\n{news[2]}", inline= False))
+            url= b.avatar.url)
 
 
     @commands.command(aliases=['N', 'n', 'Nitro', 'нитро', "Нитро"], usage = '-', description = 'Информация о премиум подписке.')
