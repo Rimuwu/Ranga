@@ -1479,7 +1479,6 @@ async def punishment_mod(message, server, p, reason, shield):
 
 @bot.event
 async def on_message(message):
-    global peoplesCD
 
     s = settings.find_one({"sid": 1})
 
@@ -1531,10 +1530,11 @@ async def on_message(message):
 
     # #auto mod
     try:
-        if erver['mod']['media_channels'] != {} or server['mod']['bad_words'] != {} or server['mod']['flud_shield'] != {} or server['mod']['members_mention'] != {} or server['mod']['roles_mention'] != {}:
+        if server['mod']['media_channels'] != {} or server['mod']['bad_words'] != {} or server['mod']['flud_shield'] != {} or server['mod']['members_mention'] != {} or server['mod']['roles_mention'] != {}:
 
             if server['mod']['black_channels'] == [] or message.channel.id not in server['mod']['black_channels']:
                 if server['mod']['wlist_members'] == [] or message.author.id not in server['mod']['wlist_members']:
+
                     list_roles = []
                     for role in message.author.roles: list_roles.append(role.id)
                     if list(set(server['mod']['wlist_roles']) & set(list_roles)) == []:
