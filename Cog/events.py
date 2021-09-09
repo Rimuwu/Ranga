@@ -14,6 +14,7 @@ import pymongo
 import math
 from datetime import datetime, timedelta, timezone
 import aiohttp
+import pprint
 
 sys.path.append("..")
 from ai3 import functions as funs
@@ -1401,7 +1402,8 @@ class MainCog(commands.Cog):
             except Exception:
                 pass
 
-        try:
+        # try:
+        if 1 == 1:
             guild = self.bot.get_guild(payload.guild_id)
             channel = guild.get_channel(payload.channel_id)
             message = await channel.fetch_message(payload.message_id)
@@ -1441,7 +1443,7 @@ class MainCog(commands.Cog):
                             if str(emoji) == '💬':
                                 ml = []
                                 for nn in list(server['tickets']['tick'].items()):
-                                    ml.append(nn[1])
+                                    ml.append(nn[1]['member'])
                                 if member.id in ml:
                                     await message.remove_reaction('💬', member)
                                 else:
@@ -1461,37 +1463,54 @@ class MainCog(commands.Cog):
                                     servers.update_one({'server': guild.id},{"$set": {'tickets': server['tickets'] }})
 
                         else:
-                            try:
-                                m = server['tickets']['tick'][str(message.id)]
-                                if m['status'] == 'open':
-                                    ms = m['member']
-                                    if str(emoji) == '✅':
-                                        if member.id == ms or funs.roles_check(member, guild.id) == True:
+                            # try:
+                            if 1 == 1:
+                                try:
+                                    m = server['tickets']['tick'][str(message.id)]
+                                except:
+                                    m = None
+
+                                if m != None:
+                                    if m['status'] == 'open':
+                                        ms = m['member']
+                                        if str(emoji) == '✅':
+                                            if member.id == ms or funs.roles_check(member, guild.id) == True:
+                                                bm = guild.get_member(ms)
+                                                await message.delete()
+
+                                                overwrites = {
+                                                            guild.default_role: discord.PermissionOverwrite(view_channel=False),
+                                                            bm: discord.PermissionOverwrite(read_messages=False, send_messages = False),
+                                                            guild.me: discord.PermissionOverwrite(read_messages=True, manage_messages=True)
+                                                            }
+
+                                                await message.channel.edit(overwrites = overwrites)
+
+                                                emb = discord.Embed(title = f'Тикет закрыт', description = f'Тикет пользователя {bm.mention} был закрыт\n\nУдалить канал > 🧨\nСохранить историю > 📜', color= server['embed_color'] )
+                                                msg = await message.channel.send(embed = emb)
+
+                                                server['tickets']['tick'].update({ str(msg.id): {'status': 'close', 'member': bm.id} })
+
+                                                del server['tickets']['tick'][str(message.id)]
+                                                servers.update_one({'server': guild.id},{"$set": {'tickets': server['tickets'] }})
+
+                                                await msg.add_reaction("🧨")
+                                                await msg.add_reaction("📜")
+
+
+                                    if m['status'] == 'close':
+                                        if str(emoji) == '🧨':
+                                            await message.channel.delete(reason = 'ticket remove')
+
+                                        elif str(emoji) == '📜':
                                             await message.delete()
-                                            emb = discord.Embed(title = f'Тикет закрыт', description = f'Удалить канал > 🧨\nСохранить историю > 📜', color= server['embed_color'] )
-                                            msg = await message.channel.send(embed = emb)
-                                            await msg.add_reaction("🧨")
-                                            await msg.add_reaction("📜")
 
-                                            server['tickets']['tick'].update({ str(msg.id): {'status': 'close'} })
-                                            del server['tickets']['tick'][str(message.id)]
-
-                                            servers.update_one({'server': guild.id},{"$set": {'tickets': server['tickets'] }})
+                                        del server['tickets']['tick'][str(message.id)]
+                                        servers.update_one({'server': guild.id},{"$set": {'tickets': server['tickets'] }})
 
 
-                                if m['status'] == 'close':
-                                    if str(emoji) == '🧨':
-                                        await message.channel.delete(reason = 'ticket remove')
-
-                                    elif str(emoji) == '📜':
-                                        await message.delete()
-
-                                    del server['tickets']['tick'][str(message.id)]
-                                    servers.update_one({'server': guild.id},{"$set": {'tickets': server['tickets'] }})
-
-
-                            except Exception:
-                                pass
+                            # except Exception:
+                            #     pass
 
 
 
@@ -1539,8 +1558,8 @@ class MainCog(commands.Cog):
                                         server['pizza_board']['messages'].update({str(message.id): {'m_id': pzz_mes.id}})
                                         servers.update_one({"server": payload.guild_id}, {"$set": {"pizza_board": server['pizza_board']}})
 
-        except Exception:
-            pass
+        # except Exception:
+        #     pass
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
