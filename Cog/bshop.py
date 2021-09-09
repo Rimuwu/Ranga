@@ -169,22 +169,22 @@ class bs(commands.Cog):
             await msg.add_reaction(x)
         await reackt()
 
-    @commands.command(usage = '-', description = 'Инвентарь фонов')
-    async def back_inv(self,ctx):
+    @commands.command(usage = '[@member]', description = 'Инвентарь фонов', aliases = ['bi'])
+    async def back_inv(self,ctx, member: discord.Member = None):
 
         bs = list(backs.find())
         d = {}
 
-
         solutions = ['◀', '▶', '🖼', '❌']
-        member = ctx.author
+        if member = None:
+            member = ctx.author
         reaction = 'a'
         number = 1
 
         ok =  self.bot.get_emoji(744137747639566346)
         no =  self.bot.get_emoji(744137801804546138)
 
-        us = users.find_one({"userid": ctx.author.id})
+        us = users.find_one({"userid": member.id})
 
 
         if us["Nitro"] == True:
@@ -219,7 +219,7 @@ class bs(commands.Cog):
 
         def check( reaction, user):
             nonlocal msg
-            return user == ctx.author and str(reaction.emoji) in solutions and str(reaction.message) == str(msg)
+            return user == member and str(reaction.emoji) in solutions and str(reaction.message) == str(msg)
 
         async def rr():
             nonlocal reaction
@@ -255,10 +255,10 @@ class bs(commands.Cog):
                 await msg.remove_reaction('🖼', member)
                 us.update({"back": d[str(number)]["id"]})
                 emb = discord.Embed(description = f'Фон успешно установлен на #{d[str(number)]["id"]}!',color=0xf03e65)
-                emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+                emb.set_author(name = '{}'.format(member), icon_url = '{}'.format(member.avatar.url))
                 await ctx.send(embed = emb)
 
-                users.update_one({'userid':ctx.author.id},{'$set':{"back": d[str(number)]["id"]}})
+                users.update_one({'userid':member.id},{'$set':{"back": d[str(number)]["id"]}})
 
                 await reackt()
 

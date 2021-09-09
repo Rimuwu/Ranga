@@ -103,8 +103,9 @@ def voice_time(guild, member, time, met):
 
                         r = str(uss['voice_lvl'] + 1)
                         uss['money'] += server['voice_reward'][str(r)]['money']
-                        for i in server['voice_reward'][str(r)]['items']:
-                             uss['inv'].append(server['items'][str(i)])
+                        if items != None:
+                            for i in server['voice_reward'][str(r)]['items']:
+                                 uss['inv'].append(server['items'][str(i)])
 
                         funs.user_update(member.id, guild, 'money', uss['money'] )
                         funs.user_update(member.id, guild, 'inv', uss['inv'] )
