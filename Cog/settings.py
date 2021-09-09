@@ -2871,7 +2871,7 @@ class settings(commands.Cog):
             return
 
         server = servers.find_one({'server':ctx.guild.id})
-        wl = server['mod']['media_channels']
+        wl = []
         for i in channel:
             wl.append(i.id)
 
