@@ -66,7 +66,7 @@ class info(commands.Cog):
             f"Команд: {len(self.bot.commands)}\n"
                   ,inline=True).add_field(name="Библиотека", value="nextcord 2.0.0")
                   .add_field(name="Хостинг", value="heroku").set_thumbnail(
-            url= b.avatar.url)
+            url= b.avatar.url))
 
 
     @commands.command(aliases=['N', 'n', 'Nitro', 'нитро', "Нитро"], usage = '-', description = 'Информация о премиум подписке.')
