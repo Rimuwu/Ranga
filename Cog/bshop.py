@@ -527,7 +527,7 @@ class bs(commands.Cog):
 
                 bs = s['bs']
                 try:
-                    bs_id = max(bs.keys()) + 1
+                    bs_id = int(max(bs.keys())) + 1
                 except:
                     bs_id = 1
 
