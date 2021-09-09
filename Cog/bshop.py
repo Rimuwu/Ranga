@@ -673,7 +673,7 @@ class bs(commands.Cog):
               'price': price,
               'url': bs["url"],
               'creator_id': bs['author'],
-              'display': 1,
+              'display': display,
               'color': 15744613,
               'format': type,
               'progress_bar': [238, 74, 84],
