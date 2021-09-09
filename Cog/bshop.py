@@ -176,7 +176,7 @@ class bs(commands.Cog):
         d = {}
 
         solutions = ['◀', '▶', '🖼', '❌']
-        if member = None:
+        if member == None:
             member = ctx.author
         reaction = 'a'
         number = 1

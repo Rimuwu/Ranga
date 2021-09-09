@@ -3107,7 +3107,7 @@ class settings(commands.Cog):
         await ctx.send(f"Награда: {reward}\nУмножение суммы: {reward_percent}" )
 
     @commands.command(usage = '(lvl) (money) (items)', description = 'Настроить награду за голосовую активность.', help = 'Награда за активность в войсе')
-    async def add_voice_reward(self, ctx, lvl:int, money:int, *item:int = None):
+    async def add_voice_reward(self, ctx, lvl:int, money:int, *, item:int = None):
         global servers
         if funs.roles_check(ctx.author, ctx.guild.id) == False:
             await ctx.send("У вас недостаточно прав для использования этой команды!")
