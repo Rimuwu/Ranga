@@ -219,7 +219,7 @@ class bs(commands.Cog):
 
         def check( reaction, user):
             nonlocal msg
-            return user == member and str(reaction.emoji) in solutions and str(reaction.message) == str(msg)
+            return user == ctx.author and str(reaction.emoji) in solutions and str(reaction.message) == str(msg)
 
         async def rr():
             nonlocal reaction
