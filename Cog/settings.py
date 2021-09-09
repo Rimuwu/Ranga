@@ -2870,7 +2870,7 @@ class settings(commands.Cog):
         await ctx.send(embed = emb)
 
     @commands.command(usage = '(#channels)', description = 'Добавить медиа-канал.', help = 'Настройка авто-модерации')
-    async def add_media_channel(self, ctx, *channel:discord.TextChannel):
+    async def add_media_channels(self, ctx, *channel:discord.TextChannel):
         global servers
         if funs.roles_check(ctx.author, ctx.guild.id) == False:
             await ctx.send("У вас недостаточно прав для использования этой команды!")
@@ -2886,7 +2886,7 @@ class settings(commands.Cog):
         await ctx.send("Каналы с режимом медиа-канал были добавлены.")
 
     @commands.command(usage = '(punishments)', description = 'Настроить наказание за нарушение в медиа-канале.', help = 'Настройка авто-модерации')
-    async def media_channel_pun(self, ctx, *punishment:str):
+    async def media_channels_pun(self, ctx, *punishment:str):
         global servers
         if funs.roles_check(ctx.author, ctx.guild.id) == False:
             await ctx.send("У вас недостаточно прав для использования этой команды!")
@@ -2904,23 +2904,23 @@ class settings(commands.Cog):
                 pun.append(i)
         if pun != []:
             server = servers.find_one({'server':ctx.guild.id})
-            server['mod']['media_channel'].update({'repetitions': repetitions, 'punishment': pun,})
+            server['mod']['media_channels'].update({'repetitions': repetitions, 'punishment': pun,})
             servers.update_one({'server':ctx.guild.id},{'$set':{'mod': server["mod"] }})
 
             if 'message' in pun:
-                await ctx.send(f'Пропишите команду {ctx.prefix}media_channel_message\n для настройки сообщения')
-                server['mod']['media_channel'].update({'message': None, 'mess-type': None})
+                await ctx.send(f'Пропишите команду {ctx.prefix}media_channels_message\n для настройки сообщения')
+                server['mod']['media_channels'].update({'message': None, 'mess-type': None})
 
             if 'role-add' in pun or "role-remove" in pun:
-                await ctx.send(f'Пропишите команду {ctx.prefix}media_channel_role\n для настройки роли')
-                server['mod']['media_channel'].update({'add-role': None, 'roleremove': None})
+                await ctx.send(f'Пропишите команду {ctx.prefix}media_channels_role\n для настройки роли')
+                server['mod']['media_channels'].update({'add-role': None, 'roleremove': None})
 
             await ctx.send(f'Наказания настроены')
         else:
             await ctx.send(f'Нету ни одного совпадения с доступными наказаниями')
 
     @commands.command(usage = '(type) (message)', description = 'Добавить сообщение за нарушение в дмедиа канале.', help = 'Настройка авто-модерации')
-    async def media_channel_message(self, ctx, type = None, *message):
+    async def media_channels_message(self, ctx, type = None, *message):
         global servers
         if funs.roles_check(ctx.author, ctx.guild.id) == False:
             await ctx.send("У вас недостаточно прав для использования этой команды!")
@@ -2928,7 +2928,7 @@ class settings(commands.Cog):
 
         server = servers.find_one({'server':ctx.guild.id})
         if type == None:
-            await ctx.send(f"{ctx.prefix}media_channel_message (type) (message)\ntype - укажите отображение emb или mes\nmessge - введите сообщени длинной максимум 1500 символов\nПример: {ctx.prefix}bad_words_message emb Ты плохой человек")
+            await ctx.send(f"{ctx.prefix}media_channels_message (type) (message)\ntype - укажите отображение emb или mes\nmessge - введите сообщени длинной максимум 1500 символов\nПример: {ctx.prefix}bad_words_message emb Ты плохой человек")
         else:
             if type not in ['emb', 'mes']:
                 await ctx.send('Требовалось указать emb или mes')
@@ -2942,7 +2942,7 @@ class settings(commands.Cog):
             await ctx.send("Сообщение настроено")
 
     @commands.command(usage = '(type) (@role)', description = 'Добавить роль за нарушение в медиа канале.', help = 'Настройка авто-модерации')
-    async def media_channel_role(self, ctx, type = None, role: discord.Role = None):
+    async def media_channels_role(self, ctx, type = None, role: discord.Role = None):
         global servers
         if funs.roles_check(ctx.author, ctx.guild.id) == False:
             await ctx.send("У вас недостаточно прав для использования этой команды!")
@@ -2960,13 +2960,13 @@ class settings(commands.Cog):
                 servers.update_one({'server':ctx.guild.id},{'$set':{'mod': server['mod']}})
 
             else:
-                await ctx.send(f"{ctx.prefix}media_channel_role (type) (role)\ntype - укажите add или remove\nrole - укажите роль\nПример: {ctx.prefix}bad_words_role add @проказник")
+                await ctx.send(f"{ctx.prefix}media_channels_role (type) (role)\ntype - укажите add или remove\nrole - укажите роль\nПример: {ctx.prefix}bad_words_role add @проказник")
                 return
 
             await ctx.send('Роль настроена')
 
         else:
-            await ctx.send(f"{ctx.prefix}media_channel_role (type) (role)\ntype - укажите add или remove\nrole - укажите роль\nПример: {ctx.prefix}bad_words_role add @проказник")
+            await ctx.send(f"{ctx.prefix}media_channels_role (type) (role)\ntype - укажите add или remove\nrole - укажите роль\nПример: {ctx.prefix}bad_words_role add @проказник")
 
     @commands.command(usage = '(#channel) (events)', description = 'Установить лог канал.', help = 'Лог')
     async def set_log(self, ctx, channel:discord.TextChannel, *events):
