@@ -129,7 +129,7 @@ class bs(commands.Cog):
                 if t == True:
                     if us['Nitro'] == True:
                         emb = discord.Embed(description = f'Фон успешно установлен на #{number}!',color=0xf03e65)
-                        emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar_url))
+                        emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
                         await ctx.send(embed = emb)
 
                         users.update_one({'userid':ctx.author.id},{'$set':{"back": number}})
@@ -139,14 +139,14 @@ class bs(commands.Cog):
                             users.update_one({'userid':ctx.author.id},{'$set':{"back": number}})
 
                             emb = discord.Embed(description = f'Фон успешно установлен на #{number}!',color=0xf03e65)
-                            emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar_url))
+                            emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
                             await ctx.send(embed = emb)
                         else:
                             bsk = backs.find_one({"bid": number})
                             if us['money'] >= bsk['price']:
 
                                 emb = discord.Embed(description = f'Фон успешно приобретён #{number}!',color=0xf03e65)
-                                emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar_url))
+                                emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
                                 await ctx.send(embed = emb)
 
                                 inv = us['back_inv']
@@ -255,7 +255,7 @@ class bs(commands.Cog):
                 await msg.remove_reaction('🖼', member)
                 us.update({"back": d[str(number)]["id"]})
                 emb = discord.Embed(description = f'Фон успешно установлен на #{d[str(number)]["id"]}!',color=0xf03e65)
-                emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar_url))
+                emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
                 await ctx.send(embed = emb)
 
                 users.update_one({'userid':ctx.author.id},{'$set':{"back": d[str(number)]["id"]}})

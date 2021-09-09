@@ -1402,7 +1402,8 @@ class MainCog(commands.Cog):
             except Exception:
                 pass
 
-        try:
+        # try:
+        if 1 == 1:
             guild = self.bot.get_guild(payload.guild_id)
             channel = guild.get_channel(payload.channel_id)
             message = await channel.fetch_message(payload.message_id)
@@ -1540,7 +1541,7 @@ class MainCog(commands.Cog):
                                         except Exception:
                                             pass
 
-                                        emb.set_author(name = payload.member.name, icon_url = payload.member.avatar.url)
+                                        emb.set_author(name = message.author.name, icon_url = message.author.avatar.url)
                                         emb.add_field(name = 'Ссылка', value = f'[Прыг!]({message.jump_url})')
 
                                         await pzz_mes.edit(content = f"<:n_pizza:871093811626000414> {message.reactions[r_l].count} ➜ {message.channel.mention}", embed = emb)
@@ -1553,7 +1554,7 @@ class MainCog(commands.Cog):
                                         except Exception:
                                             pass
 
-                                        emb.set_author(name = payload.member.name, icon_url = payload.member.avatar.url)
+                                        emb.set_author(name = message.author.name, icon_url = message.author.avatar.url)
                                         emb.add_field(name = 'Ссылка', value = f'[Прыг!]({message.jump_url})')
 
                                         pzz_mes = await pizz_channel.send(f"<:n_pizza:871093811626000414> {message.reactions[r_l].count} ➜ {message.channel.mention}", embed = emb)
@@ -1562,9 +1563,9 @@ class MainCog(commands.Cog):
                                         except:
                                             server['pizza_board'].update({'messages': {str(message.id): {'m_id': pzz_mes.id}}})
                                         servers.update_one({"server": payload.guild_id}, {"$set": {"pizza_board": server['pizza_board']}})
-
-        except Exception:
-            pass
+        #
+        # except Exception:
+        #     pass
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
