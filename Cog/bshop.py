@@ -226,6 +226,7 @@ class bs(commands.Cog):
             nonlocal number
             nonlocal bs
             nonlocal us
+            nonlocal ctx
             if str(reaction.emoji) == '◀':
                 await msg.remove_reaction('◀', member)
                 number -= 1
@@ -253,10 +254,11 @@ class bs(commands.Cog):
 
             elif str(reaction.emoji) == '🖼':
                 await msg.remove_reaction('🖼', member)
-                us.update({"back": d[str(number)]["id"]})
-                emb = discord.Embed(description = f'Фон успешно установлен на #{d[str(number)]["id"]}!',color=0xf03e65)
-                emb.set_author(name = '{}'.format(member), icon_url = '{}'.format(member.avatar.url))
-                await ctx.send(embed = emb)
+                if ctx.author.id == member.id:
+                    us.update({"back": d[str(number)]["id"]})
+                    emb = discord.Embed(description = f'Фон успешно установлен на #{d[str(number)]["id"]}!',color=0xf03e65)
+                    emb.set_author(name = '{}'.format(member), icon_url = '{}'.format(member.avatar.url))
+                    await ctx.send(embed = emb)
 
                 users.update_one({'userid':member.id},{'$set':{"back": d[str(number)]["id"]}})
 

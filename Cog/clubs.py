@@ -18,7 +18,7 @@ db = client.bot
 users = db.users
 backs = db.bs
 servers = db.servers
-clubs = db.db.clubs
+clubs = db.clubs
 
 
 class clubs(commands.Cog):
@@ -36,7 +36,6 @@ class clubs(commands.Cog):
         ltag = ["tag", "тег","Tag", "t"]
 
         user = users.find_one({"userid": ctx.author.id})
-        pprint.pprint(db.db.db.clubs.find_one())
 
 
         if name is None or arg == None:
@@ -52,6 +51,8 @@ class clubs(commands.Cog):
             else:
                 await ctx.send(f"Поиск по {arg} не доступен")
                 return
+
+        print(dom)
 
 
         if dom != None:
@@ -140,7 +141,7 @@ class clubs(commands.Cog):
 
                 emb5 = discord.Embed(color=0xf03e65).set_author(icon_url = '{}'.format(dom["flag"]), name = f'ClubTop | {dom["name"]}')
 
-                emb6 = discord.Embed(color=0xf03e65).set_author(icon_url = '{}'.format(dom["flag"]), name = f'db.clubshop | {dom["name"]}').add_field(name = 'Банк:',
+                emb6 = discord.Embed(color=0xf03e65).set_author(icon_url = '{}'.format(dom["flag"]), name = f'shop | {dom["name"]}').add_field(name = 'Банк:',
                 value = f'Монетки: {dom["bank"]}', inline = False).add_field(name = ':one: - слоты для пользователей', value = f'+5 слотов для пользователей\n`Цена: 2.000 монет\nСлотов: {dom["max_users"]}`')
 
                 emb6er1 = discord.Embed(color=0xf03e65).set_author(icon_url = '{}'.format(dom["flag"]), name = f'db.clubshop | {dom["name"]}').add_field(name = 'Банк:',
@@ -249,20 +250,20 @@ class clubs(commands.Cog):
                         m = u['money']
                         tex1 = f"Имя: <@{i}>\nМонетки: {u['money']}"
 
-                    if u['lvl'] > l:
-                        l = u['lvl']
-                        tex2 = f"Имя: <@{i}>\nУровень: {u['lvl']}"
-
-                    if u['+rep'] > r:
-                        r = u['+rep']
-                        tex3 = f"Имя: <@{i}>\nРепутация: {u['+rep']}"
+                    # if u['lvl'] > l:
+                    #     l = u['lvl']
+                    #     tex2 = f"Имя: <@{i}>\nУровень: {u['lvl']}"
+                    #
+                    # if u['+rep'] > r:
+                    #     r = u['+rep']
+                    #     tex3 = f"Имя: <@{i}>\nРепутация: {u['+rep']}"
 
 
 
                 if tp == []:
                     emb5.add_field(name = "Топ по монеткам", value = tex1)
-                    emb5.add_field(name = "Топ по уровню", value = tex2)
-                    emb5.add_field(name = "Топ по репутации", value = tex3)
+                    # emb5.add_field(name = "Топ по уровню", value = tex2)
+                    # emb5.add_field(name = "Топ по репутации", value = tex3)
                     break
 
             msg = await ctx.send(embed = emb1)
