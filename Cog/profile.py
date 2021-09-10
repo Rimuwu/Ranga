@@ -94,6 +94,7 @@ class profile(commands.Cog):
 
         headline = ImageFont.truetype("fonts/NotoSans-Bold.ttf", size = 25)
         para = ImageFont.truetype("fonts/NotoSans-Bold.ttf", size = 30)
+        paramini = ImageFont.truetype("fonts/NotoSans-Bold.ttf", size = 20)
 
 
         if ctx.author == member:
@@ -132,6 +133,9 @@ class profile(commands.Cog):
 
         t = dict(sorted(server['users'].items(),key=lambda x: x[1]['lvl'], reverse=True))
         toplvl = list(t.keys()).index(str(member.id)) +1
+
+        t = dict(sorted(server['users'].items(),key=lambda x: x[1]['voice_time'], reverse=True))
+        topvoice = list(t.keys()).index(str(member.id)) +1
 
         alpha = Image.open('elements/alpha.png')
 
@@ -268,7 +272,14 @@ class profile(commands.Cog):
         idraw.text((260,50), f"{len(main['rep'][0])}", font = para)
         idraw.text((260,90), str(len(main['rep'][1])), font = para)
         idraw.text((505,282), f"{user['xp']}  |  {expn}" , font = para)
-        idraw.text((60,298), f"{user['lvl']} #{toplvl}" , font = para)      #55,265
+        idraw.text((60,298), f"{user['lvl']} #{toplvl}" , font = para)
+        if user['voice_time'] >= 86400:
+            text = funs.time_end(user['voice_time'])[:-4]
+        if user['voice_time'] >= 604800:
+            text = funs.time_end(user['voice_time'])[:-8]
+        else:
+            text = funs.time_end(user['voice_time'])
+        idraw.text((60,252), f"{text} #{topvoice}" , font = para)
 
 
         if bc['format'] == "png":

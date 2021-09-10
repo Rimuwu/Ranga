@@ -114,7 +114,10 @@ def voice_time(guild, member, time, met):
         except Exception:
             pass
 
-
+class url_button(discord.ui.View):
+    def __init__(self, url:str, emoji:str, label:str):
+        super().__init__()
+        self.add_item(discord.ui.Button(emoji = emoji, label=label, url=url))
 
 class MainCog(commands.Cog):
     def __init__(self, bot):
@@ -1537,26 +1540,24 @@ class MainCog(commands.Cog):
                                     emb = discord.Embed(title = f'Сообщение достойное пиццы!', description = f'{ message.content}', color=0xFF8B1F )
 
                                     emb.set_author(name = message.author.name, icon_url = message.author.avatar.url)
-                                    emb.add_field(name = 'Ссылка', value = f'[Прыг!]({message.jump_url})')
 
                                     if message.attachments != []:
                                         if message.attachments[0].content_type in ['image/jpeg', 'image/png', 'image/gif']:
                                             emb.set_image(url = message.attachments[0].url)
 
-                                    await pzz_mes.edit(content = f"<:n_pizza:871093811626000414> {message.reactions[r_l].count} ➜ {message.channel.mention}", embed = emb)
+                                    await pzz_mes.edit(content = f"<:n_pizza:871093811626000414> {message.reactions[r_l].count} ➜ {message.channel.mention}", embed = emb, view= url_button(url= message.jump_url, emoji = '▶', label = 'Прыг!'))
 
-                                except KeyError:
+                                except :
                                     emb = discord.Embed(title = f'Сообщение достойное пиццы!', description = f'{ message.content}', color=0xFF8B1F )
 
                                     emb.set_author(name = message.author.name, icon_url = message.author.avatar.url)
-                                    emb.add_field(name = 'Ссылка', value = f'[Прыг!]({message.jump_url})')
 
                                     if message.attachments != []:
                                         if message.attachments[0].content_type in ['image/jpeg', 'image/png', 'image/gif']:
                                                 emb.set_image(url = message.attachments[0].url)
 
                                     if message.content != '':
-                                        pzz_mes = await pizz_channel.send(f"<:n_pizza:871093811626000414> {message.reactions[r_l].count} ➜ {message.channel.mention}", embed = emb)
+                                        pzz_mes = await pizz_channel.send(f"<:n_pizza:871093811626000414> {message.reactions[r_l].count} ➜ {message.channel.mention}", embed = emb, view= url_button(url= message.jump_url, emoji = '▶', label = 'Прыг!'))
 
                                         try:
                                             server['pizza_board']['messages'].update({str(message.id): {'m_id': pzz_mes.id}})

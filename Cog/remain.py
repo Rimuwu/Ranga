@@ -56,6 +56,25 @@ class remain(commands.Cog):
         text = funs.time_end(time)
         await ctx.send(text)
 
+    @commands.command(hidden = True)
+    async def add_url_button(self, ctx, message_id:int, url:str, emoji:str, *, label:str):
+        if funs.roles_check(ctx.author, ctx.guild.id) == False:
+            await ctx.send("У вас недостаточно прав для использования этой команды!")
+            return
+
+        try:
+            mid = await ctx.channel.fetch_message(message_id)
+        except Exception:
+            await ctx.send('Сообщение не найдено')
+
+        class url_button(discord.ui.View):
+            def __init__(self, url:str, emoji:str, label:str):
+                super().__init__()
+                self.add_item(discord.ui.Button(emoji = emoji, label=label, url=url))
+
+        await mid.edit(content = mid.content, view= url_button(url, emoji, label))
+
+
     # @commands.command()
     # async def sendi(self, ctx):
     #     creator = 323512096350535680
