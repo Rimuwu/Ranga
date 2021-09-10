@@ -58,6 +58,7 @@ class functions:
     def bd_check(author, met = None):
 
         if met == None:
+            print(users.find_one({"userid": author.id}) == None)
             if users.find_one({"userid": author.id}) == None and author.bot == False:
                 user = {
                         "username": author.name,
@@ -1510,7 +1511,7 @@ async def on_message(message):
         pass
 
     try:
-        if bot.mentioned_in() == True:
+        if message.content == f'{bot.user.mention}':
             await message.channel.send(f"Гав! Мой префикс `{server['prefix']}`")
     except Exception:
         pass
@@ -1584,6 +1585,7 @@ async def on_message(message):
     try:
         ctx.command = bot.get_command(ctx.invoked_with.lower())
         if ctx.command != None:
+            await ctx.trigger_typing()
             try:
                 if ctx.command.name not in server['mod']['off_commands']:
                     if functions.cooldown_check(message.author, message.guild, ctx.command.name, 'check') == False:

@@ -350,8 +350,7 @@ class bs(commands.Cog):
 
             response = requests.get(url, stream = True)
             response = Image.open(io.BytesIO(response.content))
-            response = response.convert("RGBA")
-            img = response.resize((800, 400), Image.ANTIALIAS) # улучшение качества
+            img = response.convert("RGBA")
 
         if type == "gif":
 
@@ -455,6 +454,7 @@ class bs(commands.Cog):
         idraw.text((260,90), str(len(main['rep'][1])), font = para)
         idraw.text((505,282), f"{user['xp']}  |  {expn}" , font = para)
         idraw.text((60,298), f"{user['lvl']} #{t}" , font = para)      #55,265
+        idraw.text((60,252), f"{funs.time_end(user['voice_time'])} #{t}" , font = para)
 
 
         if type == "png":
@@ -526,12 +526,13 @@ class bs(commands.Cog):
                 channel = await self.bot.fetch_channel(884487110747357204)
 
                 bs = s['bs']
-                try:
-                    bs_id = int(max(bs.keys())) + 1
-                except:
-                    bs_id = 1
+                # try:
+                bs_id = int(max(bs.keys())) + 2
+                # except:
+                #     bs_id = 1
+                print(bs_id)
 
-                embed = discord.Embed(title = f'ID {bs_id}', description = f'Автор: {ctx.author.id}\nУкзанный формат: {type}\nURL: {link}\n{sze}')
+                embed = discord.Embed(title = f'ID {bs_id}', description = f'Автор: {ctx.author.id}\nУкзанный формат: {type}\nURL: {link}')
                 embed.set_image(url=link)
                 await msg.clear_reactions()
                 m = await channel.send(embed=embed)
@@ -588,7 +589,7 @@ class bs(commands.Cog):
         await mid.clear_reactions()
 
         if reason == None:
-            embed = discord.Embed(title = f'ID {id} Отклонён', description = f'Автор: {bs["author"]}\nУкзанный формат: {bs["type"]}\nURL: {bs["url"]}\n{bs["size"]}', color = 0xf03e65)
+            embed = discord.Embed(title = f'ID {id} Отклонён', description = f'Автор: {bs["author"]}\nУкзанный формат: {bs["type"]}\nURL: {bs["url"]}', color = 0xf03e65)
             embed.set_image(url=bs["url"])
         if reason != None:
             embed = discord.Embed(title = f'ID {id} Отклонён', description = f'Автор: {bs["author"]}\nУкзанный формат: {bs["type"]}\nURL: {bs["url"]}\n\n\nПричина: {"".join(reason)}', color = 0xf03e65)

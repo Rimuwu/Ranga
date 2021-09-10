@@ -1202,6 +1202,7 @@ class MainCog(commands.Cog):
         channel = self.bot.get_channel(884486925933764649)
 
         if isinstance(error, commands.CommandNotFound):
+            normal = True
             pass
 
         if isinstance(error, commands.CommandOnCooldown):
@@ -1221,6 +1222,10 @@ class MainCog(commands.Cog):
 
         elif str(error)=="Command raised an exception: TypeError: 'NoneType' object is not subscriptable":
             await ctx.send(f"Объект не найден!")
+            normal = True
+
+        elif str(error)=="Command raised an exception: Forbidden: 403 Forbidden (error code: 50005): Cannot edit a message authored by another user":
+            await ctx.send(f"Не возможно изменить сообщение другово пользователя!")
             normal = True
 
         elif str(error)=="Command raised an exception: NotFound: 404 Not Found (error code: 10008): Unknown Message":
@@ -1271,7 +1276,7 @@ class MainCog(commands.Cog):
     async def on_voice_state_update(self, member, before, after):
         global voice_dict
 
-        rr = ['🎍', '🎋', '💫', '🌪', ' 🔥', '🌟', '⚡️', '☄️', '💥', '🌚', '🌞', '🍬', '🍭', '🍡', '🌷', '🐾', '🍹', '🍸', '🍱', '🎆', '🎭', '💎', '🎨']
+        rr = ['🎍', '🎋', '💫', '🌪', ' 🔥', '🌟', '⚡️', '☄️', '💥', '🌚', '🌞', '🍬', '🍭', '🍡', '🌷', '🐾', '🍹', '🍸', '🍱', '🎆', '🎭', '💎', '🎨', '🍕', '🍻', '🍩']
         server = servers.find_one({"server": member.guild.id})
         serv = server['server']
         if server['voice']["voice_category"] != None:
