@@ -2175,13 +2175,13 @@ class settings(commands.Cog):
             await ctx.send("У вас недостаточно прав для использования этой команды!")
             return
         server = servers.find_one({'server':ctx.guild.id})
-        a = server['off_commands']
+        a = server['mod']['off_commands']
         for i in arg:
             c = self.bot.get_command(i)
             if c == None:
                 await ctx.send(f'Команды {i} не было найдено!')
                 return
-            if c.name not in server['off_commands']:
+            if c.name not in server['mod']['off_commands']:
                 await ctx.send(f'Команда `{c.name}` не отключена!')
                 return
             a.remove(c.name)
@@ -2197,7 +2197,7 @@ class settings(commands.Cog):
             await ctx.send("У вас недостаточно прав для использования этой команды!")
             return
         server = servers.find_one({'server':ctx.guild.id})
-        a = server['off_commands']
+        a = server['mod']['off_commands']
         text = ''
         for i in a:
             text += f"`{i}`, "
