@@ -1516,22 +1516,18 @@ async def on_message(message):
     except Exception:
         pass
 
-    try:
-        gl = server['globalchat']['channel']
-    except Exception:
-        gl = None
-
-
     if message.author.id in s['black list']: return
 
     try:
         if message.channel.id in server['mod']['black_channels']: return
     except Exception:
         pass
-
-    if message.channel.id == server['globalchat']['channel']:
-        await global_chat(message, s, server)
-        return
+    try:
+        if message.channel.id == server['globalchat']['channel']:
+            await global_chat(message, s, server)
+            return
+    except Exception:
+        pass
 
     # #auto mod
     try:
