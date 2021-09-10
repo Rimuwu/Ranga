@@ -2187,7 +2187,7 @@ class settings(commands.Cog):
             a.remove(c.name)
         await ctx.send('Команда(ы) были включены на данном сервере.')
         b = server['mod']
-        b.update({'off_commands': b})
+        b.update({'off_commands': a})
         servers.update_one({'server':ctx.guild.id},{'$set': {'mod': b }})
 
     @commands.command(aliases = ['disabled'], usage = '-', description = 'Список отключённых команд.', help = 'Управление командами')
