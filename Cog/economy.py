@@ -1385,7 +1385,7 @@ class economy(commands.Cog):
                 await ctx.send(f"Награда {int(amout * server['economy']['games']['blackjack']['percent'])}{server['economy']['currency']}")
             if member != None:
                 funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] + int(amout * 2))
-                funs.user_update(member, ctx.guild, 'money', user2['money'] - amout)
+                funs.user_update(member.id, ctx.guild, 'money', user2['money'] - amout)
                 await ctx.send(f"Игрок 1 выйграл {int(amout * server['economy']['games']['blackjack']['percent'])}")
 
         if win_check(mem2_hand, mem1_hand) == 'player 2 win':
@@ -1393,7 +1393,7 @@ class economy(commands.Cog):
                 funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - amout )
             if member != None:
                 funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - amout)
-                funs.user_update(member, ctx.guild, 'money', user2['money'] + int(amout * 2) )
+                funs.user_update(member.id, ctx.guild, 'money', user2['money'] + int(amout * 2) )
                 await ctx.send(f"Игрок 2 выйграл {int(amout * server['economy']['games']['blackjack']['percent'])}")
 
         if win_check(mem2_hand, mem1_hand) == 'friendship':

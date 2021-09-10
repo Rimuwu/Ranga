@@ -270,7 +270,7 @@ class settings(commands.Cog):
             await ctx.send("Тип указан не правильно ")
             return
 
-        await ctx.send(f'Изображение усталовлено!')
+        await ctx.send(f'Изображение установлено!')
 
         servers.update_one( {"server": ctx.guild.id}, {"$set":{"upsend_sett": a}})
 

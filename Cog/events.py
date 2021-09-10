@@ -1403,170 +1403,167 @@ class MainCog(commands.Cog):
             except Exception:
                 pass
 
-        # try:
-        if 1 == 1:
-            guild = self.bot.get_guild(payload.guild_id)
-            channel = guild.get_channel(payload.channel_id)
-            message = await channel.fetch_message(payload.message_id)
-            server = servers.find_one({"server":payload.guild_id})
-            emoji = payload.emoji
-            member = payload.member
 
-            try:
-                mm = server['rr'][str(message.id)]
-                mr = True
-            except Exception:
-                mr = False
+        guild = self.bot.get_guild(payload.guild_id)
+        channel = guild.get_channel(payload.channel_id)
+        message = await channel.fetch_message(payload.message_id)
+        server = servers.find_one({"server":payload.guild_id})
+        emoji = payload.emoji
+        member = payload.member
 
-            if mr == True:
-                num = 0
-                for i in server['rr'][str(message.id)]['emojis']:
-                    l = i
-                    if emoji.name in i or emoji.id in i:
-                        try:
-                            roles = []
-                            for i in server['rr'][str(message.id)]['allow roles']:
-                                roles.append(message.guild.get_role(i))
-                            if list(set(roles) & set(payload.member.roles)) != []:
-                                await rr(l, server['rr'][str(message.id)]["func"], message, payload, num)
-                            else:
-                                await message.remove_reaction(emoji, payload.member)
-                                return
+        try:
+            mm = server['rr'][str(message.id)]
+            mr = True
+        except Exception:
+            mr = False
 
-                        except Exception:
+        if mr == True:
+            num = 0
+            for i in server['rr'][str(message.id)]['emojis']:
+                l = i
+                if emoji.name in i or emoji.id in i:
+                    try:
+                        roles = []
+                        for i in server['rr'][str(message.id)]['allow roles']:
+                            roles.append(message.guild.get_role(i))
+                        if list(set(roles) & set(payload.member.roles)) != []:
                             await rr(l, server['rr'][str(message.id)]["func"], message, payload, num)
-                        num += 1
-
-            if mr == False:
-                if server['tickets'] != {}:
-                    if payload.member.bot != True:
-                        if message.id == server['tickets']['t_message']:
-                            if str(emoji) == '💬':
-                                ml = []
-                                for nn in list(server['tickets']['tick'].items()):
-                                    ml.append(nn[1]['member'])
-                                if member.id in ml:
-                                    await message.remove_reaction('💬', member)
-                                else:
-                                    await message.remove_reaction('💬', member)
-                                    category = await self.bot.fetch_channel(server['tickets']['category'])
-                                    if len(category.text_channels) == 50:
-                                        await member.send(f'🌌 Галактика чем то недовольна!\nВ данный момент активно 50 тикетов, пожалуйста подождите и попробуйте позже ещё раз!\nЕсли у вас серьёзная преблема, обратитесь к администрации!')
-
-                                    if len(category.text_channels) < 50:
-                                        emb = discord.Embed(title = f'Управление', description = f'Если вы хотите закрыть билет, нажмите ✅', color= server['embed_color'] )
-                                        overwrites = {
-                                                    guild.default_role: discord.PermissionOverwrite(view_channel=False),
-                                                    guild.me: discord.PermissionOverwrite(read_messages=True, manage_messages=True),
-                                                    payload.member: discord.PermissionOverwrite(read_messages=True, send_messages=True),
-                                                    }
-                                        channel = await guild.create_text_channel(name=f"ticket {server['tickets']['t_n']+1}", category = category,  overwrites=overwrites, reason = "ticket create")
-                                        msg = await channel.send(f'{member.mention}',embed = emb)
-                                        await msg.add_reaction("✅")
-                                        server['tickets']['t_n'] = server['tickets']['t_n']+1
-                                        server['tickets']['tick'].update({ str(msg.id): {'member': member.id, 'status': 'open'} })
-                                        servers.update_one({'server': guild.id},{"$set": {'tickets': server['tickets'] }})
-
                         else:
+                            await message.remove_reaction(emoji, payload.member)
+                            return
+
+                    except Exception:
+                        await rr(l, server['rr'][str(message.id)]["func"], message, payload, num)
+                    num += 1
+
+        if mr == False:
+            if server['tickets'] != {}:
+                if payload.member.bot != True:
+                    if message.id == server['tickets']['t_message']:
+                        if str(emoji) == '💬':
+                            ml = []
+                            for nn in list(server['tickets']['tick'].items()):
+                                ml.append(nn[1]['member'])
+                            if member.id in ml:
+                                await message.remove_reaction('💬', member)
+                            else:
+                                await message.remove_reaction('💬', member)
+                                category = await self.bot.fetch_channel(server['tickets']['category'])
+                                if len(category.text_channels) == 50:
+                                    await member.send(f'🌌 Галактика чем то недовольна!\nВ данный момент активно 50 тикетов, пожалуйста подождите и попробуйте позже ещё раз!\nЕсли у вас серьёзная преблема, обратитесь к администрации!')
+
+                                if len(category.text_channels) < 50:
+                                    emb = discord.Embed(title = f'Управление', description = f'Если вы хотите закрыть билет, нажмите ✅', color= server['embed_color'] )
+                                    overwrites = {
+                                                guild.default_role: discord.PermissionOverwrite(view_channel=False),
+                                                guild.me: discord.PermissionOverwrite(read_messages=True, manage_messages=True),
+                                                payload.member: discord.PermissionOverwrite(read_messages=True, send_messages=True),
+                                                }
+                                    channel = await guild.create_text_channel(name=f"ticket {server['tickets']['t_n']+1}", category = category,  overwrites=overwrites, reason = "ticket create")
+                                    msg = await channel.send(f'{member.mention}',embed = emb)
+                                    await msg.add_reaction("✅")
+                                    server['tickets']['t_n'] = server['tickets']['t_n']+1
+                                    server['tickets']['tick'].update({ str(msg.id): {'member': member.id, 'status': 'open'} })
+                                    servers.update_one({'server': guild.id},{"$set": {'tickets': server['tickets'] }})
+
+                    else:
+                        try:
                             try:
-                                try:
-                                    m = server['tickets']['tick'][str(message.id)]
-                                except:
-                                    m = None
+                                m = server['tickets']['tick'][str(message.id)]
+                            except:
+                                m = None
 
-                                if m != None:
-                                    if m['status'] == 'open':
-                                        ms = m['member']
-                                        if str(emoji) == '✅':
-                                            if member.id == ms or funs.roles_check(member, guild.id) == True:
-                                                bm = guild.get_member(ms)
-                                                await message.delete()
-
-                                                overwrites = {
-                                                            guild.default_role: discord.PermissionOverwrite(view_channel=False),
-                                                            bm: discord.PermissionOverwrite(read_messages=False, send_messages = False),
-                                                            guild.me: discord.PermissionOverwrite(read_messages=True, manage_messages=True)
-                                                            }
-
-                                                await message.channel.edit(overwrites = overwrites)
-
-                                                emb = discord.Embed(title = f'Тикет закрыт', description = f'Тикет пользователя {bm.mention} был закрыт\n\nУдалить канал > 🧨\nСохранить историю > 📜', color= server['embed_color'] )
-                                                msg = await message.channel.send(embed = emb)
-
-                                                server['tickets']['tick'].update({ str(msg.id): {'status': 'close', 'member': bm.id} })
-
-                                                del server['tickets']['tick'][str(message.id)]
-                                                servers.update_one({'server': guild.id},{"$set": {'tickets': server['tickets'] }})
-
-                                                await msg.add_reaction("🧨")
-                                                await msg.add_reaction("📜")
-
-
-                                    if m['status'] == 'close':
-                                        if str(emoji) == '🧨':
-                                            await message.channel.delete(reason = 'ticket remove')
-
-                                        elif str(emoji) == '📜':
+                            if m != None:
+                                if m['status'] == 'open':
+                                    ms = m['member']
+                                    if str(emoji) == '✅':
+                                        if member.id == ms or funs.roles_check(member, guild.id) == True:
+                                            bm = guild.get_member(ms)
                                             await message.delete()
 
-                                        del server['tickets']['tick'][str(message.id)]
-                                        servers.update_one({'server': guild.id},{"$set": {'tickets': server['tickets'] }})
+                                            overwrites = {
+                                                        guild.default_role: discord.PermissionOverwrite(view_channel=False),
+                                                        bm: discord.PermissionOverwrite(read_messages=False, send_messages = False),
+                                                        guild.me: discord.PermissionOverwrite(read_messages=True, manage_messages=True)
+                                                        }
+
+                                            await message.channel.edit(overwrites = overwrites)
+
+                                            emb = discord.Embed(title = f'Тикет закрыт', description = f'Тикет пользователя {bm.mention} был закрыт\n\nУдалить канал > 🧨\nСохранить историю > 📜', color= server['embed_color'] )
+                                            msg = await message.channel.send(embed = emb)
+
+                                            server['tickets']['tick'].update({ str(msg.id): {'status': 'close', 'member': bm.id} })
+
+                                            del server['tickets']['tick'][str(message.id)]
+                                            servers.update_one({'server': guild.id},{"$set": {'tickets': server['tickets'] }})
+
+                                            await msg.add_reaction("🧨")
+                                            await msg.add_reaction("📜")
 
 
-                            except Exception:
-                                pass
+                                if m['status'] == 'close':
+                                    if str(emoji) == '🧨':
+                                        await message.channel.delete(reason = 'ticket remove')
+
+                                    elif str(emoji) == '📜':
+                                        await message.delete()
+
+                                    del server['tickets']['tick'][str(message.id)]
+                                    servers.update_one({'server': guild.id},{"$set": {'tickets': server['tickets'] }})
+
+
+                        except Exception:
+                            pass
 
 
 
-                if server['pizza_board'] != {}:
-                    if payload.member.bot != True:
-                        if message.author.bot != True:
-                            if str(emoji) == '🍕':
+            if server['pizza_board'] != {}:
+                if payload.member.bot != True:
+                    if message.author.bot != True:
+                        if str(emoji) == '🍕':
 
-                                r_l = 0
-                                for i in message.reactions:
-                                    if str(i) == '🍕':
-                                        break
-                                    else:
-                                        r_l += 1
+                            r_l = 0
+                            for i in message.reactions:
+                                if str(i) == '🍕':
+                                    break
+                                else:
+                                    r_l += 1
 
-                                if server['pizza_board']['count'] <= message.reactions[r_l].count:
-                                    pizz_channel = await self.bot.fetch_channel(server['pizza_board']['channel'])
-                                    try:
-                                        pzz_mes =  await pizz_channel.fetch_message(server['pizza_board']['messages'][str(message.id)]['m_id'])
+                            if server['pizza_board']['count'] <= message.reactions[r_l].count:
+                                pizz_channel = await self.bot.fetch_channel(server['pizza_board']['channel'])
+                                try:
+                                    pzz_mes =  await pizz_channel.fetch_message(server['pizza_board']['messages'][str(message.id)]['m_id'])
 
-                                        emb = discord.Embed(title = f'Сообщение достойное пиццы!', description = f'{ message.content}', color=0xFF8B1F )
+                                    emb = discord.Embed(title = f'Сообщение достойное пиццы!', description = f'{ message.content}', color=0xFF8B1F )
 
-                                        try:
-                                            emb.set_image(url = message.attachments[0].proxy.url)
-                                        except Exception:
-                                            pass
+                                    emb.set_author(name = message.author.name, icon_url = message.author.avatar.url)
+                                    emb.add_field(name = 'Ссылка', value = f'[Прыг!]({message.jump_url})')
 
-                                        emb.set_author(name = message.author.name, icon_url = message.author.avatar.url)
-                                        emb.add_field(name = 'Ссылка', value = f'[Прыг!]({message.jump_url})')
+                                    if message.attachments != []:
+                                        if message.attachments[0].content_type in ['image/jpeg', 'image/png', 'image/gif']:
+                                            emb.set_image(url = message.attachments[0].url)
 
-                                        await pzz_mes.edit(content = f"<:n_pizza:871093811626000414> {message.reactions[r_l].count} ➜ {message.channel.mention}", embed = emb)
+                                    await pzz_mes.edit(content = f"<:n_pizza:871093811626000414> {message.reactions[r_l].count} ➜ {message.channel.mention}", embed = emb)
 
-                                    except KeyError:
-                                        emb = discord.Embed(title = f'Сообщение достойное пиццы!', description = f'{ message.content}', color=0xFF8B1F )
+                                except KeyError:
+                                    emb = discord.Embed(title = f'Сообщение достойное пиццы!', description = f'{ message.content}', color=0xFF8B1F )
 
-                                        try:
-                                            emb.set_image(url = message.attachments[0].proxy.url)
-                                        except Exception:
-                                            pass
+                                    emb.set_author(name = message.author.name, icon_url = message.author.avatar.url)
+                                    emb.add_field(name = 'Ссылка', value = f'[Прыг!]({message.jump_url})')
 
-                                        emb.set_author(name = message.author.name, icon_url = message.author.avatar.url)
-                                        emb.add_field(name = 'Ссылка', value = f'[Прыг!]({message.jump_url})')
+                                    if message.attachments != []:
+                                        if message.attachments[0].content_type in ['image/jpeg', 'image/png', 'image/gif']:
+                                                emb.set_image(url = message.attachments[0].url)
 
+                                    if message.content != '':
                                         pzz_mes = await pizz_channel.send(f"<:n_pizza:871093811626000414> {message.reactions[r_l].count} ➜ {message.channel.mention}", embed = emb)
+
                                         try:
                                             server['pizza_board']['messages'].update({str(message.id): {'m_id': pzz_mes.id}})
                                         except:
                                             server['pizza_board'].update({'messages': {str(message.id): {'m_id': pzz_mes.id}}})
                                         servers.update_one({"server": payload.guild_id}, {"$set": {"pizza_board": server['pizza_board']}})
-        #
-        # except Exception:
-        #     pass
+
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
