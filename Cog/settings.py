@@ -2164,9 +2164,9 @@ class settings(commands.Cog):
             a.append(c.name)
 
         await ctx.send('Команда(ы) были отключены на данном сервере.')
-        a = server['mod']
-        a.update({'off_commands': a})
-        servers.update_one({'server':ctx.guild.id},{'$set': {'mod': a }})
+        b = server['mod']
+        b.update({'off_commands': a})
+        servers.update_one({'server':ctx.guild.id},{'$set': {'mod': b }})
 
     @commands.command(usage = '(commands)', description = 'Включить команду.', help = 'Управление командами')
     async def enable(self, ctx, *arg:str):
@@ -2186,9 +2186,9 @@ class settings(commands.Cog):
                 return
             a.remove(c.name)
         await ctx.send('Команда(ы) были включены на данном сервере.')
-        a = server['mod']
-        a.update({'off_commands': a})
-        servers.update_one({'server':ctx.guild.id},{'$set': {'mod': a }})
+        b = server['mod']
+        b.update({'off_commands': b})
+        servers.update_one({'server':ctx.guild.id},{'$set': {'mod': b }})
 
     @commands.command(aliases = ['disabled'], usage = '-', description = 'Список отключённых команд.', help = 'Управление командами')
     async def disabled_commands(self, ctx):
@@ -2198,10 +2198,7 @@ class settings(commands.Cog):
             return
         server = servers.find_one({'server':ctx.guild.id})
         a = server['mod']['off_commands']
-        text = ''
-        for i in a:
-            text += f"`{i}`, "
-        emb = discord.Embed(title = f'Отключённые команды',description = text,color=server['embed_color'])
+        emb = discord.Embed(title = f'Отключённые команды',description = ', '.join(a),color=server['embed_color'])
         await ctx.send(embed = emb)
 
     @commands.command(usage = '(roles)', description = 'Добавить административную роль.', help = 'Настройка модерации')
