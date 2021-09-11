@@ -285,12 +285,10 @@ class functions:
         if user.id == 323512096350535680: #для помощи другим пользователям в настройке
             return True
 
-        print(user, user.guild_permissions.administrator)
-
         try:
 
             if server['mod']['admin_roles'] == []:
-                if user.guild_permissions.administrator != None:
+                if user.guild_permissions.administrator != False:
                     return True
                 else:
                     return False
