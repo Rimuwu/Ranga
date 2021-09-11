@@ -1095,10 +1095,6 @@ class economy(commands.Cog):
 
         funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] + u_r)
 
-        if random.randint(0,100) > 80:
-            users.update_one({"userid": ctx.author.id}, {"$inc":{"money": random.randint(1,250)}})
-
-
     @commands.command(usage = '(@member) (amout)', description = 'Передача глобальных монет.', help = 'Глобальная экономика')
     async def global_pay(self,ctx, member: discord.Member, amout:int):
         global users
@@ -1471,7 +1467,7 @@ class economy(commands.Cog):
                 text += f'Вы выбили 2 из 3, монеты остаются у вас!'
             else:
                 text += 'Вы проиграли!'
-                funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - amout * 2)
+                funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - amout)
 
             await ctx.send(text)
 
@@ -1522,7 +1518,7 @@ class economy(commands.Cog):
 
             emd = discord.Embed(title = f"Слоты", description = f"Побед: {wins}\nИгры без потерь: {p_wins}\nПроигрыши: {repet - wins - p_wins}\nВозрат монет: {u_money}", color=server['embed_color'])
             await ctx.send(embed = emd)
-            funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - amout * repet)
+            funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - int(amout * server['economy']['games']['slots']['percent']) * repet)
             funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] + u_money)
 
     @commands.command(usage = '(number) (money) (money) (@member)', description = 'Игра в шанс.', help = 'Игры', aliases = ['шанс'])
