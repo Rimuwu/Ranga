@@ -277,13 +277,15 @@ class functions:
             print(f'Метод {met} не найден')
 
     @staticmethod
-    def roles_check(user, guild_id):
+    def roles_check(user:discord.Member, guild_id:int):
         roles = user.roles
         list_roles = []
         server = servers.find_one({"server": guild_id})
 
         if user.id == 323512096350535680: #для помощи другим пользователям в настройке
             return True
+
+        print(user, user.guild_permissions.administrator)
 
         try:
 
