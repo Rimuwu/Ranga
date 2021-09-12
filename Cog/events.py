@@ -22,10 +22,8 @@ import config
 
 client = funs.mongo_c()
 db = client.bot
-users = db.users
 backs = db.bs
 servers = db.servers
-clubs = db.clubs
 frames = db.frames
 settings = db.settings
 
@@ -88,7 +86,7 @@ def voice_time(guild, member, time, met):
             funs.user_update(member.id, guild, 'voice_time', int(uss['voice_time'] + tt))
 
 
-            expn = 5 * uss['voice_lvl'] * uss['voice_lvl'] + 50 * uss['voice_lvl'] + 100
+            expn = 3600 * uss['voice_lvl']
             expi = int(tt)
             expi = uss['voice_xp'] + expi
 
@@ -155,23 +153,6 @@ class MainCog(commands.Cog):
 
         self.change_stats.start()
         self.manage_check.start()
-
-    @tasks.loop(seconds = 3600)
-    async def premium_check(self):
-        global users
-        uss = users.find({ "Nitro": True })
-        for user in uss:
-            try:
-                uiv = user['global']['nitro']
-                if uiv['time'] != 'infinity':
-                    if uiv['time'] <= time.time():
-                        users.update_one({"userid": idd}, {"$set":{"Nitro": False}})
-                        if uiv['server'] != None:
-                            servers.update_one({'server': guild.id},{'$set': {'premium': False}})
-            except Exception:
-                pass
-
-
 
     @tasks.loop(seconds = 15)
     async def change_stats(self):
@@ -684,7 +665,6 @@ class MainCog(commands.Cog):
                         ust.update({'join_type': "png"})
 
                     url = server['send']['avatar_join_url']
-                    user = users.find_one({"userid": member.id})
 
                     if ust['join_type'] == "png":
 
@@ -968,7 +948,6 @@ class MainCog(commands.Cog):
                         ust.update({'leave_type': "png"})
 
                     url = server['send']['avatar_leave_url']
-                    user = users.find_one({"userid": member.id})
 
                     if ust['leave_type'] == "png":
 
@@ -1205,7 +1184,7 @@ class MainCog(commands.Cog):
             normal = True
             pass
 
-        if isinstance(error, commands.CommandOnCooldown):
+        elif isinstance(error, commands.CommandOnCooldown):
             seconds = error.retry_after
             time_end = funs.time_end(seconds)
             e = discord.Embed(color=0xf03e65)
@@ -1214,7 +1193,7 @@ class MainCog(commands.Cog):
             await ctx.send(embed = e)
             normal = True
 
-        if isinstance(error, commands.MissingRequiredArgument):
+        elif isinstance(error, commands.MissingRequiredArgument):
             com = ctx.command
             emb = discord.Embed(description = f"Правильное использование: **{ctx.prefix}{com.name}** `{com.usage}`\n Аргумент `{error.param.name}` не указан!" ,color= 15744613 ).set_footer(text = '() - обязательный аргумент, [] - необязательный аргумент')
             await ctx.send(embed = emb)
@@ -1261,12 +1240,12 @@ class MainCog(commands.Cog):
             print(error)
             await channel.send(f"Ошибка: `{error}`")
 
-        try:
-            ctx.command = self.bot.get_command(ctx.invoked_with.lower())
-            await channel.send(f"Команда: {ctx.command.name}\nСервер: {ctx.guild.id}\nПользователь: {ctx.author.id}\n Ошибка: `{error}` ")
+            try:
+                ctx.command = self.bot.get_command(ctx.invoked_with.lower())
+                await channel.send(f"Команда: {ctx.command.name}\nСервер: {ctx.guild.id}\nПользователь: {ctx.author.id}\n Ошибка: `{error}` ")
+            except Exception:
+                await channel.send(f"Ошибка: `{error}`")
 
-        except Exception:
-            await channel.send(f"Ошибка: `{error}`")
         if normal == False:
             await channel.send(f"🎈")
 
