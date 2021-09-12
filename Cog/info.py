@@ -15,10 +15,7 @@ import config
 
 client = funs.mongo_c()
 db = client.bot
-users = db.users
-backs = db.bs
 servers = db.servers
-clubs = db.clubs
 settings = db.settings
 
 
@@ -75,7 +72,6 @@ class info(commands.Cog):
         global users
         s = settings.find_one({"sid": 1})
 
-        i = users.find_one({"userid": 323512096350535680})
         b = ctx.guild.get_member(734730292484505631)
 
         kk = self.bot.get_emoji(778533802342875136)
@@ -197,25 +193,6 @@ class info(commands.Cog):
         emb.set_thumbnail(url= ctx.guild.icon.url)
         await ctx.send(embed=emb)
 
-
-    @commands.command(hidden=True)
-    async def add_nitro(self, ctx, idd:int, amout:int):
-        global users
-        global settings
-
-        creator = 323512096350535680
-        kk = self.bot.get_emoji(778533802342875136)
-        un = self.bot.get_emoji(778545536138608652)
-
-        if ctx.author.id == creator:
-            users.update_one({"userid": idd}, {"$set":{"Nitro": True}})
-            users.update_one({"userid": idd}, {"$inc":{"money": 10000}})
-            settings.update_one({"sid": 1}, {"$inc":{"bank": amout}})
-            await ctx.send(f"Статус Котик Nitro был выдан пользователю с id - {idd}")
-
-        else:
-            await ctx.send('Отмена')
-            return
     @commands.command(aliases = ['автар', 'аватарка'], usage = '(@member)', description = 'Аватарка пользователя.')
     async def avatar(self, ctx, member: discord.Member = None):
         server = servers.find_one({"server": ctx.guild.id})
@@ -248,7 +225,7 @@ class info(commands.Cog):
     @commands.command(usage = '-', description = 'Покупка премиум подписки.')
     async def it_nitro_buy(self, ctx):
         server = servers.find_one({"server": ctx.guild.id})
-        us = users.find_one({"userid": ctx.author.id})
+        us = funs.user_check(ctx.author, member.guild)
 
         emb = discord.Embed(
             title="Информация о покупке IT Nitro",
@@ -266,28 +243,12 @@ class info(commands.Cog):
                     if int(i['sum']) >= 250:
                         await ctx.send('Вам было выданно IT Nitro!')
                         idd = ctx.author.id
-                        users.update_one({"userid": idd}, {"$set":{"Nitro": True}})
-                        users.update_one({"userid": idd}, {"$inc":{"money": 10000}})
-                        us['global_inv'].update({ 'nitro': { 'time': time.time() + 7776000, 'server': None } })
-                        users.update_one({"userid": idd}, {"$set":{"global_inv": us['global_inv'] }})
+
+                        funs.user_update(member.id, member.guild, 'Nitro', True)
+                        funs.user_update(member.id, member.guild, 'money', us + 10000)
                         break
                     else:
                         await ctx.send('Сумма меньше 250-ти рублей!')
-
-
-    @commands.command(usage = '-', description = 'Активация премиум подписки.')
-    async def activate_premium(self, ctx):
-        user = users.find_one({"userid": ctx.author.id})
-        if user['Nitro'] == True:
-            if user['global_inv']['nitro']['server'] == None:
-                servers.update_one({'server': guild.id},{'$set': {'premium': True}})
-                user['global_inv']['nitro'].update({ 'server': ctx.guild.id })
-                users.update_one({"userid": ctx.author.id}, {"$set":{"global_inv": us['global_inv'] }})
-
-                await ctx.send('Премиум активирован!✨🎉\nПремиум будет действовать до момента конца it nitro у пользователя!')
-            else:
-                await ctx.send('Премиум подписка уже активирована на другом сервере!')
-
 
 def setup(bot):
     bot.add_cog(info(bot))

@@ -18,10 +18,8 @@ import config
 
 client = funs.mongo_c()
 db = client.bot
-users = db.users
 backs = db.bs
 servers = db.servers
-clubs = db.clubs
 frames = db.frames
 
 class profile(commands.Cog):
@@ -32,7 +30,7 @@ class profile(commands.Cog):
     @commands.command(usage = '(@member) [+\-]', description = 'Повысить\понизить репутацию пользователя.')
     async def rep(self,ctx, member: discord.Member=None, arg=None):
 
-        user = users.find_one({"userid": member.id})
+        user = funs.user_check(member, member.guild)
         server = servers.find_one({"server": ctx.guild.id})
 
         if member == ctx.author:
@@ -53,7 +51,7 @@ class profile(commands.Cog):
 
 
                 user['rep'][0].append(ctx.author.id)
-                users.update_one({'userid':member.id},{'$set':{"rep": user['rep']}})
+                funs.user_update(member.id, member.guild, 'rep', user['rep'])
                 embed = discord.Embed(title="+rep!", description=f"<@{member.id}> получает **+rep** от <@{ctx.author.id}>!",color=0x63d955)
                 await ctx.send(embed=embed)
 
@@ -65,7 +63,7 @@ class profile(commands.Cog):
                     user['rep'][0].remove(ctx.author.id)
 
                 user['rep'][1].append(ctx.author.id)
-                users.update_one({'userid':member.id},{'$set':{"rep": user['rep']}})
+                funs.user_update(member.id, member.guild, 'rep', user['rep'])
                 embed = discord.Embed(title="-rep!", description=f"<@{member.id}> получает **-rep** от <@{ctx.author.id}>!",color=server['embed_color'])
                 await ctx.send(embed=embed)
             else:
@@ -78,10 +76,9 @@ class profile(commands.Cog):
             member = ctx.author
 
         user = funs.user_check(member, ctx.guild)
-        main = users.find_one({"userid": member.id})
         server = servers.find_one({"server": ctx.guild.id})
 
-        back = main['back']
+        back = user['back']
         bc = backs.find_one({"bid": back})
         url = bc['url']
         progress_bar = bc["progress_bar"]
@@ -95,10 +92,6 @@ class profile(commands.Cog):
         headline = ImageFont.truetype("fonts/NotoSans-Bold.ttf", size = 25)
         para = ImageFont.truetype("fonts/NotoSans-Bold.ttf", size = 30)
         paramini = ImageFont.truetype("fonts/NotoSans-Bold.ttf", size = 20)
-
-
-        if ctx.author == member:
-            users.update_one({'userid': ctx.author.id}, {'$set': {'username':f"{name}#{tag}"}})
 
         def trans_paste(fg_img,bg_img,alpha=10,box=(0,0)):
             fg_img_trans = Image.new("RGBA",fg_img.size)
@@ -173,9 +166,6 @@ class profile(commands.Cog):
 
         alpha = Image.composite(bar, alpha, mask)
 
-        if ctx.author == member:
-            users.update_one({'userid': ctx.author.id}, {'$set': {'username':f"{name}#{tag}"}})
-
         text_image = Image.open(f"elements/text.png")
         alpha = trans_paste(text_image, alpha, 1.0)
 
@@ -233,7 +223,7 @@ class profile(commands.Cog):
         fg_img = im
         alpha = trans_paste(fg_img, bg_img, 1.0, (25, 25, 175, 175))
 
-        fr = main['frame']
+        fr = user['frame']
         if fr != None:
             fr = frames.find_one({"id": fr})
 
@@ -262,15 +252,15 @@ class profile(commands.Cog):
                 alpha = trans_paste(fg_img, bg_img, 1.0, (20, 20, 180, 180))
 
         idraw = ImageDraw.Draw(alpha)
-        if main['guild'] != None:
-            club = clubs.find_one({'name': main['guild']})
+        if user['guild'] != None:
+            club = server['rpg']['guild'][f'{user["guild"]}']
             idraw.text((315,360), f"{name}#{tag} [{club['tag']}]", font = headline) #первое значение это отступ с лева, второе сверху
         else:
             idraw.text((315,360), f"{name}#{tag}", font = headline)
 
         idraw.text((60,348), f"{user['money']} #{topmn}", font = para)
-        idraw.text((260,50), f"{len(main['rep'][0])}", font = para)
-        idraw.text((260,90), str(len(main['rep'][1])), font = para)
+        idraw.text((260,50), f"{len(user['rep'][0])}", font = para)
+        idraw.text((260,90), str(len(user['rep'][1])), font = para)
         idraw.text((505,282), f"{user['xp']}  |  {expn}" , font = para)
         idraw.text((60,298), f"{user['lvl']} #{toplvl}" , font = para)
         if user['voice_time'] >= 86400:

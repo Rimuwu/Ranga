@@ -14,11 +14,7 @@ import config
 
 client = funs.mongo_c()
 db = client.bot
-users = db.users
-backs = db.bs
 servers = db.servers
-clubs = db.clubs
-frames = db.frames
 settings = db.settings
 
 
@@ -231,11 +227,12 @@ class mod(commands.Cog):
             await ctx.send("У этого пользователя нету такого варна.")
             return
 
-        w = server['mod']['warns']
+        m = server['mod']
+        w = m['warns']
         w.copy()
         try:
             w[str(member.id)].pop(str(num))
-            servers.update_one({"server": ctx.guild.id}, {"$set": {'mod': w}})
+            servers.update_one({"server": ctx.guild.id}, {"$set": {'mod': m}})
         except Exception:
             await ctx.send(f"У данного пользователя нет варна #{num}")
             return

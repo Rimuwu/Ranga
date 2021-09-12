@@ -14,7 +14,6 @@ from ai3 import functions as funs
 
 client = funs.mongo_c()
 db = client.bot
-users = db.users
 servers = db.servers
 
 

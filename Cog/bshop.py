@@ -19,7 +19,6 @@ import config
 
 client = funs.mongo_c()
 db = client.bot
-users = db.users
 backs = db.bs
 servers = db.servers
 settings = db.settings
@@ -42,7 +41,7 @@ class bs(commands.Cog):
         ok =  self.bot.get_emoji(744137747639566346)
         no =  self.bot.get_emoji(744137801804546138)
 
-        us = users.find_one({"userid": ctx.author.id})
+        user = funs.user_check(ctx.author, ctx.guild)
 
         if number < 0 or number > backs.count():
             number = 0
@@ -62,15 +61,15 @@ class bs(commands.Cog):
 
             b = backs.find_one({"bid": number})
 
-            if str(number) in us['back_inv']:
+            if str(number) in user['back_inv']:
                 status_b = ok
             else:
                 status_b = no
 
-            if us['Nitro'] == True:
+            if user['Nitro'] == True:
                 status_b = ok
 
-            if b['display'] == 0 and number not in us['back_inv'] or b['display'] == 0 and str(number) not in us['back_inv']:
+            if b['display'] == 0 and number not in user['back_inv'] or b['display'] == 0 and str(number) not in user['back_inv']:
                 status_b = f'{no} Не доступен {no}'
 
             emb = discord.Embed(title = "Покупка фонов", description =
@@ -89,7 +88,7 @@ class bs(commands.Cog):
             nonlocal reaction
             nonlocal number
             nonlocal bs
-            nonlocal us
+            nonlocal user
             if str(reaction.emoji) == '◀':
                 await msg.remove_reaction('◀', member)
                 number -= 1
@@ -121,39 +120,42 @@ class bs(commands.Cog):
                 b = backs.find_one({"bid": number})
 
                 t = True
-                if b['display'] == 0 and str(number) not in us['back_inv']:
+                if b['display'] == 0 and str(number) not in user['back_inv']:
                     t = False
-                if b['display'] == 0 and number not in us['back_inv']:
+                if b['display'] == 0 and number not in user['back_inv']:
                     t = False
 
                 if t == True:
-                    if us['Nitro'] == True:
+                    if user['Nitro'] == True:
                         emb = discord.Embed(description = f'Фон успешно установлен на #{number}!',color=0xf03e65)
                         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
                         await ctx.send(embed = emb)
 
-                        users.update_one({'userid':ctx.author.id},{'$set':{"back": number}})
+                        funs.user_update(ctx.author.id, member.guild, 'back', number)
+
                     else:
 
-                        if str(number) in us["back_inv"] or number in us["back_inv"]:
-                            users.update_one({'userid':ctx.author.id},{'$set':{"back": number}})
+                        if str(number) in user["back_inv"] or number in user["back_inv"]:
+                            funs.user_update(ctx.author.id, member.guild, 'back', number)
 
                             emb = discord.Embed(description = f'Фон успешно установлен на #{number}!',color=0xf03e65)
                             emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
                             await ctx.send(embed = emb)
                         else:
                             bsk = backs.find_one({"bid": number})
-                            if us['money'] >= bsk['price']:
+                            if user['money'] >= bsk['price']:
 
                                 emb = discord.Embed(description = f'Фон успешно приобретён #{number}!',color=0xf03e65)
                                 emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
                                 await ctx.send(embed = emb)
 
-                                inv = us['back_inv']
+                                inv = user['back_inv']
                                 inv.append(number)
-                                users.update_one({'userid':ctx.author.id},{'$set':{"back_inv": inv}})
-                                users.update_one({'userid':ctx.author.id},{'$set':{"back": number}})
-                                users.update_one({'userid':ctx.author.id},{'$inc':{"money": -bsk['price']}})
+                                funs.user_update(ctx.author.id, member.guild, 'back_inv', inv)
+                                funs.user_update(ctx.author.id, member.guild, 'back', number)
+                                funs.user_update(ctx.author.id, member.guild, 'money', user['money'] - bsk['price'])
+
+
                 await reackt()
 
         async def reackt():
@@ -184,14 +186,14 @@ class bs(commands.Cog):
         ok =  self.bot.get_emoji(744137747639566346)
         no =  self.bot.get_emoji(744137801804546138)
 
-        us = users.find_one({"userid": member.id})
+        user = funs.user_check(ctx.author, ctx.guild)
 
 
-        if us["Nitro"] == True:
+        if user["Nitro"] == True:
             await ctx.send(f'У вас имеются все фоны, загляните в {ctx.prefix}bshop')
             return
 
-        result = sorted([int(item) for item in us["back_inv"]])
+        result = sorted([int(item) for item in user["back_inv"]])
 
         nl = 1
         for i in result:
@@ -210,7 +212,7 @@ class bs(commands.Cog):
 
         def embed(number):
             emb = discord.Embed(title = "Инвентарь фонов", description =
-            f"🎭Автор: <@{d[str(number)]['creator_id']}> | 🖼Установлен: {us['back']}", color = int(d[str(number)]["emb_color"]))
+            f"🎭Автор: <@{d[str(number)]['creator_id']}> | 🖼Установлен: {user['back']}", color = int(d[str(number)]["emb_color"]))
             emb.set_image(url =f'{d[str(number)]["url"]}')
             emb.set_footer(text = f'ID {d[str(number)]["id"]}')
             return emb
@@ -225,7 +227,7 @@ class bs(commands.Cog):
             nonlocal reaction
             nonlocal number
             nonlocal bs
-            nonlocal us
+            nonlocal user
             nonlocal ctx
             if str(reaction.emoji) == '◀':
                 await msg.remove_reaction('◀', member)
@@ -255,12 +257,12 @@ class bs(commands.Cog):
             elif str(reaction.emoji) == '🖼':
                 await msg.remove_reaction('🖼', member)
                 if ctx.author.id == member.id:
-                    us.update({"back": d[str(number)]["id"]})
+                    user.update({"back": d[str(number)]["id"]})
                     emb = discord.Embed(description = f'Фон успешно установлен на #{d[str(number)]["id"]}!',color=0xf03e65)
                     emb.set_author(name = '{}'.format(member), icon_url = '{}'.format(member.avatar.url))
                     await ctx.send(embed = emb)
 
-                users.update_one({'userid':member.id},{'$set':{"back": d[str(number)]["id"]}})
+                funs.user_update(member.id, member.guild, 'back', d[str(number)]["id"])
 
                 await reackt()
 
@@ -295,8 +297,6 @@ class bs(commands.Cog):
 
         member = ctx.author
 
-        user = funs.user_check(member, ctx.guild)
-        main = users.find_one({"userid": member.id})
         server = servers.find_one({"server": ctx.guild.id})
 
         back = 1
@@ -313,8 +313,6 @@ class bs(commands.Cog):
         para = ImageFont.truetype("fonts/NotoSans-Bold.ttf", size = 30)
 
 
-        if ctx.author == member:
-            users.update_one({'userid': ctx.author.id}, {'$set': {'username':f"{name}#{tag}"}})
 
         def trans_paste(fg_img,bg_img,alpha=10,box=(0,0)):
             fg_img_trans = Image.new("RGBA",fg_img.size)
@@ -452,8 +450,8 @@ class bs(commands.Cog):
         idraw.text((315,360), f"{name}#{tag}", font = headline)
 
         idraw.text((60,348), f"{user['money']} #{t}", font = para)
-        idraw.text((260,50), f"{len(main['rep'][0])}", font = para)
-        idraw.text((260,90), str(len(main['rep'][1])), font = para)
+        idraw.text((260,50), f"{len(user['rep'][0])}", font = para)
+        idraw.text((260,90), str(len(user['rep'][1])), font = para)
         idraw.text((505,282), f"{user['xp']}  |  {expn}" , font = para)
         idraw.text((60,298), f"{user['lvl']} #{t}" , font = para)      #55,265
         idraw.text((60,252), f"{funs.time_end(user['voice_time'])} #{t}" , font = para)

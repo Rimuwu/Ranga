@@ -16,7 +16,6 @@ import config
 
 client = funs.mongo_c()
 db = client.bot
-users = db.users
 backs = db.bs
 servers = db.servers
 

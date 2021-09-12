@@ -16,7 +16,6 @@ import config
 
 client = funs.mongo_c()
 db = client.bot
-users = db.users
 backs = db.bs
 servers = db.servers
 
@@ -440,7 +439,6 @@ class settings(commands.Cog):
 
         member = ctx.author
         server = servers.find_one({"server": member.guild.id})
-        user = users.find_one({"userid": member.id})
         name = member.name
         tag = member.discriminator
         reaction = 'a'
@@ -697,8 +695,6 @@ class settings(commands.Cog):
 
 
         url = link
-        user = users.find_one({"userid": ctx.author.id})
-
         if gif == False:
 
             response = requests.get(url, stream = True)
@@ -945,7 +941,6 @@ class settings(commands.Cog):
 
         member = ctx.author
         server = servers.find_one({"server": member.guild.id})
-        user = users.find_one({"userid": member.id})
         name = member.name
         tag = member.discriminator
         reaction = 'a'
@@ -1197,7 +1192,6 @@ class settings(commands.Cog):
 
 
         url = link
-        user = users.find_one({"userid": ctx.author.id})
 
         if gif == False:
 
