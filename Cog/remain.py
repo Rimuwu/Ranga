@@ -18,7 +18,6 @@ import config
 
 client = funs.mongo_c()
 db = client.bot
-users = db.users
 backs = db.bs
 servers = db.servers
 settings = db.settings
@@ -73,45 +72,6 @@ class remain(commands.Cog):
                 self.add_item(discord.ui.Button(emoji = emoji, label=label, url=url))
 
         await mid.edit(content = mid.content, view= url_button(url, emoji, label))
-
-
-    # @commands.command()
-    # async def sendi(self, ctx):
-    #     creator = 323512096350535680
-    #     if ctx.author.id != creator:
-    #         return
-    #
-    #     for i in users.find({}):
-    #         member = await self.bot.fetch_user(i['userid'])
-    #         emb = discord.Embed(description = f"Здравствуйте {member.mention}, команда бота IT Котик поздравляет вас с наступающим новым годом! Мы благодарим каждого пользователя за использование бота и дарим ва подарки!\n Переходить на **[Ссылка](https://discord.gg/cFa8K37pBa)** и прописывайте в <@792687534727102502> `+2021` что бы получить `2021 монетку` и новогоднюю роль.\nС наступающим!", color=0xf03e65)
-    #         emb.set_author(icon_url = '{}'.format(ctx.author.avatar_url), name = '{}'.format(ctx.author))
-    #         try:
-    #             await member.send(embed = emb)
-    #         except Exception:
-    #             pass
-    #
-    # @commands.command(aliases=["2021","Press_F_to_pay_2020"])
-    # async def NewYear(self,ctx):
-    #     global settings
-    #     s = settings.find_one({"sid": 1})
-    #     if ctx.guild.id != 792687533792034827:
-    #         emb = discord.Embed(description = f"Эту команду можно использовать только на официальном сервере бота **[Ссылка](https://discord.gg/cFa8K37pBa)**", color=0xf03e65)
-    #         emb.set_author(icon_url = '{}'.format(ctx.author.avatar_url), name = '{}'.format(ctx.author))
-    #         await ctx.send(embed = emb)
-    #     else:
-    #         if ctx.author.id not in s['newyear']:
-    #             emb = discord.Embed(description = f"С наступающим! Держи 2021 монеток и роль <@&794164924124364820>!", color=0xf03e65)
-    #             emb.set_author(icon_url = '{}'.format(ctx.author.avatar_url), name = '{}'.format(ctx.author))
-    #             emb.set_footer(text='Жинозавр')
-    #             await ctx.send(embed = emb)
-    #             users.update_one({'userid':ctx.author.id},{'$inc':{"money": 2021}})
-    #             await ctx.author.add_roles(ctx.guild.get_role(794164924124364820))
-    #
-    #             s['newyear'].append(ctx.author.id)
-    #             settings.update_one({'sid':1},{'$set': {'newyear': s['newyear'] }})
-    #         else:
-    #             await ctx.send('Вы уже забрали подарочек!')
-
 
 def setup(bot):
     bot.add_cog(remain(bot))
