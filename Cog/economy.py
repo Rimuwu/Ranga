@@ -14,7 +14,6 @@ import config
 
 client = funs.mongo_c()
 db = client.bot
-users = db.users
 backs = db.bs
 servers = db.servers
 
@@ -1094,47 +1093,6 @@ class economy(commands.Cog):
         await ctx.send(embed = emb)
 
         funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] + u_r)
-
-    @commands.command(usage = '(@member) (amout)', description = 'Передача глобальных монет.', help = 'Глобальная экономика')
-    async def global_pay(self,ctx, member: discord.Member, amout:int):
-        global users
-
-        if ctx.author == member:
-            await ctx.send("Транзакция отклонена, самому себе переводить нет смысла.")
-            return
-
-        user = users.find_one({"userid": ctx.author.id})
-        server = servers.find_one({"server": ctx.guild.id})
-
-        if amout > user['money'] or amout < 0:
-            await ctx.send("Транзакция отклонена")
-            return
-        else:
-            if user['Nitro'] == False:
-
-                am = amout - amout / 100 * 2
-
-                emb=discord.Embed(title="Транзакция совершена",
-                colour=server['embed_color']).add_field(name='Отправитель',
-                value=f"<@{ctx.author.id}>: {str(amout)}"
-                ).add_field(name='Получатель',
-                value= f"<@{member.id}>: {int(am)}")
-                emb.set_footer(text="Злой котик украл 2% на вискас")
-                users.update_one({'userid':member.id},{'$inc':{"money": int(am)}})
-                users.update_one({'userid':ctx.author.id},{'$inc':{"money": -amout}})
-
-            else:
-                am = amout
-
-                emb=discord.Embed(title="Транзакция совершена",
-                colour=server['embed_color']).add_field(name='Отправитель',
-                value=f"<@{ctx.author.id}>: {str(amout)}"
-                ).add_field(name='Получатель',
-                value= f"<@{member.id}>: {am}").set_footer(text="Котик не съел 2%")
-                users.update_one({'userid':member.id},{'$inc':{"money": am}})
-                users.update_one({'userid':ctx.author.id},{'$inc':{"money": -amout}})
-
-            await ctx.send(embed = emb)
 
     @commands.command(aliases = ['21point','21очко'], usage = '(amout) [@member]', description = 'Игра "Собери 21"', help = 'Игры')
     async def blackjack(self,ctx, amout:int, member: discord.Member = None):
