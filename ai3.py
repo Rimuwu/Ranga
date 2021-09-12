@@ -54,38 +54,37 @@ bot = commands.Bot(command_prefix = get_prefix, intents = intents)
 class functions:
 
 
+    # @staticmethod
+    # def bd_check(author, met = None):
+    #
+    #     if met == None:
+    #         if users.find_one({"userid": author.id}) == None and author.bot == False:
+    #             user = {
+    #                     "username": author.name,
+    #                     "userid": author.id,
+    #                     "money": 0,
+    #                     "back": 1,
+    #                     "frame": None,
+    #                     'back_inv': [0],
+    #                     'frames_inv': [],
+    #                     'guild': None,
+    #                     'Nitro': False,
+    #                     'rep': [[],[]],
+    #                     'global_inv': {},
+    #             }
+    #             users.insert_one(user)
+    #         return True
+    #
+    #     if met == 'check':
+    #         # False если пользователь не найден, True если найден
+    #         if users.find_one({"userid": author.id}) == None:
+    #             return False
+    #         else:
+    #             return True
+
+
     @staticmethod
-    def bd_check(author, met = None):
-
-        if met == None:
-            print(users.find_one({"userid": author.id}) == None)
-            if users.find_one({"userid": author.id}) == None and author.bot == False:
-                user = {
-                        "username": author.name,
-                        "userid": author.id,
-                        "money": 0,
-                        "back": 1,
-                        "frame": None,
-                        'back_inv': [0],
-                        'frames_inv': [],
-                        'guild': None,
-                        'Nitro': False,
-                        'rep': [[],[]],
-                        'global_inv': {},
-                }
-                users.insert_one(user)
-            return True
-
-        if met == 'check':
-            # False если пользователь не найден, True если найден
-            if users.find_one({"userid": author.id}) == None:
-                return False
-            else:
-                return True
-
-
-    @staticmethod
-    def time_end(seconds):
+    def time_end(seconds:int):
         mm = int(seconds//2592000)
         seconds -= mm*2592000
         w = int(seconds//604800)
@@ -125,7 +124,7 @@ class functions:
             return  f"{mm}M {w}w {d}d {h}h {m}m {s}s"
 
     @staticmethod
-    def text_replase(text, member = None):
+    def text_replase(text:str, member: discord.Member = None):
         if text == 'text':
             text = "Доступные теги:\n`{member.mention}` - упоминает пользователя\n`{member.name}` - отображает имя пользователя\n`{member.tag}` - отображает тег пользователя (6228)\n`{member.name.tag}` - отображает имя и тег пользователя (имя#0000)\n`{guild.name}` -  отображает имя сервера\n`{members}` - отображает колличество пользователей на сервере\n`{members.ordinal}` - отображает колличество пользовталей с окончанием (668-ой)\n`{time}` - указывает время на момент события (24:61 31.02.3021)\n`{premium_subscribers}` - указывает число бустов\n`{boost.role}` - упоминает системную роль бустеров\n`{member.lvl}` - уровень пользователя\n`{member.money}` - монеты пользователя\n`{member.xp}` - опыт полльзователя"
             return text
@@ -166,7 +165,7 @@ class functions:
             return text
 
     @staticmethod
-    def user_check(user, guild, met = None, key = 'users'):
+    def user_check(user, guild: discord.Guild, met:str = None, key:str = 'users'):
 
         def upd(server):
             return {
@@ -185,7 +184,18 @@ class functions:
                     'cache': {
                                'week_act': [0, None],
                     },
+
+                    'guild': None,
+                    'Nitro': False,
+                    'back': 0,
+                    'back_inv': [0],
+                    'frame': None,
+                    'frame_inv': [],
+                    'rep': [[],[]],
                    }
+
+        if type(user) == int:
+            user.id = user
 
         server = servers.find_one({"server": guild.id})
         if met == None:
@@ -219,7 +229,7 @@ class functions:
 
 
     @staticmethod
-    def change_race(user, guild, race):
+    def change_race(user:discord.Member, guild:discord.Guild, race):
         server = servers.find_one({"server": guild.id})
         try:
             user = server['users'][str(user.id)]
@@ -246,9 +256,12 @@ class functions:
             return a[str(user.id)]
 
     @staticmethod
-    def user_update(user_id, guild, key:str, ch, met = 'update', key2 = 'users'):
+    def user_update(user_id, guild: discord.Guild, key:str, ch, met = 'update', key2 = 'users'):
         server = servers.find_one({"server": guild.id})
         a = server[key2].copy()
+
+        if type(user_id) == discord.Member:
+            user_id = user_id.id
 
         if met == 'update':
 
@@ -282,13 +295,14 @@ class functions:
         list_roles = []
         server = servers.find_one({"server": guild_id})
 
+
         if user.id == 323512096350535680: #для помощи другим пользователям в настройке
             return True
 
         try:
 
             if server['mod']['admin_roles'] == []:
-                if user.guild_permissions.administrator != False:
+                if user.guild_permissions.administrator == True:
                     return True
                 else:
                     return False
@@ -302,13 +316,13 @@ class functions:
                     return False
 
         except Exception:
-            if user.guild_permissions.administrator != None:
+            if user.guild_permissions.administrator == True:
                 return True
             else:
                 return False
 
     @staticmethod
-    def cooldown_check(user, guild, command, met, rest = False):
+    def cooldown_check(user:discord.Member, guild:discord.Guild, command:str, met:str, rest = False):
         server = servers.find_one({"server": guild.id})
 
         #Выводим True если у пользователя активный кулдаун, False если пользователя нет в словаре
@@ -548,6 +562,17 @@ class functions:
                      'date_save': False,
                     },
             'voice_reward': {},
+
+            'rpg': {
+                'locations': {},
+                'mobs': {},
+                'boss': {},
+                'raids-boss': {},
+                'guilds': {},
+                'settings': {},
+                'effects': {},
+
+            },
 
         }
         servers.insert_one(server)
@@ -1092,11 +1117,10 @@ def cooldown(user_id, guild_id):
         pass
 
 
-async def lvl_up_image(message, main, user, server):
+async def lvl_up_image(message, user, server):
 
     server = servers.find_one({"server": message.guild.id})
     user = functions.user_check(message.author, message.guild)
-    main = users.find_one({"userid": message.author.id})
 
     upitems = server["upsend_sett"]['upitems']
     UpSend = server["upsend_sett"]['upsend']
@@ -1320,27 +1344,26 @@ async def lvl(message, server):
     expi = random.randint(0, server['economy']['lvl_xp'])
     expii = user['xp'] + expi
 
-    main = users.find_one({"userid": message.author.id})
-
     functions.user_update(message.author.id, message.guild, "xp", expii)
 
-    if main != None:
-        if main['guild'] != None:
-            guild = clubs.find_one({"name": main['guild']})
+    if user != None:
+        if user['guild'] != None:
+            rpg = server['rpg']
+            guild = rpg['guild'][f'{user["guild"]}']
             exp = guild['exp'] + random.randint(0, 5)
-            clubs.update_one({'name': main['guild']},{'$set':{"exp": exp}})
+            guild.update({'exp': exp})
+            servers.update_one( {"server": ctx.guild.id}, {"$set": {'rpg': rpg}} )
             expnc = 5 * guild['lvl'] * guild['lvl'] + 50 * guild['lvl'] + 100
 
             if expnc <= exp:
-                clubs.update_one({'name': main['guild']}, {'$set':{"exp": 0}})
-                clubs.update_one({'name': main['guild']}, {'$inc':{"lvl": 1}})
+                guild.update({'exp': 0})
+                guild.update({'lvl': guild['lvl']+1 })
 
     if expn <= user['xp']:
-        # try:
-        if 1 == 1:
-            await lvl_up_image(message, main, user, server)
-        # except Exception:
-        #     pass
+        try:
+            await lvl_up_image(message, user, server)
+        except Exception:
+            pass
 
     return True
 
@@ -1589,12 +1612,11 @@ async def on_message(message):
             try:
                 if ctx.command.name not in server['mod']['off_commands']:
                     if functions.cooldown_check(message.author, message.guild, ctx.command.name, 'check') == False:
-                        if functions.bd_check(message.author) == True:
-                            await bot.process_commands(message) # Выполнение команды
-                            print(ctx.command.name, 'no_errors')
+                        await bot.process_commands(message) # Выполнение команды
+                        print(ctx.command.name, 'no_errors')
 
-                            if ctx.command.name in server['mod']['cooldowns'].keys():
-                                functions.cooldown_check(message.author, message.guild, ctx.command.name, 'add')
+                        if ctx.command.name in server['mod']['cooldowns'].keys():
+                            functions.cooldown_check(message.author, message.guild, ctx.command.name, 'add')
 
                     else:
                         if server['mod']['cooldowns'][ctx.command.name]['type'] == 'users':
