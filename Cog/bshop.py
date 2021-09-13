@@ -11,6 +11,7 @@ import asyncio
 import time
 import pymongo
 import pprint
+import os
 
 
 sys.path.append("..")
@@ -298,6 +299,7 @@ class bs(commands.Cog):
         member = ctx.author
 
         server = servers.find_one({"server": ctx.guild.id})
+        user = funs.user_check(ctx.author, ctx.guild)
 
         back = 1
         s = settings.find_one({"sid": 1})
@@ -311,7 +313,6 @@ class bs(commands.Cog):
 
         headline = ImageFont.truetype("fonts/NotoSans-Bold.ttf", size = 25)
         para = ImageFont.truetype("fonts/NotoSans-Bold.ttf", size = 30)
-
 
 
         def trans_paste(fg_img,bg_img,alpha=10,box=(0,0)):
@@ -383,9 +384,6 @@ class bs(commands.Cog):
         mask = mask.filter(ImageFilter.BoxBlur(1.5))
 
         alpha = Image.composite(bar, alpha, mask)
-
-        if ctx.author == member:
-            users.update_one({'userid': ctx.author.id}, {'$set': {'username':f"{name}#{tag}"}})
 
         text_image = Image.open(f"elements/text.png")
         alpha = trans_paste(text_image, alpha, 1.0)

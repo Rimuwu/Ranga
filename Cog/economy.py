@@ -1481,7 +1481,6 @@ class economy(commands.Cog):
 
     @commands.command(usage = '(number) (money) (money) (@member)', description = 'Игра в шанс.', help = 'Игры', aliases = ['шанс'])
     async def chance(self, ctx, number:int = None, money:int = None,  member:discord.Member = None):
-        global users
 
         kk = self.bot.get_emoji(778533802342875136)
         user = funs.user_check(ctx.author, ctx.guild)

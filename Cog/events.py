@@ -119,9 +119,7 @@ class url_button(discord.ui.View):
 
 class MainCog(commands.Cog):
     def __init__(self, bot):
-        global users
         global servers
-        global clubs
         self.bot = bot
 
 
