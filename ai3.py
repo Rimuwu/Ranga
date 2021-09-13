@@ -53,36 +53,6 @@ bot = commands.Bot(command_prefix = get_prefix, intents = intents)
 
 class functions:
 
-
-    # @staticmethod
-    # def bd_check(author, met = None):
-    #
-    #     if met == None:
-    #         if users.find_one({"userid": author.id}) == None and author.bot == False:
-    #             user = {
-    #                     "username": author.name,
-    #                     "userid": author.id,
-    #                     "money": 0,
-    #                     "back": 1,
-    #                     "frame": None,
-    #                     'back_inv': [0],
-    #                     'frames_inv': [],
-    #                     'guild': None,
-    #                     'Nitro': False,
-    #                     'rep': [[],[]],
-    #                     'global_inv': {},
-    #             }
-    #             users.insert_one(user)
-    #         return True
-    #
-    #     if met == 'check':
-    #         # False если пользователь не найден, True если найден
-    #         if users.find_one({"userid": author.id}) == None:
-    #             return False
-    #         else:
-    #             return True
-
-
     @staticmethod
     def time_end(seconds:int):
         mm = int(seconds//2592000)
@@ -229,31 +199,38 @@ class functions:
 
 
     @staticmethod
-    def change_race(user:discord.Member, guild:discord.Guild, race):
-        server = servers.find_one({"server": guild.id})
-        try:
-            user = server['users'][str(user.id)]
-        except Exception:
-            if user.bot == True:
-                return
-            else:
-                user_check(user, guild)
+    def change_race(member:discord.Member, guild:discord.Guild, race:str):
 
-            r = server['races'][race]
-            a = server['users'].copy()
-            a.update({str(user.id):{
-            'hp': 0,
-            'hpmax': 0,
-            'mana': 0,
-            'manamax': 0,
-            "pet": None,
-            "weapon": None,
-            'armor': None,
-            'race': race,
-            'gm_status': True,
-            } })
-            servers.update_one({"server": guild.id}, {"$set": {"users": a}})
-            return a[str(user.id)]
+        server = servers.find_one({"server": guild.id})
+        user = functions.user_check(member, guild)
+
+        if member.bot == True:
+            return False
+
+        r = server['races'][race]
+        a = server['users']
+        pprint.pprint(a[str(member.id)])
+        a[str(member.id)].update({
+
+        'hp': r['hp'], 'hpmax': r['hp'],
+        'mana': r['mana'], 'manamax': r['mana'],
+        "pet": None, "weapon": None, 'armor': None,
+
+        'rpg_lvl': 0, 'rpg_xp': 0,
+        'bio': None, 'people_avatar': None,
+
+        'race': race,
+        'gm_status': True,
+        })
+
+        if r['items'] != None:
+            for i in r['items']:
+                a[str(member.id)]['inv'].append(server['items'][str(i)])
+
+        pprint.pprint(a[str(member.id)])
+
+        servers.update_one({"server": guild.id}, {"$set": {"users": a}})
+        return a[str(member.id)]
 
     @staticmethod
     def user_update(user_id, guild: discord.Guild, key:str, ch, met = 'update', key2 = 'users'):
@@ -615,7 +592,7 @@ class functions:
 
         elif pun == 1: #мьют
             try:
-                await user.add_roles(self.bot.get_guild(ctx.guild.id).get_role(server['mod']['muterole']))
+                await user.add_roles(bot.get_guild(ctx.guild.id).get_role(server['mod']['muterole']))
                 a = server['mute_members']
                 a.update({str(user.id): time.time() + punishment['time'] })
                 servers.update_one({"server": ctx.guild.id}, {"$set": {"mute_members": a}})
@@ -1358,6 +1335,7 @@ async def lvl(message, server):
             if expnc <= exp:
                 guild.update({'exp': 0})
                 guild.update({'lvl': guild['lvl']+1 })
+                servers.update_one( {"server": ctx.guild.id}, {"$set": {'rpg': rpg}} )
 
     if expn <= user['xp']:
         try:
@@ -1463,14 +1441,14 @@ async def punishment_mod(message, server, p, reason, shield):
             if 'role-add' in p:
                 if server['mod'][shield]['add-role'] != None:
                     try:
-                        await user.add_roles(self.bot.get_guild(message.guild.id).get_role(server['mod'][shield]['add-role']))
+                        await user.add_roles(bot.get_guild(message.guild.id).get_role(server['mod'][shield]['add-role']))
                     except Exception:
                         pass
 
             if 'role-remove' in p:
                 if server['mod'][shield]['roleremove'] != None:
                     try:
-                        await user.remove_roles(self.bot.get_guild(message.guild.id).get_role(server['mod'][shield]['remove-role']))
+                        await user.remove_roles(bot.get_guild(message.guild.id).get_role(server['mod'][shield]['remove-role']))
                     except Exception:
                         pass
 
