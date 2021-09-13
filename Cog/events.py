@@ -1354,7 +1354,6 @@ class MainCog(commands.Cog):
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
 
-
         async def rr(l, func, message, payload, num):
             roles = []
             server = servers.find_one({"server":payload.guild_id})
@@ -1473,7 +1472,7 @@ class MainCog(commands.Cog):
 
                                             await message.channel.edit(overwrites = overwrites)
 
-                                            emb = discord.Embed(title = f'Тикет закрыт', description = f'Тикет пользователя {bm.mention} был закрыт\n\nУдалить канал > 🧨\nСохранить историю > 📜', color= server['embed_color'] )
+                                            emb = discord.Embed(title = f'Тикет закрыт', description = f'Тикет пользователя {bm.mention} был закрыт\n\nУдалить канал > 🧨\nСохранить историю > 📜\nОграничить доступ к тикетам > ❌', color= server['embed_color'] )
                                             msg = await message.channel.send(embed = emb)
 
                                             server['tickets']['tick'].update({ str(msg.id): {'status': 'close', 'member': bm.id} })
@@ -1483,16 +1482,28 @@ class MainCog(commands.Cog):
 
                                             await msg.add_reaction("🧨")
                                             await msg.add_reaction("📜")
+                                            await msg.add_reaction("❌")
 
 
                                 if m['status'] == 'close':
                                     if str(emoji) == '🧨':
                                         await message.channel.delete(reason = 'ticket remove')
+                                        del server['tickets']['tick'][str(message.id)]
 
                                     elif str(emoji) == '📜':
                                         await message.delete()
+                                        del server['tickets']['tick'][str(message.id)]
 
-                                    del server['tickets']['tick'][str(message.id)]
+                                    elif str(emoji) == '❌':
+
+                                        try:
+                                            server['tickets']['bl'].append(server['tickets']['tick'][str(message.id)]['member'])
+                                        except :
+                                            server['tickets'].update({ 'bl':[server['tickets']['tick'][str(message.id)]['member']] })
+
+                                        emb = discord.Embed(title = f'Тикет закрыт', description = f'Тикет пользователя {bm.mention} был закрыт\n\nУдалить канал > 🧨\nСохранить историю > 📜\n`Ограничен доступ к тикетам!`', color= server['embed_color'] )
+                                        await message.channel.edit(embed = emb)
+
                                     servers.update_one({'server': guild.id},{"$set": {'tickets': server['tickets'] }})
 
 

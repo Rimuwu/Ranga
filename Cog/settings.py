@@ -561,13 +561,13 @@ class settings(commands.Cog):
         headline = ImageFont.truetype("fonts/20421.ttf", size = 50)
         big = ImageFont.truetype("fonts/NotoSans-Bold.ttf", size = 100)
 
-        
+
         l = len(name)
         if l < 11:
             number = 11
         if l >= 11:
             number = 9
-        
+
         wp1 = 245          #x
         wp2 = 275          #y
 
@@ -1069,7 +1069,7 @@ class settings(commands.Cog):
 
         if server['premium'] == False:
             gif = False
-        
+
         headline = ImageFont.truetype("fonts/20421.ttf", size = 50)
         big = ImageFont.truetype("fonts/NotoSans-Bold.ttf", size = 100)
 
@@ -3117,7 +3117,7 @@ class settings(commands.Cog):
         if reward_percent < 1.0:
             await ctx.send("Процент не может быть меньше 1%!")
             return
-        
+
         server = servers.find_one({"server": ctx.guild.id})
 
         server['economy']['daily_reward'].update({'reward': reward})
@@ -3354,6 +3354,7 @@ class settings(commands.Cog):
         server['tickets'].update({'category': category})
         server['tickets'].update({'tick': {} })
         server['tickets'].update({'t_n': 0 })
+        server['tickets'].update({'bl': [] })
         servers.update_one({'server':ctx.guild.id},{'$set':{'tickets': server['tickets']}})
 
     @commands.command(usage = '[mini] [max]', description = 'Настроить игру шанс.', help = 'Настройка экономики')
