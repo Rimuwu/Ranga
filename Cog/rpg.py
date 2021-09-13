@@ -219,6 +219,7 @@ class rpg(commands.Cog):
                 else:
                     await ctx.send("Требовалось указать описание (макс 300 символов) или `none`, повторите настройку ещё раз!")
                     return
+                    
 
             await message.edit(embed = embed( type, name, act, image, quality, description))
 

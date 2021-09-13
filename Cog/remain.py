@@ -73,5 +73,6 @@ class remain(commands.Cog):
 
         await mid.edit(content = mid.content, view= url_button(url, emoji, label))
 
+
 def setup(bot):
     bot.add_cog(remain(bot))

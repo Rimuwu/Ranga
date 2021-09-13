@@ -11,6 +11,7 @@ import asyncio
 import time
 import pymongo
 import os
+import pprint
 
 sys.path.append("..")
 from ai3 import functions as funs
@@ -272,6 +273,126 @@ class profile(commands.Cog):
         idraw.text((60,252), f"{text} #{topvoice}" , font = para)
 
 
+        embed = discord.Embed(color=0xf03e65)
+        embed.set_author(name = ctx.author, url = ctx.author.avatar.url)
+
+        reaction = 'a'
+
+        inv = {}
+
+        for i in user['inv']:
+            try:
+                try:
+                    if inv[i['name']] == i:
+                        inv.update({ i['name']: { 'it':i, 'count': inv[i['name']]['count']+1 } })
+                    if inv[i['name']] != i:
+                        try:
+                            inv.update({ f'{i["name"]} (особ.)': { 'it':i, 'count': inv[i['name']]['count']+1 } })
+                        except:
+                            inv.update({ f'{i["name"]} (особ.)': { 'it':i, 'count': 1 } })
+                except:
+                    inv.update({i['name']: { 'it':i, 'count': 1 } })
+            except:
+                inv.update({ i['name']: { 'it':i, 'count': 1 } })
+
+        # pprint.pprint(inv)
+
+        if inv == {}:
+            emb_i = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь', description = 'Тут пусто 🔎',color=0xf03e65)
+
+        if inv != {}:
+
+            emb_i = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь',color=0xf03e65)
+
+
+            text, text2, text3, text4, text5 = '', '', '', '', ''
+            num, num2, num3, num4, num5 = 0, 0, 0, 0, 0
+
+            for i in inv.keys():
+                item = inv[i]['it']
+                if item['quality'] == 'n':
+                    qul = '<:normal_q:781531816993620001>'
+                elif item['quality'] == 'u':
+                    qul = '<:unusual_q:781531868780691476>'
+                elif item['quality'] == 'r':
+                    qul = '<:rare_q:781531919140651048>'
+                elif item['quality'] == 'o':
+                    qul = '<:orate_q:781531996866084874>'
+                elif item['quality'] == 'l':
+                    qul = '<:legendary_q:781532085130100737>'
+                else:
+                    qul = '???'
+
+                if item['type'] == 'weapon':
+
+                    text += f"{qul} | {i}: {inv[i]['count']}\n"
+                    num += 1
+
+                elif item['type'] == 'point':
+
+                    text2 += f"{qul} | {i}: {inv[i]['count']}\n"
+                    num2 += 1
+
+                elif item['type'] == 'eat':
+
+                    text3 += f"{qul} | {i}: {inv[i]['count']}\n"
+                    num3 += 1
+
+                elif item['type'] == 'pet':
+
+                    text4 += f"{qul} | {i}: {inv[i]['count']}\n"
+                    num4 += 1
+
+                else:
+                    text5 += f"{qul} | {i}: {inv[i]['count']}\n"
+                    num5 += 1
+
+
+            if num > 0:
+                emb_i.add_field(name= f"Предметы | Оружия: {num}", value= text)
+            if num2 > 0:
+                emb_i.add_field(name= f"Предметы | Зелья: {num2}", value= text2)
+            if num3 > 0:
+                emb_i.add_field(name= f"Предметы | Еда: {num3}", value= text3)
+            if num4 > 0:
+                emb_i.add_field(name= f"Предметы | Питомцы: {num4}", value= text4)
+            if num5 > 0:
+                emb_i.add_field(name= f"Предметы | Остальное: {num5}", value= text5)
+
+
+        emb_s = discord.Embed(title = ':bust_in_silhouette:  | Профиль',
+        color=0xf03e65)
+
+        if user['gm_status'] != False:
+            if user['bio'] == None:
+                emb_s.add_field(name="<:info:886888485796065311> | Информация", value=f'Тут пусто 🔎', inline = False)
+            if user['bio'] != None:
+                emb_s.add_field(name="<:info:886888485796065311> | Информация", value=user['bio'], inline = False)
+            if user['people_avatar'] != None:
+                emb_s.set_thumbnail(url = user['people_avatar'])
+
+            emb_s.add_field(name="<:hunt:886890612341739550> | Уровень наёмника", value=f'<:lvl:886876034149011486> {user["rpg_lvl"]} уровень\n<:lvl:886876034149011486> {user["rpg_xp"]} | {5 * user["rpg_lvl"]*user["rpg_lvl"] + 50 * user["rpg_lvl"] + 100}')
+
+            emb_s.add_field(name="<:characteristic:886892962888421376> | Статистика персонажа", value=f'<:heart:886874654072008705> {user["hp"]} | {user["hpmax"]}\n<:c_mana:886893705594818610> {user["mana"]} | {user["manamax"]} ')
+
+            if user['weapon'] == None:
+                weapon = "Руки"
+            else:
+                weapon = user['weapon']['name']
+
+            if user['armor'] == None:
+                armor = "Майка"
+            else:
+                armor = user['armor']['name']
+
+            if user['pet'] == None:
+                pet = "Отсутсвует"
+            else:
+                pet = user['pet']['name']
+
+            emb_s.add_field(name="<:p_backpack:886909262712930325> | Снаряжение", value=f'Оружие: {weapon}\n<:armor:827220888130682880> | {armor}\n<:pet1:886919865544368158> | {pet}')
+
+
         if bc['format'] == "png":
 
             bg_img = img
@@ -284,11 +405,8 @@ class profile(commands.Cog):
             image_pix=BytesIO(output.getvalue())
 
             file = discord.File(fp = image_pix, filename="user_card.png")
-            embed = discord.Embed(color=0xf03e65)
-            embed.set_image(url="attachment://user_card.png")
-
-            await ctx.send(file=file, embed=embed)
-
+            emb_i.set_image(url="attachment://user_card.png")
+            emb_s.set_image(url="attachment://user_card.png")
 
         else:
             await ctx.trigger_typing()
@@ -311,14 +429,92 @@ class profile(commands.Cog):
             fs[0].save('user_card.gif', save_all=True, append_images=fs[1:], loop = 0, optimize=True, quality=75)
 
             file = discord.File(fp = "user_card.gif", filename="user_card.gif")
-            embed = discord.Embed(color=server['embed_color'])
-            embed.set_image(url="attachment://user_card.gif")
+            emb_i.set_image(url="attachment://user_card.gif")
+            emb_s.set_image(url="attachment://user_card.gif")
 
-            await ctx.send(file=file, embed=embed)
+
+        msg = await ctx.send(file=file, embed=emb_s)
+
+        try:
+            os.remove('user_card.gif')
+        except Exception:
+            pass
+
+        page_s = 'stat'
+
+        def check(reaction, user):
+            nonlocal msg
+            return user == ctx.author and str(reaction.emoji) == '<:ch_page:886895064331202590>' and str(reaction.message) == str(msg)
+
+        async def rr():
+            nonlocal reaction
+            nonlocal page_s
+
+            if str(reaction.emoji) == '<:ch_page:886895064331202590>':
+                await msg.remove_reaction('<:ch_page:886895064331202590>', ctx.author)
+                if page_s == 'inv':
+                    page_s = 'stat'
+                    await msg.edit(embed = emb_s)
+                else:
+                    page_s = 'inv'
+                    await msg.edit(embed = emb_i)
+
+
+        async def reackt():
+            nonlocal reaction
             try:
-                os.remove('user_card.gif')
-            except Exception:
+                reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check = check)
+            except asyncio.TimeoutError:
+                await msg.clear_reactions()
+                return
+            else:
+                await rr(), await reackt()
+
+        await msg.add_reaction('<:ch_page:886895064331202590>')
+
+        await reackt()
+
+
+    @commands.command(usage = '(avatar character\none) (bio) ', description = 'Установить информацию о своём аватаре.')
+    async def bio(self,ctx, avatar:str, *, bio:str):
+
+        user = funs.user_check(member, member.guild)
+        server = servers.find_one({"server": ctx.guild.id})
+
+        if user['gm_status'] == False:
+            await ctx.send("Такой функции как "+ str(arg) + " не существует, имеется только + или -")
+            return
+
+        if user['gm_status'] == True:
+
+            if avatar != 'none':
+                try:
+                    emb1 = discord.Embed(title = "Изображение", color=server['embed_color'])
+                    emb1.set_thumbnail(url = avatar)
+                    msg2 = await ctx.send(embed = emb1)
+                except Exception:
+                    await ctx.send("Требовалось указать __ссылку__, повторите настройку ещё раз.")
+                    return
+
+                try:
+                    await msg2.delete()
+                except Exception:
+                    pass
+
+                funs.user_update(ctx.author.id, ctx.author.guild, 'people_avatar', avatar)
+            else:
                 pass
+
+            desc = ' '.join(bio)
+
+            if len(desc) > 1024:
+                await ctx.send("Тебовалось указать описание персонажа <= 1024 символа")
+                return
+
+            funs.user_update(ctx.author.id, ctx.author.guild, 'bio', bio)
+
+            await ctx.send("Информация и картинка персонажа настроенны!")
+
 
 
 
