@@ -658,7 +658,7 @@ class bs(commands.Cog):
             m = g.get_member(bs['author'])
             if m != None:
                 try:
-                    await m.send(f'Ваш фон под id {id} был отклонён по причине: {reason}')
+                    await m.send(f'Ваш фон под id {id} был принят!')
                 except:
                     pass
 
