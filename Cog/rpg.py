@@ -1926,7 +1926,7 @@ class rpg(commands.Cog):
         if item['description'] != None:
             emb.add_field(name='Описание:', value= item['description'])
 
-        msg1 = await ctx.send(embed = emb)
+        await ctx.send(embed = emb)
 
 def setup(bot):
     bot.add_cog(rpg(bot))

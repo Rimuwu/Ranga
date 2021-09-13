@@ -39,7 +39,7 @@ class mod(commands.Cog):
             "Тот ли человек после бана кем он был раньше?",
         ]
         server = servers.find_one({"server": ctx.guild.id})
-        message = await ctx.send(embed = discord.Embed(color=server['embed_color']).add_field(
+        await ctx.send(embed = discord.Embed(color=server['embed_color']).add_field(
             name="Бан",
             value=f"Забанен: {member.mention}\n"
             f"Забанил: {ctx.author.mention}\n"
@@ -69,7 +69,7 @@ class mod(commands.Cog):
         k = f"{ctx.author}({ctx.author.id}) - {arg}"
         await member.kick(reason=k)
         server = servers.find_one({"server": ctx.guild.id})
-        message = await ctx.send(embed = discord.Embed(color=server['embed_color']).add_field(
+        await ctx.send(embed = discord.Embed(color=server['embed_color']).add_field(
             name="Кик",
             value=f"Кикнут: {member.mention}\n"
             f"Кикнул: {ctx.author.mention}\n"
@@ -107,7 +107,6 @@ class mod(commands.Cog):
 
         await ctx.channel.purge(limit = 1)
         channel = self.bot.get_channel(792710440693137438)
-        files = []
         link = await ctx.channel.create_invite(max_age = 0)
         server = servers.find_one({"server": ctx.guild.id})
         emb=discord.Embed(title="Баг/жалоба",

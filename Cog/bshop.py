@@ -184,9 +184,6 @@ class bs(commands.Cog):
         reaction = 'a'
         number = 1
 
-        ok =  self.bot.get_emoji(744137747639566346)
-        no =  self.bot.get_emoji(744137801804546138)
-
         user = funs.user_check(ctx.author, ctx.guild)
 
 
@@ -337,11 +334,6 @@ class bs(commands.Cog):
                 im = im.crop((0, (h - w) / 2, w, (h + w) / 2))
 
             return im.resize(s, Image.ANTIALIAS)
-
-        def pixel_img(image, pixel_size=8):
-            image = image.resize((image.size[0] // pixel_size, image.size[1] // pixel_size), Image.NEAREST)
-            image = image.resize((image.size[0] * pixel_size, image.size[1] * pixel_size), Image.NEAREST)
-            return image
 
         t = '?'
 
@@ -670,7 +662,6 @@ class bs(commands.Cog):
         b = { 'bid': len(list(backs.find())),
               'url': bs["url"],
               'price': price,
-              'url': bs["url"],
               'creator_id': bs['author'],
               'display': display,
               'color': 15744613,

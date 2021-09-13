@@ -1205,8 +1205,6 @@ async def lvl_up_image(message, user, server):
     alpha = Image.composite(bar, alpha, mask)
 
     idraw = ImageDraw.Draw(alpha)
-    name = member.name
-    tag = member.discriminator
     para = ImageFont.truetype("fonts/20421.ttf", size = 30)
     paga = ImageFont.truetype("fonts/20421.ttf", size = 60)
     pata = ImageFont.truetype("fonts/20421.ttf", size = 50)
@@ -1314,8 +1312,6 @@ async def lvl_up_image(message, user, server):
 
 async def lvl(message, server):
 
-    t1 = time.time()
-
     user = functions.user_check(message.author, message.guild)
     expn = 5 * user['lvl']*user['lvl'] + 50 * user['lvl'] + 100
     expi = random.randint(0, server['economy']['lvl_xp'])
@@ -1329,13 +1325,13 @@ async def lvl(message, server):
             guild = rpg['guild'][f'{user["guild"]}']
             exp = guild['exp'] + random.randint(0, 5)
             guild.update({'exp': exp})
-            servers.update_one( {"server": ctx.guild.id}, {"$set": {'rpg': rpg}} )
+            servers.update_one( {"server": guild.id}, {"$set": {'rpg': rpg}} )
             expnc = 5 * guild['lvl'] * guild['lvl'] + 50 * guild['lvl'] + 100
 
             if expnc <= exp:
                 guild.update({'exp': 0})
                 guild.update({'lvl': guild['lvl']+1 })
-                servers.update_one( {"server": ctx.guild.id}, {"$set": {'rpg': rpg}} )
+                servers.update_one( {"server": guild.id}, {"$set": {'rpg': rpg}} )
 
     if expn <= user['xp']:
         try:
@@ -1418,6 +1414,8 @@ def mod_media(message):
         return True
 
 async def punishment_mod(message, server, p, reason, shield):
+
+    user = message.author
 
     if 'ban' in p:
         try:

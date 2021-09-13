@@ -54,7 +54,7 @@ class voice(commands.Cog):
                 emb = discord.Embed(description = 'Канал был закрыт для подключения пользователей!', color=0xf03e65)
 
             emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-            message = await ctx.send(embed = emb, delete_after = 5.0)
+            await ctx.send(embed = emb, delete_after = 5.0)
 
     @commands.command(usage = '[@member]', description = 'Открыть приватку.')
     async def voice_unlock(self,ctx, member:discord.Member = None):
@@ -89,7 +89,7 @@ class voice(commands.Cog):
                 emb = discord.Embed(description = 'Канал был открыт для подключения пользователей!', color=0xf03e65)
 
             emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-            message = await ctx.send(embed = emb, delete_after = 5.0)
+            await ctx.send(embed = emb, delete_after = 5.0)
 
     @commands.command(usage = '[@member]', description = 'Скрыть приватку.')
     async def voice_hide(self,ctx, member:discord.Member = None):
@@ -124,7 +124,7 @@ class voice(commands.Cog):
                 emb = discord.Embed(description = 'Канал был закрыт для просмотра пользователей!', color=0xf03e65)
 
             emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-            message = await ctx.send(embed = emb, delete_after = 5.0)
+            await ctx.send(embed = emb, delete_after = 5.0)
 
     @commands.command(usage = '[@member]', description = 'Раскрыть приватку.')
     async def voice_unhide(self,ctx, member:discord.Member = None):
@@ -159,7 +159,7 @@ class voice(commands.Cog):
                 emb = discord.Embed(description = 'Канал был открыт для просмотра пользователей!', color=0xf03e65)
 
             emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-            message = await ctx.send(embed = emb, delete_after = 5.0)
+            await ctx.send(embed = emb, delete_after = 5.0)
 
     @commands.command(usage = '(@member)', description = 'Кикнуть из приватки')
     async def voice_kick(self,ctx, member:discord.Member):
@@ -192,7 +192,7 @@ class voice(commands.Cog):
             emb = discord.Embed(description = f'{member.mention} был исключён из войса!', color=0xf03e65)
 
             emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-            message = await ctx.send(embed = emb, delete_after = 5.0)
+            await ctx.send(embed = emb, delete_after = 5.0)
 
     @commands.command(usage = '(@member)', description = 'Передать управление.')
     async def voice_owner(self,ctx, member:discord.Member):
@@ -227,7 +227,7 @@ class voice(commands.Cog):
             emb = discord.Embed(description = f'{member.mention} теперь создатель войса!', color=0xf03e65)
 
             emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-            message = await ctx.send(embed = emb, delete_after = 5.0)
+            await ctx.send(embed = emb, delete_after = 5.0)
 
     @commands.command(usage = '(limit)', description = 'Установить лимит')
     async def voice_limit(self, ctx, limit:int):
@@ -262,7 +262,7 @@ class voice(commands.Cog):
             await channel.edit(user_limit = limit ,reason="Настройка лимита приватного войса")
 
             emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-            message = await ctx.send(embed = emb, delete_after = 5.0)
+            await ctx.send(embed = emb, delete_after = 5.0)
 
     @commands.command(usage = '(name)', description = 'Изменить название приватки.')
     async def voice_name(self, ctx, *,name:str):
@@ -299,9 +299,7 @@ class voice(commands.Cog):
             await channel.edit(name = name ,reason="Настройка названия приватного войса")
 
             emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-            message = await ctx.send(embed = emb, delete_after = 5.0)
-
-
+            await ctx.send(embed = emb, delete_after = 5.0)
 
 
 def setup(bot):

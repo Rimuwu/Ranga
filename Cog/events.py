@@ -101,7 +101,7 @@ def voice_time(guild, member, time, met):
 
                         r = str(uss['voice_lvl'] + 1)
                         uss['money'] += server['voice_reward'][str(r)]['money']
-                        if items != None:
+                        if server['voice_reward'][str(r)]['items'] != None:
                             for i in server['voice_reward'][str(r)]['items']:
                                  uss['inv'].append(server['items'][str(i)])
 
@@ -154,7 +154,6 @@ class MainCog(commands.Cog):
 
     @tasks.loop(seconds = 15)
     async def change_stats(self):
-        global stats
         await self.bot.change_presence( status = discord.Status.online, activity = discord.Game(name = random.choice(stat_list)))
 
     @tasks.loop(seconds=1)
@@ -786,7 +785,7 @@ class MainCog(commands.Cog):
                     #аватарка
                     bg_img = alpha
                     fg_img = im
-                    p = trans_paste(fg_img, bg_img, 1.0, (ap1, ap2, ap1 + size[0], ap2 + size[0]))
+                    im = trans_paste(fg_img, bg_img, 1.0, (ap1, ap2, ap1 + size[0], ap2 + size[0]))
 
                     if server['welcome']['wel_text'] == None:
                         text = f"Welcome {name}#{tag} to {member.guild.name}"
@@ -1069,7 +1068,7 @@ class MainCog(commands.Cog):
                     #аватарка
                     bg_img = alpha
                     fg_img = im
-                    p = trans_paste(fg_img, bg_img, 1.0, (ap1, ap2, ap1 + size[0], ap2 + size[0]))
+                    im = trans_paste(fg_img, bg_img, 1.0, (ap1, ap2, ap1 + size[0], ap2 + size[0]))
 
                     if server['goodbye']['lea_text'] == None:
                         text = f"Goodbye {name}#{tag} to {member.guild.name}"
@@ -1632,7 +1631,7 @@ class MainCog(commands.Cog):
                 user = funs.user_check(booster, booster.guild)
                 for i in server['boost']['reward']:
                     user['inv'].append(server['items'][str(i)])
-                funs.user_update(member.id, guild, 'inv', user['inv'])
+                funs.user_update(booster.id, booster.guild, 'inv', user['inv'])
 
 
         if after.premium_since != None and before.premium_since != after.premium_since and before.premium_since != None:
@@ -1952,7 +1951,6 @@ class MainCog(commands.Cog):
                                     drf.update({ key: [ list(l) ] })
 
                     text = ''
-                    op = ''
                     for i in drf:
                         if channel.guild.get_member(int(i)) != None:
                             memb = channel.guild.get_member(int(i))
@@ -2117,7 +2115,6 @@ class MainCog(commands.Cog):
             server = servers.find_one({"server": invite.guild.id})
             if server['mod']['log_channel'] != {}:
 
-                counter = 0
                 log = server['mod']['log_channel']['logging']
                 channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
                 if 'invite_create' in log or 'all' in log or 'invite' in log:
@@ -2139,7 +2136,6 @@ class MainCog(commands.Cog):
             server = servers.find_one({"server": invite.guild.id})
             if server['mod']['log_channel'] != {}:
 
-                counter = 0
                 log = server['mod']['log_channel']['logging']
                 channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
                 if 'invite_delete' in log or 'all' in log or 'invite' in log:
@@ -2157,7 +2153,6 @@ class MainCog(commands.Cog):
                 if before.author.bot == True:
                     return
 
-                counter = 0
                 log = server['mod']['log_channel']['logging']
                 channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
                 if 'message_edit' in log or 'all' in log or 'message' in log:

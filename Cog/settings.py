@@ -3,12 +3,14 @@ from nextcord.ext import tasks, commands
 import requests
 from PIL import Image, ImageFont, ImageDraw, ImageOps, ImageSequence, ImageFilter
 import io
+from io import BytesIO
 import sys
 import random
 from random import choice
 import asyncio
 import time
 import pymongo
+import os
 
 sys.path.append("..")
 from ai3 import functions as funs
@@ -125,7 +127,6 @@ class settings(commands.Cog):
             num1 = 0
             num2 = 0
             page = numberpage
-            text = ''
 
             if numberpage != 1:
                 numberpage *= 6
@@ -349,7 +350,7 @@ class settings(commands.Cog):
         a = server['voice']
 
         if voicechannel == None:
-            voicechannel = await ctx.guild.create_voice_channel(name=f"random", category=category)
+            voicechannel = await ctx.guild.create_voice_channel(name=f"random")
 
         await ctx.send(f"Канал с рандомным перекидыванием был установлен на <#{voicechannel.id}>")
 
@@ -556,6 +557,27 @@ class settings(commands.Cog):
 
         if server['premium'] == False:
             gif = False
+
+        headline = ImageFont.truetype("fonts/20421.ttf", size = 50)
+        big = ImageFont.truetype("fonts/NotoSans-Bold.ttf", size = 100)
+
+        
+        l = len(name)
+        if l < 11:
+            number = 11
+        if l >= 11:
+            number = 9
+        
+        wp1 = 245          #x
+        wp2 = 275          #y
+
+        tp2 = 400
+        tp1 = int(400 - l * number) #текст
+
+        size = (250,250)        #y
+        ap1 = int(960 / 2 - size[0] / 2)         #x
+        ap2 = 30          #y
+
 
 
         try:
@@ -801,12 +823,6 @@ class settings(commands.Cog):
         im = crop(im, size)
         im.putalpha(prepare_mask(size, 4))
 
-        def make_ellipse_mask(size, x0, y0, x1, y1, blur_radius):
-            img = Image.new("L", size, color=0)
-            draw = ImageDraw.Draw(img)
-            draw.ellipse((x0, y0, x1, y1), fill=255)
-            return img.filter(ImageFilter.GaussianBlur(radius=blur_radius))
-
         overlay_image = alpha.filter(ImageFilter.GaussianBlur(radius=15))
         if f_el == None:
             mask_image = make_ellipse_mask((960, 470), ap1 - 10, ap2 - 10, ap1 + size[0] + 10, ap2 + size[1] + 10, 1)
@@ -817,7 +833,7 @@ class settings(commands.Cog):
         #аватарка
         bg_img = alpha
         fg_img = im
-        p = trans_paste(fg_img, bg_img, 1.0, (ap1, ap2, ap1 + size[0], ap2 + size[0]))
+        im = trans_paste(fg_img, bg_img, 1.0, (ap1, ap2, ap1 + size[0], ap2 + size[0]))
 
         if w_text == None:
             text = f"Welcome {name}#{tag} to {member.guild.name}"
@@ -1053,6 +1069,26 @@ class settings(commands.Cog):
 
         if server['premium'] == False:
             gif = False
+        
+        headline = ImageFont.truetype("fonts/20421.ttf", size = 50)
+        big = ImageFont.truetype("fonts/NotoSans-Bold.ttf", size = 100)
+
+        l = len(name)
+        if l < 11:
+            number = 11
+        if l >= 11:
+            number = 9
+
+
+        wp1 = 245          #x
+        wp2 = 275          #y
+
+        tp2 = 400
+        tp1 = int(400 - l * number) #текст
+
+        size = (250,250)        #y
+        ap1 = int(960 / 2 - size[0] / 2)         #x
+        ap2 = 30          #y
 
 
         try:
@@ -1299,12 +1335,6 @@ class settings(commands.Cog):
         im = crop(im, size)
         im.putalpha(prepare_mask(size, 4))
 
-        def make_ellipse_mask(size, x0, y0, x1, y1, blur_radius):
-            img = Image.new("L", size, color=0)
-            draw = ImageDraw.Draw(img)
-            draw.ellipse((x0, y0, x1, y1), fill=255)
-            return img.filter(ImageFilter.GaussianBlur(radius=blur_radius))
-
         overlay_image = alpha.filter(ImageFilter.GaussianBlur(radius=15))
         if f_el == None:
             mask_image = make_ellipse_mask((960, 470), ap1 - 10, ap2 - 10, ap1 + size[0] + 10, ap2 + size[1] + 10, 1)
@@ -1315,7 +1345,7 @@ class settings(commands.Cog):
         #аватарка
         bg_img = alpha
         fg_img = im
-        p = trans_paste(fg_img, bg_img, 1.0, (ap1, ap2, ap1 + size[0], ap2 + size[0]))
+        im = trans_paste(fg_img, bg_img, 1.0, (ap1, ap2, ap1 + size[0], ap2 + size[0]))
 
         if w_text == None:
             text = f"Goodbye {name}#{tag}"
@@ -1703,7 +1733,7 @@ class settings(commands.Cog):
         for i in a:
             c = self.bot.get_channel(i)
             text = text + f', {c.mention}'
-        message = await ctx.send(embed = discord.Embed(title="ЧС каналов",description=text, color=server['embed_color']))
+        await ctx.send(embed = discord.Embed(title="ЧС каналов",description=text, color=server['embed_color']))
 
     @commands.command(usage = '(#channel)', description = 'Добавить игнорируемый канал.', help = 'Настройка модерации')
     async def bchannels_add(self, ctx, channel:discord.TextChannel):
@@ -1861,7 +1891,7 @@ class settings(commands.Cog):
         try:
             m = server['rr'][str(message_id)] #при не нахождении выводит ошибку
             try:
-                message = await ctx.channel.fetch_message(message_id) #при не нахождении выводит ошибку
+                await ctx.channel.fetch_message(message_id) #при не нахождении выводит ошибку
             except Exception:
                 r = server['rr'].copy()
                 r.pop(str(message_id), None)
@@ -1888,7 +1918,7 @@ class settings(commands.Cog):
         try:
             m = server['rr'][str(message_id)] #при не нахождении выводит ошибку
             try:
-                message = await ctx.channel.fetch_message(message_id) #при не нахождении выводит ошибку
+                await ctx.channel.fetch_message(message_id) #при не нахождении выводит ошибку
             except Exception:
                 r = server['rr'].copy()
                 r.pop(str(message_id), None)
@@ -1971,7 +2001,7 @@ class settings(commands.Cog):
         try:
             m = server['rr'][str(message_id)] #при не нахождении выводит ошибку
             try:
-                message = await ctx.channel.fetch_message(message_id) #при не нахождении выводит ошибку
+                await ctx.channel.fetch_message(message_id) #при не нахождении выводит ошибку
             except Exception:
                 r = server['rr'].copy()
                 r.pop(str(message_id), None)
@@ -2594,8 +2624,6 @@ class settings(commands.Cog):
             await ctx.send(f'Сообщение не может быть более 20-ти символов')
             return
 
-        server = servers.find_one({'server':ctx.guild.id})
-
         servers.update_one({'server':ctx.guild.id},{'$set':{'nick_change': description}})
         await ctx.send(funs.text_replase(description, ctx.author))
         await ctx.send('Установлено изменение ника при входе (текст указан как бы это выглядело зайдя вы на сервер)')
@@ -3089,6 +3117,8 @@ class settings(commands.Cog):
         if reward_percent < 1.0:
             await ctx.send("Процент не может быть меньше 1%!")
             return
+        
+        server = servers.find_one({"server": ctx.guild.id})
 
         server['economy']['daily_reward'].update({'reward': reward})
         server['economy']['daily_reward'].update({'reward_percent': reward_percent})
@@ -3200,7 +3230,6 @@ class settings(commands.Cog):
             num1 = 0
             num2 = 0
             page = numberpage
-            text = ''
 
             if numberpage != 1:
                 numberpage *= 6
@@ -3401,7 +3430,7 @@ class settings(commands.Cog):
             status = True
 
             emb = discord.Embed(description = f"{''.join(message)}", color = color)
-            msg = await ctx.send(embed = emb)
+            await ctx.send(embed = emb)
 
         else:
             try:
@@ -3414,7 +3443,7 @@ class settings(commands.Cog):
 
             if status == True:
                 emb = discord.Embed(description = f"{''.join(message)}", color = int(color, 16) )
-                msg = await ctx.send(embed = emb)
+                await ctx.send(embed = emb)
 
             else:
                 await ctx.send("Требовалось указать цвет в формате hex, его можно посмотерть например тут https://csscolor.ru/")

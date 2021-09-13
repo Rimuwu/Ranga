@@ -22,12 +22,10 @@ settings = db.settings
 class info(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        global users
         global settings
 
     @commands.command(aliases=['bot', 'invite'], usage = '-', description = 'Информация о боте.')
     async def info(self,ctx):
-        server = servers.find_one({"server": ctx.guild.id})
 
         ping = self.bot.latency
         ping_emoji = "🟩🔳🔳🔳🔳"
@@ -48,7 +46,7 @@ class info(commands.Cog):
         s1 = self.bot.get_guild(601124004224434357)
         s2 = self.bot.get_guild(792687533792034827)
         b = ctx.guild.me
-        message = await ctx.send(embed = discord.Embed(
+        await ctx.send(embed = discord.Embed(
             title="Ранга",
             description=f"Я Ранга! По велению Римуру-доно, я прибыл чтобы наблюдать за этим местом!\n\nЯ кастомный бот для семьи серверов AW, к ним относятся: [{s1}](https://discord.gg/VyDc2e4HYE), [{s2}](https://discord.gg/9X5pkqmB3X)",
             color=0x34cb2c).add_field(
@@ -69,16 +67,12 @@ class info(commands.Cog):
     @commands.command(aliases=['N', 'n', 'Nitro', 'нитро', "Нитро"], usage = '-', description = 'Информация о премиум подписке.')
     async def nitro(self,ctx):
         global settings
-        global users
-        s = settings.find_one({"sid": 1})
-
-        b = ctx.guild.get_member(734730292484505631)
 
         kk = self.bot.get_emoji(778533802342875136)
         un = self.bot.get_emoji(778545536138608652)
 
         emb = discord.Embed(title = f'{un}Информация о Котик Nitro', color=0xfe00b8)
-        emb.add_field(name="Плюшки:", value=f"Опыт: х2\ndaily: x2\n Комиссия: Off\n Покупка всех фонов: Бесплатно\nВалюта: 10к{kk}\nДоступ на тест сервер\nНастройка оповещений гифкой.\nСнятие ограничений на настройку.")
+        emb.add_field(name="Плюшки:", value=f"Опыт: х2\ndaily: x2\n Комиссия: Off\n Покупка всех фонов: Бесплатно\nВалюта: 10к{kk}")
         emb.add_field(name="Статус:", value=f"Цена: 250 руб. (rus)\nДлительность: 3 месяца")
         emb.add_field(name="Связь:", value=f"Покупка: {ctx.prefix}it_nitro_buy", inline = False)
         emb.set_thumbnail(url= 'https://ia.wampi.ru/2020/11/18/icons8-dog-paw-print-96.png')
@@ -123,10 +117,6 @@ class info(commands.Cog):
             msg = "Выключен"
         allu = self.bot.get_emoji(737350813386539014)
         bans = self.bot.get_emoji(737350831329902622)
-        online = self.bot.get_emoji(737350846261755995)
-        offline = self.bot.get_emoji(737350856805974038)
-        yelst = self.bot.get_emoji(737350871637164076)
-        dnd = self.bot.get_emoji(737350880940130406)
         allc = self.bot.get_emoji(737350902729670688)
         cat = self.bot.get_emoji(737350924128878601)
         channels = self.bot.get_emoji(737350940117434389)
@@ -151,13 +141,6 @@ class info(commands.Cog):
                                             f"{bott}Ботов - {ms.count(1)}\n"
                                             f"{bans}Баны - {len(await ctx.guild.bans())}\n",
                                             inline=True)
-
-        # emb.add_field(name="Статусы:",value=
-        #                                     f"{online}Онлайн - {member_by_status['online']}\n"
-        #                                     f"{offline}Оффлайн - {member_by_status['offline']}\n"
-        #                                     f"{yelst}Не активен - {member_by_status['idle']}\n"
-        #                                     f"{dnd}Не беспокоить - {member_by_status['dnd']}",
-        #                                     inline=True)
 
         emb.add_field(name="Статус буста:",value=f"{boost}Бусты - {ctx.guild.premium_subscription_count}\n{boost}Уровень - {ctx.guild.premium_tier}",inline=False)
 
@@ -225,7 +208,7 @@ class info(commands.Cog):
     @commands.command(usage = '-', description = 'Покупка премиум подписки.')
     async def it_nitro_buy(self, ctx):
         server = servers.find_one({"server": ctx.guild.id})
-        us = funs.user_check(ctx.author, member.guild)
+        us = funs.user_check(ctx.author, ctx.author.guild)
 
         emb = discord.Embed(
             title="Информация о покупке IT Nitro",
@@ -242,10 +225,9 @@ class info(commands.Cog):
                 if i['comment'] == str(ctx.author.id):
                     if int(i['sum']) >= 250:
                         await ctx.send('Вам было выданно IT Nitro!')
-                        idd = ctx.author.id
 
-                        funs.user_update(member.id, member.guild, 'Nitro', True)
-                        funs.user_update(member.id, member.guild, 'money', us + 10000)
+                        funs.user_update(ctx.author.id, ctx.author.guild, 'Nitro', True)
+                        funs.user_update(ctx.author.id, ctx.author.guild, 'money', us + 10000)
                         break
                     else:
                         await ctx.send('Сумма меньше 250-ти рублей!')

@@ -797,7 +797,6 @@ class economy(commands.Cog):
 
             item = server['items'][str(product['items'][0])]
 
-            type = item['type']
             ttype = item['type']
             ttype = ttype.replace('eat', f'🍖 | Еда')
             ttype = ttype.replace('point', f'<:mana:780352235246452756> | Зелье')
@@ -1288,7 +1287,6 @@ class economy(commands.Cog):
             nonlocal member, ctx
             nonlocal mem1_hand, mem2_hand
             for i in range(2):
-                print(score(mem2_hand, mem1_hand))
                 if score(mem2_hand, mem1_hand) == False:
                     try:
                         await message.edit(embed = emb('Игрок 1'))
@@ -1479,8 +1477,8 @@ class economy(commands.Cog):
             funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - int(amout * server['economy']['games']['slots']['percent']) * repet)
             funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] + u_money)
 
-    @commands.command(usage = '(number) (money) (money) (@member)', description = 'Игра в шанс.', help = 'Игры', aliases = ['шанс'])
-    async def chance(self, ctx, number:int = None, money:int = None,  member:discord.Member = None):
+    @commands.command(usage = '(number) (money) (@member)', description = 'Игра в шанс.', help = 'Игры', aliases = ['шанс'])
+    async def chance(self, ctx, number:int = None, money:int = None, member:discord.Member = None ):
 
         kk = self.bot.get_emoji(778533802342875136)
         user = funs.user_check(ctx.author, ctx.guild)
@@ -1531,7 +1529,7 @@ class economy(commands.Cog):
         async def text():
             nonlocal mess
             nonlocal number
-            global user
+            nonlocal user
             nonlocal server
             await mess.clear_reactions()
             emb3 = discord.Embed(description = f'<@{member.id}> введите число от `1 до 100`', color=server['embed_color'])

@@ -92,7 +92,6 @@ class profile(commands.Cog):
 
         headline = ImageFont.truetype("fonts/NotoSans-Bold.ttf", size = 25)
         para = ImageFont.truetype("fonts/NotoSans-Bold.ttf", size = 30)
-        paramini = ImageFont.truetype("fonts/NotoSans-Bold.ttf", size = 20)
 
         def trans_paste(fg_img,bg_img,alpha=10,box=(0,0)):
             fg_img_trans = Image.new("RGBA",fg_img.size)
@@ -117,10 +116,6 @@ class profile(commands.Cog):
 
             return im.resize(s, Image.ANTIALIAS)
 
-        def pixel_img(image, pixel_size=8):
-            image = image.resize((image.size[0] // pixel_size, image.size[1] // pixel_size), Image.NEAREST)
-            image = image.resize((image.size[0] * pixel_size, image.size[1] * pixel_size), Image.NEAREST)
-            return image
 
         t = dict(sorted(server['users'].items(),key=lambda x: x[1]['money'], reverse=True))
         topmn = list(t.keys()).index(str(member.id)) +1
@@ -478,11 +473,11 @@ class profile(commands.Cog):
     @commands.command(usage = '(avatar character\none) (bio) ', description = 'Установить информацию о своём аватаре.')
     async def bio(self,ctx, avatar:str, *, bio:str):
 
-        user = funs.user_check(member, member.guild)
+        user = funs.user_check(ctx.author, ctx.author.guild)
         server = servers.find_one({"server": ctx.guild.id})
 
         if user['gm_status'] == False:
-            await ctx.send("Такой функции как "+ str(arg) + " не существует, имеется только + или -")
+            await ctx.send("Требуется быть зарегестрированным пользователем в рпг системе!")
             return
 
         if user['gm_status'] == True:
