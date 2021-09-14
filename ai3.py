@@ -225,7 +225,7 @@ class functions:
 
         if r['items'] != None:
             for i in r['items']:
-                a[str(member.id)]['inv'].append(server['items'][str(i)])
+                a[str(member.id)]['inv'].append(funs.creat_item(guild.id, i))
 
         pprint.pprint(a[str(member.id)])
 
@@ -541,6 +541,7 @@ class functions:
             'voice_reward': {},
 
             'rpg': {
+                'iid': 0,
                 'locations': {},
                 'mobs': {},
                 'boss': {},
@@ -642,6 +643,52 @@ class functions:
     def mongo_c():
         global client
         return client
+
+    @staticmethod
+    async def reactions_check(solutions: list, member: discord.Member, msg: discord.Message, clear:bool = False, timeout:float = 30.0):
+
+        def check(reaction, user):
+            nonlocal msg
+            return user == member and str(reaction.emoji) in solutions and reaction.message == msg
+
+        async def reackt():
+            try:
+                reaction, user = await bot.wait_for('reaction_add', timeout=timeout, check = check)
+            except asyncio.TimeoutError:
+                await msg.clear_reactions()
+                return 'Timeout'
+            else:
+                if reaction.emoji in solutions:
+                    if clear == False:
+                        await msg.remove_reaction(str(reaction.emoji), member)
+                    else:
+                        await msg.clear_reactions()
+
+                    return reaction
+
+        for x in solutions:
+            await msg.add_reaction(x)
+
+        return await reackt()
+
+    @staticmethod
+    def creat_item(guild_id:int, item_id:int):
+        server = servers.find_one({'server': guild_id})
+        rpg = server['rpg']
+        iid = rpg['iid'] + 1
+
+        try:
+            item = server['items'][str(item_id)]
+        except:
+            print('Объект не найден')
+            return {}
+
+        item.update({'iid': iid})
+        rpg.update({'iid': iid})
+
+        servers.update_one({"server": guild_id}, {"$set": {"rpg": rpg}})
+        return item
+
 
 # коги ======================================= #
 
@@ -1130,7 +1177,7 @@ async def lvl_up_image(message, user, server):
 
     try:
         for i in upitems[str(lvl+1)]['items']:
-            user['inv'].append(server['items'][str(i)])
+            user['inv'].append(funs.creat_item(guild.id, i))
         functions.user_update(message.author.id, message.guild, "inv", user['inv'])
     except Exception:
         pass

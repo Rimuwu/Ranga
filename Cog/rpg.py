@@ -8,6 +8,7 @@ from random import choice
 import asyncio
 import time
 import pymongo
+from fuzzywuzzy import fuzz
 
 sys.path.append("..")
 from ai3 import functions as funs
@@ -1921,19 +1922,53 @@ class rpg(commands.Cog):
         il.update({f'{name}': race})
         servers.update_one({'server':ctx.guild.id},{"$set":{'races': il}})
 
-        print(race)
+
+
+
+    @commands.command(usage = '(item_name)', description = 'Использовать предмет из инвентаря.')
+    async def use(self, ctx, *, i_name:str):
+
+        user = funs.user_check(ctx.author, ctx.guild)
+        server = servers.find_one({"server": ctx.guild.id})
+
+        s_i = []
+
+        for i in user['inv']:
+            if fuzz.token_sort_ratio(i_name,i['name']) > 90 or fuzz.ratio(i_name,i['name']) > 90 or i_name == i['name']:
+                s_i.append(i)
+
+        if len(s_i) == 1:
+            emb = discord.Embed(description = f'вы хотите использовать **{s_i[0]["name"]}** ?', title = '<:inventory_b:886909340550823936> | Инвентарь', color=server['embed_color'])
+            msg = await ctx.send(embed= emb)
+            r = await funs.reactions_check( ["✅", "❌"], ctx.author, msg, True)
+            if r != 'Timeout':
+                if str(r.emoji) == "✅":
+                    print('Использование')
+                else:
+                    print('Отмена')
+            else:
+                await ctx.send('Время вышло')
+
+        if len(s_i) == 0:
+            emb = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь', description = f'В вашем инвентаре не было найдено такого предмета!\nПопробуйте указать более точное название или осмотрите свой инвентарь более подробно!', color=server['embed_color'])
+            msg = await ctx.send(embed= emb)
+
+        if len(s_i) > 1:
+            text = ''
+            items = {}
+            n = 0
+            for i in s_i:
+                n += 1
+                text += f'{n}# {i["name"]}\n'
+                items.update({ str(n): i })
+
+            emb = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь', description = f'В инвентаре найдено несколько совпадений:\n{text}', color=server['embed_color']).set_footer(text = 'В чат введите число с нужным вам предметом')
+            msg = await ctx.send(embed= emb)
 
 
 
 
-    # @commands.command(usage = '', description = '') #смээээээээээээээээээээээээээээээээээээрт
-    # async def use(self, ctx, iid:int):
-    #
-    #     user = funs.user_check(ctx.author, ctx.guild)
-    #     server = servers.find_one({"server": ctx.guild.id})
-    #
-    #     try:
-    #         await
+
 
     @commands.command(usage = '(id)', description = 'Информация о предмете.')
     async def item_info(self, ctx, id:int):

@@ -276,19 +276,20 @@ class profile(commands.Cog):
         inv = {}
 
         for i in user['inv']:
-            try:
-                try:
-                    if inv[i['name']] == i:
-                        inv.update({ i['name']: { 'it':i, 'count': inv[i['name']]['count']+1 } })
-                    if inv[i['name']] != i:
-                        try:
-                            inv.update({ f'{i["name"]} (особ.)': { 'it':i, 'count': inv[i['name']]['count']+1 } })
-                        except:
-                            inv.update({ f'{i["name"]} (особ.)': { 'it':i, 'count': 1 } })
-                except:
-                    inv.update({i['name']: { 'it':i, 'count': 1 } })
-            except:
-                inv.update({ i['name']: { 'it':i, 'count': 1 } })
+            print(i)
+            del i['iid']
+
+            if i in items:
+                if i['name'] in list(inv.keys()):
+                    inv.update({ i['name']: { 'it':i, 'count': inv[i['name']]['count']+1 } })
+                else:
+                    inv.update({ i['name']: { 'it':i, 'count': 1 } })
+
+            if i not in items:
+                if i['name'] in list(inv.keys()):
+                    inv.update({ f'{i["name"]} (особ.)': { 'it':i, 'count': inv[i['name']]['count']+1 } })
+                else:
+                    inv.update({ f'{i["name"]} (особ.)': { 'it':i, 'count': 1 } })
 
         # pprint.pprint(inv)
 
@@ -300,8 +301,8 @@ class profile(commands.Cog):
             emb_i = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь',color=0xf03e65)
 
 
-            text, text2, text3, text4, text5 = '', '', '', '', ''
-            num, num2, num3, num4, num5 = 0, 0, 0, 0, 0
+            text, text2, text3, text4, text5, text6 = '', '', '', '', '', ''
+            num, num2, num3, num4, num5, num6 = 0, 0, 0, 0, 0, 0
 
             for i in inv.keys():
                 item = inv[i]['it']
@@ -321,26 +322,31 @@ class profile(commands.Cog):
                 if item['type'] == 'weapon':
 
                     text += f"{qul} | {i}: {inv[i]['count']}\n"
-                    num += 1
+                    num += inv[i]['count']
 
                 elif item['type'] == 'point':
 
                     text2 += f"{qul} | {i}: {inv[i]['count']}\n"
-                    num2 += 1
+                    num2 += inv[i]['count']
 
                 elif item['type'] == 'eat':
 
                     text3 += f"{qul} | {i}: {inv[i]['count']}\n"
-                    num3 += 1
+                    num3 += inv[i]['count']
 
                 elif item['type'] == 'pet':
 
                     text4 += f"{qul} | {i}: {inv[i]['count']}\n"
-                    num4 += 1
+                    num4 += inv[i]['count']
+
+                elif item['type'] == 'role':
+
+                    text6 += f"{qul} | {i}: {inv[i]['count']}\n"
+                    num6 += inv[i]['count']
 
                 else:
                     text5 += f"{qul} | {i}: {inv[i]['count']}\n"
-                    num5 += 1
+                    num5 += inv[i]['count']
 
 
             if num > 0:
@@ -351,6 +357,8 @@ class profile(commands.Cog):
                 emb_i.add_field(name= f"Предметы | Еда: {num3}", value= text3)
             if num4 > 0:
                 emb_i.add_field(name= f"Предметы | Питомцы: {num4}", value= text4)
+            if num6 > 0:
+                emb_i.add_field(name= f"Предметы | Роли: {num5}", value= text6)
             if num5 > 0:
                 emb_i.add_field(name= f"Предметы | Остальное: {num5}", value= text5)
 

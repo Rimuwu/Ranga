@@ -103,7 +103,7 @@ def voice_time(guild, member, time, met):
                         uss['money'] += server['voice_reward'][str(r)]['money']
                         if server['voice_reward'][str(r)]['items'] != None:
                             for i in server['voice_reward'][str(r)]['items']:
-                                 uss['inv'].append(server['items'][str(i)])
+                                 uss['inv'].append(funs.creat_item(guild.id, i))
 
                         funs.user_update(member.id, guild, 'money', uss['money'] )
                         funs.user_update(member.id, guild, 'inv', uss['inv'] )
@@ -1641,7 +1641,7 @@ class MainCog(commands.Cog):
             if server['boost']['reward'] != []:
                 user = funs.user_check(booster, booster.guild)
                 for i in server['boost']['reward']:
-                    user['inv'].append(server['items'][str(i)])
+                    user['inv'].append(funs.creat_item(guild.id, i))
                 funs.user_update(booster.id, booster.guild, 'inv', user['inv'])
 
 
