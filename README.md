@@ -37,10 +37,14 @@
 > - cluster_token = https://account.mongodb.com/account/login (mongodb+srv://bot:password@cluster0.clustr_name.mongodb.net/<dbname>?retryWrites=true&w=majority)
 > - donatepay_token = https://donatepay.ru/page/api
 
+> - bs_channel = id канала для принятия\отклонения фонов (bs_app)
+> - error_channel = канал с логом ошибок
+> - start_channel = канал с логом запуска
+
 - запустите файл ai3.py
 
 ### Для связи
-- Для связи с разработчиком обратитесь на [дискор сервер](https://discord.gg/9X5pkqmB3X)
+- Для связи с разработчиком обратитесь на [дискорд сервер](https://discord.gg/9X5pkqmB3X)
 - Или в [личные сообщения](https://discord.com/channels/@me/323512096350535680)
 
 ###### Просьба соблюдать лицензию.
