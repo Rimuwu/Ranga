@@ -276,12 +276,13 @@ class profile(commands.Cog):
         inv = {}
 
         items = []
-        for i in user['inv'].items:
-            items.append(i)
+        for i in server['items'].keys():
+            items.append(server['items'][i])
 
-        for i in user['inv']:
-            print(i)
-            del i['iid']
+        for k in user['inv']:
+            i_d = k
+            i = k
+            # del i['iid']
 
             if i in items:
                 if i['name'] in list(inv.keys()):
@@ -290,10 +291,10 @@ class profile(commands.Cog):
                     inv.update({ i['name']: { 'it':i, 'count': 1 } })
 
             if i not in items:
-                if i['name'] in list(inv.keys()):
-                    inv.update({ f'{i["name"]} (особ.)': { 'it':i, 'count': inv[i['name']]['count']+1 } })
+                if f'{i["name"]} (#{i_d["iid"]})' in list(inv.keys()):
+                    inv.update({ f'{i["name"]} (#{i_d["iid"]})': { 'it':i, 'count': inv[i['name']]['count']+1 } })
                 else:
-                    inv.update({ f'{i["name"]} (особ.)': { 'it':i, 'count': 1 } })
+                    inv.update({ f'{i["name"]} (#{i_d["iid"]})': { 'it':i, 'count': 1 } })
 
         # pprint.pprint(inv)
 

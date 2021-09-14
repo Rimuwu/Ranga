@@ -298,11 +298,9 @@ class bs(commands.Cog):
         server = servers.find_one({"server": ctx.guild.id})
         user = funs.user_check(ctx.author, ctx.guild)
 
-        back = 1
         s = settings.find_one({"sid": 1})
-        bc = backs.find_one({"bid": back})
         url = link
-        progress_bar = bc["progress_bar"]
+        progress_bar = [238, 74, 84]
         expn = 5 * user['lvl']*user['lvl'] + 50 * user['lvl'] + 100
 
         name = member.name
