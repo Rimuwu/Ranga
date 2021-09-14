@@ -777,7 +777,7 @@ class economy(commands.Cog):
         user['money'] = user['money'] - product['price']
         if funs.user_update(ctx.author.id, ctx.guild, 'money', user['money']) == True:
             for i in product['items']:
-                user['inv'].append(funs.creat_item(guild.id, i))
+                user['inv'].append(funs.creat_item(ctx.guild.id, i))
 
             if funs.user_update(ctx.author.id, ctx.guild, 'inv', user['inv']) == True:
                 await ctx.send(f"Продукт был куплен!")
@@ -1028,7 +1028,7 @@ class economy(commands.Cog):
                     user['money'] = user['money'] - product['price']
                     if funs.user_update(ctx.author.id, ctx.guild, 'money', user['money']) == True:
                         for i in product['items']:
-                            user['inv'].append(funs.creat_item(guild.id, i))
+                            user['inv'].append(funs.creat_item(ctx.guild.id, i))
 
                         if funs.user_update(ctx.author.id, ctx.guild, 'inv', user['inv']) == True:
                             await ctx.send(f"Продукт был куплен!")

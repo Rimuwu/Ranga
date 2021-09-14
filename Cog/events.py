@@ -1641,7 +1641,7 @@ class MainCog(commands.Cog):
             if server['boost']['reward'] != []:
                 user = funs.user_check(booster, booster.guild)
                 for i in server['boost']['reward']:
-                    user['inv'].append(funs.creat_item(guild.id, i))
+                    user['inv'].append(funs.creat_item(booster.guild.id, i))
                 funs.user_update(booster.id, booster.guild, 'inv', user['inv'])
 
 
