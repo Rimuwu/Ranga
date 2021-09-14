@@ -275,6 +275,10 @@ class profile(commands.Cog):
 
         inv = {}
 
+        items = []
+        for i in user['inv'].items:
+            items.append(i)
+
         for i in user['inv']:
             print(i)
             del i['iid']

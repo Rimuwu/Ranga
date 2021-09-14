@@ -225,7 +225,7 @@ class functions:
 
         if r['items'] != None:
             for i in r['items']:
-                a[str(member.id)]['inv'].append(funs.creat_item(guild.id, i))
+                a[str(member.id)]['inv'].append(functions.creat_item(guild.id, i))
 
         pprint.pprint(a[str(member.id)])
 
@@ -1177,7 +1177,7 @@ async def lvl_up_image(message, user, server):
 
     try:
         for i in upitems[str(lvl+1)]['items']:
-            user['inv'].append(funs.creat_item(guild.id, i))
+            user['inv'].append(functions.creat_item(message.guild.id, i))
         functions.user_update(message.author.id, message.guild, "inv", user['inv'])
     except Exception:
         pass

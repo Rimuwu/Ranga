@@ -587,6 +587,26 @@ class rpg(commands.Cog):
                 else:
                     await ctx.send("Требовалось указать описание (макс 300 символов) или `none`, повторите настройку ещё раз!")
                     return
+            
+            try:
+                await message.edit(embed = embed(type, name, act, image, quality, description, f'Укажите описание предмета или `none`: (макс 2000 символов)'))
+                msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
+            except asyncio.TimeoutError:
+                await ctx.send("Время вышло.")
+                return
+            else:
+                try:
+                    await msg.delete()
+                except Exception:
+                    pass
+                action_m = str(msg.content)
+                if action_m == 'none':
+                    item.update({ 'action_m': None})
+                elif len(action_m) > 0 and len(action_m) < 2001:
+                    item.update({ 'action_m': msg.content})
+                else:
+                    await ctx.send("Требовалось указать сообщение (макс 2к символов) или `none`, повторите настройку ещё раз!")
+                    return
 
             await message.edit(embed = embed( type, name, act, image, quality, description, action_m))
 
@@ -757,6 +777,27 @@ class rpg(commands.Cog):
                     item.update({ 'description': msg.content})
                 else:
                     await ctx.send("Требовалось указать описание (макс 300 символов) или `none`, повторите настройку ещё раз!")
+                    return
+                
+
+            try:
+                await message.edit(embed = embed(type, name, act, image, quality, description, f'Укажите описание предмета или `none`: (макс 2000 символов)'))
+                msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
+            except asyncio.TimeoutError:
+                await ctx.send("Время вышло.")
+                return
+            else:
+                try:
+                    await msg.delete()
+                except Exception:
+                    pass
+                action_m = str(msg.content)
+                if action_m == 'none':
+                    item.update({ 'action_m': None})
+                elif len(action_m) > 0 and len(action_m) < 2001:
+                    item.update({ 'action_m': msg.content})
+                else:
+                    await ctx.send("Требовалось указать сообщение (макс 2к символов) или `none`, повторите настройку ещё раз!")
                     return
 
             await message.edit(embed = embed( type, name, act, style, image, quality, description, action_m))
