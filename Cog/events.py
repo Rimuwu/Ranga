@@ -127,7 +127,7 @@ class MainCog(commands.Cog):
     async def on_ready(self):
         global start_time
 
-        channel = self.bot.get_channel(884486606399094876)
+        channel = self.bot.get_channel(config.start_channel)
         ping = self.bot.latency
         ping_emoji = "🟩🔳🔳🔳🔳"
 
@@ -1175,7 +1175,7 @@ class MainCog(commands.Cog):
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         normal = False
-        channel = self.bot.get_channel(884486925933764649)
+        channel = self.bot.get_channel(config.error_channel)
 
         if isinstance(error, commands.CommandNotFound):
             normal = True

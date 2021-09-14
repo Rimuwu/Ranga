@@ -513,14 +513,13 @@ class bs(commands.Cog):
             if str(reaction.emoji) == '✅':
 
                 await msg.remove_reaction('✅', member)
-                channel = await self.bot.fetch_channel(884487110747357204)
+                channel = await self.bot.fetch_channel(config.bs_channel)
 
                 bs = s['bs']
-                # try:
-                bs_id = int(max(bs.keys())) + 2
-                # except:
-                #     bs_id = 1
-                print(bs_id)
+                try:
+                    bs_id = int(max(bs.keys())) + 2
+                except:
+                    bs_id = 1
 
                 embed = discord.Embed(title = f'ID {bs_id}', description = f'Автор: {ctx.author.id}\nУкзанный формат: {type}\nURL: {link}')
                 embed.set_image(url=link)
@@ -574,7 +573,7 @@ class bs(commands.Cog):
             await ctx.send("Фон уже был принят\отклонён!")
             return
 
-        channel = self.bot.get_channel(884487110747357204)
+        channel = self.bot.get_channel(config.bs_channel)
         mid = await channel.fetch_message(bs['message'])
         await mid.clear_reactions()
 
@@ -636,7 +635,7 @@ class bs(commands.Cog):
         if type == None:
             type = bs['type']
 
-        channel = self.bot.get_channel(884487110747357204)
+        channel = self.bot.get_channel(config.bs_channel)
         mid = await channel.fetch_message(bs['message'])
         await mid.clear_reactions()
 

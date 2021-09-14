@@ -82,7 +82,7 @@ class rpg(commands.Cog):
 
         if type == 'eat':
 
-            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано'):
+            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано'):
                 nonlocal server
 
                 emb = discord.Embed(title = "Создание предмета", description = "", color=server['embed_color'])
@@ -93,6 +93,8 @@ class rpg(commands.Cog):
                     emb.set_thumbnail(url = image)
                 emb.add_field(name = "Качество предмета", value = f"{quality}")
                 emb.add_field(name = "Описание предмета", value = f"{description}")
+                emb.add_field(name = "Сообщение при активации", value = f"{action_m}")
+
                 emb.set_footer(text = 'Отправляйте сообщения в чат без использованеи команд, на одно указание у вас 60 сек.')
                 return emb
 
@@ -219,13 +221,33 @@ class rpg(commands.Cog):
                 else:
                     await ctx.send("Требовалось указать описание (макс 300 символов) или `none`, повторите настройку ещё раз!")
                     return
-                    
 
-            await message.edit(embed = embed( type, name, act, image, quality, description))
+            try:
+                await message.edit(embed = embed(type, name, act, image, quality, description, f'Укажите описание предмета или `none`: (макс 2000 символов)'))
+                msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
+            except asyncio.TimeoutError:
+                await ctx.send("Время вышло.")
+                return
+            else:
+                try:
+                    await msg.delete()
+                except Exception:
+                    pass
+                action_m = str(msg.content)
+                if action_m == 'none':
+                    item.update({ 'action_m': None})
+                elif len(action_m) > 0 and len(action_m) < 2001:
+                    item.update({ 'action_m': msg.content})
+                else:
+                    await ctx.send("Требовалось указать сообщение (макс 2к символов) или `none`, повторите настройку ещё раз!")
+                    return
+
+
+            await message.edit(embed = embed( type, name, act, image, quality, description, action_m))
 
         elif type == 'point':
 
-            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', style = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано'):
+            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', style = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано'):
                 nonlocal server
 
                 emb = discord.Embed(title = "Создание предмета", description = "", color=server['embed_color'])
@@ -237,6 +259,7 @@ class rpg(commands.Cog):
                     emb.set_thumbnail(url = image)
                 emb.add_field(name = "Качество предмета", value = f"{quality}")
                 emb.add_field(name = "Описание предмета", value = f"{description}")
+                emb.add_field(name = "Сообщение при активации", value = f"{action_m}")
                 emb.set_footer(text = 'Отправляйте сообщения в чат без использованеи команд, на одно указание у вас 60 сек.')
                 return emb
 
@@ -391,11 +414,31 @@ class rpg(commands.Cog):
                     await ctx.send("Требовалось указать описание (макс 300 символов) или `none`, повторите настройку ещё раз!")
                     return
 
-            await message.edit(embed = embed( type, name, act, style, image, quality, description))
+            try:
+                await message.edit(embed = embed(type, name, act, image, quality, description, f'Укажите описание предмета или `none`: (макс 2000 символов)'))
+                msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
+            except asyncio.TimeoutError:
+                await ctx.send("Время вышло.")
+                return
+            else:
+                try:
+                    await msg.delete()
+                except Exception:
+                    pass
+                action_m = str(msg.content)
+                if action_m == 'none':
+                    item.update({ 'action_m': None})
+                elif len(action_m) > 0 and len(action_m) < 2001:
+                    item.update({ 'action_m': msg.content})
+                else:
+                    await ctx.send("Требовалось указать сообщение (макс 2к символов) или `none`, повторите настройку ещё раз!")
+                    return
+
+            await message.edit(embed = embed( type, name, act, style, image, quality, description, action_m))
 
         elif type == 'case':
 
-            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано'):
+            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано'):
                 nonlocal server
 
                 emb = discord.Embed(title = "Создание предмета", description = "", color=server['embed_color'])
@@ -406,6 +449,7 @@ class rpg(commands.Cog):
                     emb.set_thumbnail(url = image)
                 emb.add_field(name = "Качество предмета", value = f"{quality}")
                 emb.add_field(name = "Описание предмета", value = f"{description}")
+                emb.add_field(name = "Сообщение при активации", value = f"{action_m}")
                 emb.set_footer(text = 'Отправляйте сообщения в чат без использованеи команд, на одно указание у вас 60 сек.')
                 return emb
 
@@ -543,11 +587,11 @@ class rpg(commands.Cog):
                     await ctx.send("Требовалось указать описание (макс 300 символов) или `none`, повторите настройку ещё раз!")
                     return
 
-            await message.edit(embed = embed( type, name, act, image, quality, description))
+            await message.edit(embed = embed( type, name, act, image, quality, description, action_m))
 
         elif type == 'armor':
 
-            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', style = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано'):
+            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', style = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано'):
                 nonlocal server
 
                 emb = discord.Embed(title = "Создание предмета", description = "", color=server['embed_color'])
@@ -559,6 +603,7 @@ class rpg(commands.Cog):
                     emb.set_thumbnail(url = image)
                 emb.add_field(name = "Качество предмета", value = f"{quality}")
                 emb.add_field(name = "Описание предмета", value = f"{description}")
+                emb.add_field(name = "Сообщение при активации", value = f"{action_m}")
                 emb.set_footer(text = 'Отправляйте сообщения в чат без использованеи команд, на одно указание у вас 60 сек.')
                 return emb
 
@@ -713,12 +758,12 @@ class rpg(commands.Cog):
                     await ctx.send("Требовалось указать описание (макс 300 символов) или `none`, повторите настройку ещё раз!")
                     return
 
-            await message.edit(embed = embed( type, name, act, style, image, quality, description))
+            await message.edit(embed = embed( type, name, act, style, image, quality, description, action_m))
 
 
         elif type == 'weapon':
 
-            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', style = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано'):
+            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', style = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано'):
                 nonlocal server
 
                 emb = discord.Embed(title = "Создание предмета", description = "", color=server['embed_color'])
@@ -730,6 +775,7 @@ class rpg(commands.Cog):
                     emb.set_thumbnail(url = image)
                 emb.add_field(name = "Качество предмета", value = f"{quality}")
                 emb.add_field(name = "Описание предмета", value = f"{description}")
+                emb.add_field(name = "Сообщение при активации", value = f"{action_m}")
                 emb.set_footer(text = 'Отправляйте сообщения в чат без использованеи команд, на одно указание у вас 60 сек.')
                 return emb
 
@@ -884,11 +930,31 @@ class rpg(commands.Cog):
                     await ctx.send("Требовалось указать описание (макс 300 символов) или `none`, повторите настройку ещё раз!")
                     return
 
-            await message.edit(embed = embed( type, name, act, style, image, quality, description))
+            try:
+                await message.edit(embed = embed(type, name, act, image, quality, description, f'Укажите описание предмета или `none`: (макс 2000 символов)'))
+                msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
+            except asyncio.TimeoutError:
+                await ctx.send("Время вышло.")
+                return
+            else:
+                try:
+                    await msg.delete()
+                except Exception:
+                    pass
+                action_m = str(msg.content)
+                if action_m == 'none':
+                    item.update({ 'action_m': None})
+                elif len(action_m) > 0 and len(action_m) < 2001:
+                    item.update({ 'action_m': msg.content})
+                else:
+                    await ctx.send("Требовалось указать сообщение (макс 2к символов) или `none`, повторите настройку ещё раз!")
+                    return
+
+            await message.edit(embed = embed( type, name, act, style, image, quality, description, action_m))
 
         elif type == 'pet':
 
-            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', style = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано'):
+            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', style = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано'):
 
                 emb = discord.Embed(title = "Создание предмета", description = "", color=server['embed_color'])
                 emb.add_field(name = "Тип предмета", value = f"{type}")
@@ -899,6 +965,7 @@ class rpg(commands.Cog):
                     emb.set_thumbnail(url = image)
                 emb.add_field(name = "Качество предмета", value = f"{quality}")
                 emb.add_field(name = "Описание предмета", value = f"{description}")
+                emb.add_field(name = "Сообщение при активации", value = f"{action_m}")
                 emb.set_footer(text = 'Отправляйте сообщения в чат без использованеи команд, на одно указание у вас 60 сек.')
                 return emb
 
@@ -1178,7 +1245,7 @@ class rpg(commands.Cog):
 
         elif type == 'recipe':
 
-            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', ndi = 'Не указано', create = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано'):
+            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', ndi = 'Не указано', create = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано'):
                 nonlocal server
 
                 emb = discord.Embed(title = "Создание предмета", description = "", color=server['embed_color'])
@@ -1191,6 +1258,7 @@ class rpg(commands.Cog):
                     emb.set_thumbnail(url = image)
                 emb.add_field(name = "Качество предмета", value = f"{quality}")
                 emb.add_field(name = "Описание предмета", value = f"{description}")
+                emb.add_field(name = "Сообщение при активации", value = f"{action_m}")
                 emb.set_footer(text = 'Отправляйте сообщения в чат без использованеи команд, на одно указание у вас 60 сек.')
                 return emb
 
@@ -1421,11 +1489,31 @@ class rpg(commands.Cog):
                     await ctx.send("Требовалось указать описание (макс 300 символов) или `none`, повторите настройку ещё раз!")
                     return
 
-            await message.edit(embed = embed( type, name, act, ndi, create, image, quality, description))
+            try:
+                await message.edit(embed = embed(type, name, act, image, quality, description, f'Укажите описание предмета или `none`: (макс 2000 символов)'))
+                msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
+            except asyncio.TimeoutError:
+                await ctx.send("Время вышло.")
+                return
+            else:
+                try:
+                    await msg.delete()
+                except Exception:
+                    pass
+                action_m = str(msg.content)
+                if action_m == 'none':
+                    item.update({ 'action_m': None})
+                elif len(action_m) > 0 and len(action_m) < 2001:
+                    item.update({ 'action_m': msg.content})
+                else:
+                    await ctx.send("Требовалось указать сообщение (макс 2к символов) или `none`, повторите настройку ещё раз!")
+                    return
+
+            await message.edit(embed = embed( type, name, act, ndi, create, image, quality, description, action_m))
 
         elif type == 'role':
 
-            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', style = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано'):
+            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', style = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано'):
                 nonlocal server
 
                 emb = discord.Embed(title = "Создание предмета", description = "", color=server['embed_color'])
@@ -1440,6 +1528,7 @@ class rpg(commands.Cog):
                     emb.set_thumbnail(url = image)
                 emb.add_field(name = "Качество предмета", value = f"{quality}")
                 emb.add_field(name = "Описание предмета", value = f"{description}")
+                emb.add_field(name = "Сообщение при активации", value = f"{action_m}")
                 emb.set_footer(text = 'Отправляйте сообщения в чат без использованеи команд, на одно указание у вас 60 сек.')
                 return emb
 
@@ -1600,7 +1689,27 @@ class rpg(commands.Cog):
                     await ctx.send("Требовалось указать описание (макс 300 символов) или `none`, повторите настройку ещё раз!")
                     return
 
-            await message.edit(embed = embed( type, name, act, style, image, quality, description))
+            try:
+                await message.edit(embed = embed(type, name, act, image, quality, description, f'Укажите описание предмета или `none`: (макс 2000 символов)'))
+                msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
+            except asyncio.TimeoutError:
+                await ctx.send("Время вышло.")
+                return
+            else:
+                try:
+                    await msg.delete()
+                except Exception:
+                    pass
+                action_m = str(msg.content)
+                if action_m == 'none':
+                    item.update({ 'action_m': None})
+                elif len(action_m) > 0 and len(action_m) < 2001:
+                    item.update({ 'action_m': msg.content})
+                else:
+                    await ctx.send("Требовалось указать сообщение (макс 2к символов) или `none`, повторите настройку ещё раз!")
+                    return
+
+            await message.edit(embed = embed( type, name, act, style, image, quality, description, action_m))
 
         try:
             l = server['items']

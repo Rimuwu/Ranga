@@ -97,29 +97,6 @@ class mod(commands.Cog):
         message = await ctx.send("Пожалуйста, подождите. . .")
         await message.edit(content = f"Понг! {ping_emoji} `{ping * 1000:.0f}ms` :ping_pong:")
 
-    @commands.command(aliases = ['complaint', "репорт", "жалоба"], usage = '(message)', description = 'Отправить жалобу на баг бота.', help = 'Бот')
-    async def report(self,ctx, *, complaint):
-        global settings
-        s = settings.find_one({"sid": 1})
-
-        if ctx.author.id in s['black list']:
-            return
-
-        await ctx.channel.purge(limit = 1)
-        channel = self.bot.get_channel(792710440693137438)
-        link = await ctx.channel.create_invite(max_age = 0)
-        server = servers.find_one({"server": ctx.guild.id})
-        emb=discord.Embed(title="Баг/жалоба",
-            colour=server['embed_color']).add_field(name='Данные',
-            value=f"Имя: {ctx.author.name}\n"
-            f"ID: {ctx.author.id}\n"
-            f"Имя сервера: {ctx.guild.name}"
-            ).add_field(name='Приглашение на сервер',
-            value= f"[Инвайт]({link})").add_field(name="Проблемма",
-            value=f"{complaint}", inline=False)
-
-        await channel.send(embed=emb)
-        await ctx.send("Ваша жалоба отправлена!")
 
     @commands.command(usage = '(@member) (time) [reason]', description = 'Замьютить пользователя на сервере.', help = 'Мьюты', aliases = ['мьют'])
     async def mute(self, ctx, member: discord.Member = None, timem = None, *, reason = None):
