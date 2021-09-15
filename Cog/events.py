@@ -208,9 +208,9 @@ class MainCog(commands.Cog):
                 if serv != None:
                     # await otl.send(f'Сервер {serv} найден')
                     try:
-                        if serv.premium_subscription_count < 15:
+                        if serv.premium_subscription_count < 7:
                             servers.update_one({'server':g['server']},{'$set':{'banner_status': False}})
-                        if serv.premium_subscription_count >= 15:
+                        if serv.premium_subscription_count >= 7:
                             try:
                                 offset = timezone(timedelta(hours=g['banner']['time']))
                                 hour = int(str(datetime.now(offset)).split()[1][:-19])

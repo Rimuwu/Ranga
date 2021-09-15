@@ -2386,7 +2386,7 @@ class settings(commands.Cog):
         else:
             blist = ['time', 'top-lvl', 'stat', 'voice-stat', 'common', 'stat-nb', 'voice-stat-nb']
 
-        if ctx.guild.premium_subscription_count < 15:
+        if ctx.guild.premium_subscription_count < 7:
             await ctx.send("У вас не достаточно бустов сервера!")
             return
 
@@ -2715,6 +2715,24 @@ class settings(commands.Cog):
 
         else:
             await ctx.send(f"{ctx.prefix}set_flud_role (type) (role)\ntype - укажите add или remove\nrole - укажите роль\nПример: {ctx.prefix}set_flud_role add @флудер")
+
+    @commands.command(usage = '(#channels)', description = 'Добавить каналы на которые не реагирует флуд-защита', help = 'Настройка авто-модерации')
+    async def flud_nr_channels(self, ctx, *channel:discord.TextChannel):
+        global servers
+        if funs.roles_check(ctx.author, ctx.guild.id) == False:
+            await ctx.send("У вас недостаточно прав для использования этой команды!")
+            return
+
+        server = servers.find_one({'server':ctx.guild.id})
+        wl = []
+        for i in channel:
+            wl.append(i.id)
+
+        server['mod']['flud_ch_nor'].update({'channels': wl})
+        servers.update_one({'server':ctx.guild.id},{'$set':{'mod': server['mod']}})
+        await ctx.send("Каналы были настроены!")
+
+
 
     @commands.command(usage = '-', description = 'Информация о защите от плохих слов\сообщений', help = 'Настройка авто-модерации')
     async def bad_words_info(self, ctx):
@@ -3483,6 +3501,8 @@ class settings(commands.Cog):
 
         servers.update_one({'server':ctx.guild.id},{'$set':{'economy': a}})
         await ctx.send(f"Стартовый капитал установлен!")
+
+
 
 
 

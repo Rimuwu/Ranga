@@ -29,7 +29,7 @@ class profile(commands.Cog):
 
 
     @commands.command(usage = '(@member) [+\-]', description = 'Повысить\понизить репутацию пользователя.')
-    async def rep(self,ctx, member: discord.Member=None, arg=None):
+    async def rep(self,ctx, member: discord.Member, arg=None):
 
         user = funs.user_check(member, member.guild)
         server = servers.find_one({"server": ctx.guild.id})

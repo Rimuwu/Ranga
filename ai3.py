@@ -480,6 +480,7 @@ class functions:
                     'wlist_members': [], #пользователи на которых не реагирует автомод
                     'log_channel': {}, #канал логирования
                     'delete_command': None, #настройка удаления команды после использования
+                    'flud_ch_nor': [],
 
                    },
 
@@ -525,7 +526,6 @@ class functions:
 
             'races': {},
             'items': {},
-            'premium': False,
 
             'embed_color': 0xf03e65,
             'banner_status': False,
@@ -1587,11 +1587,12 @@ async def on_message(message):
                     if list(set(server['mod']['wlist_roles']) & set(list_roles)) == []:
 
                         if server['mod']['flud_shield'] != {}:
-                            if await mod_flud(message, server) == True:
-                                try:
-                                    await punishment_mod(message, server, server['mod']['flud_shield']['punishment'], 'Auto flud warn', 'flud_shield')
-                                except Exception:
-                                    pass
+                            if message.channel.id not in server['mod']['flud_ch_nor']:
+                                if await mod_flud(message, server) == True:
+                                    try:
+                                        await punishment_mod(message, server, server['mod']['flud_shield']['punishment'], 'Auto flud warn', 'flud_shield')
+                                    except Exception:
+                                        pass
 
                         if server['mod']['bad_words'] != {}:
                             if mod_bad_words(message, server) == True:
