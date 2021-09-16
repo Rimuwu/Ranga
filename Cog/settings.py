@@ -3424,7 +3424,7 @@ class settings(commands.Cog):
             status = False
 
         if status == True:
-            servers.update_one({'server':ctx.guild.id},{'$set':{'embed_color': color}})
+            servers.update_one({'server':ctx.guild.id},{'$set':{'embed_color': int(color, 16)}})
             await ctx.send("Цвет установлен!")
 
 
