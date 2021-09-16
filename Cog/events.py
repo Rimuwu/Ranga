@@ -1,20 +1,12 @@
 import nextcord as discord
 from nextcord.ext import tasks, commands
-import requests
-from PIL import Image, ImageFont, ImageDraw, ImageOps, ImageSequence, ImageFilter
-import io
-from io import BytesIO
 import sys
 import random
 from random import choice
 import asyncio
 import time
-import os
 import pymongo
-import math
-from datetime import datetime, timedelta, timezone
-import aiohttp
-import pprint
+
 
 sys.path.append("..")
 from ai3 import functions as funs
@@ -24,2401 +16,1609 @@ client = funs.mongo_c()
 db = client.bot
 backs = db.bs
 servers = db.servers
-frames = db.frames
-settings = db.settings
-
-voice_dict = {}
-start_time = time.time()
-
-stat_list = [
-               "Играю с твоей душой...",
-               'Я волк, но в душе я дракон, рррррр!',
-               "Пинг 52к + баги == Ранга",
-               "Моя любимая рыбка - карась",
-               'Мошенница - Акудама SSS ранга, Награда: 100.000.000$',
-               'Чем сильнее я становлюсь, тем сильнее мои враги...',
-               'IT | Демон | 1.?.9',
-            ]
-
-async def voice_check(guild):
-    server = servers.find_one({"server": guild.id})
-    v = server['voice']
-    if v == {}: return
-    for i in list(v):
-        try:
-            try:
-                chan = guild.get_channel(int(i))
-            except Exception:
-                v['private_voices'].pop(i)
-                servers.update_one({'server': guild.id},{'$set': {'voice': v}})
-
-            if chan == None:
-                v['private_voices'].pop(i)
-                servers.update_one({'server': guild.id},{'$set': {'voice': v}})
-
-            elif len(chan.members) < 1:
-                try:
-                    await chan.delete()
-                except Exception:
-                    pass
-                v['private_voices'].pop(i)
-                servers.update_one({'server': guild.id},{'$set': {'voice': v}})
-        except Exception:
-            pass
-
-def voice_time(guild, member, time, met):
-    global voice_dict
-    global servers
-    server = servers.find_one({"server": guild.id})
-
-    if met == 'add':
-        try:
-            voice_dict[str(guild.id)].update({ str(member.id) : time })
-        except Exception:
-            voice_dict.update({ str(guild.id) : { str(member.id) : time }})
-
-    if met == 'delete':
-
-        try:
-            tt = time - voice_dict[str(guild.id)][str(member.id)]
-            del voice_dict[str(guild.id)][str(member.id)]
-            uss = funs.user_check(member, guild)
-            funs.user_update(member.id, guild, 'voice_time', int(uss['voice_time'] + tt))
 
 
-            expn = 3600 * uss['voice_lvl']
-            expi = int(tt)
-            expi = uss['voice_xp'] + expi
-
-            funs.user_update(member.id, guild, 'voice_xp', expi )
-
-            if expn <= expi:
-                funs.user_update(member.id, guild, 'voice_xp', 0 )
-                funs.user_update(member.id, guild, 'voice_lvl', uss['voice_lvl'] + 1 )
-
-                if server['voice_reward'] != {}:
-                    if str(uss['voice_lvl'] + 1) in list(server['voice_reward'].keys()):
-
-                        r = str(uss['voice_lvl'] + 1)
-                        uss['money'] += server['voice_reward'][str(r)]['money']
-                        if server['voice_reward'][str(r)]['items'] != None:
-                            for i in server['voice_reward'][str(r)]['items']:
-                                 uss['inv'].append(funs.creat_item(guild.id, i))
-
-                        funs.user_update(member.id, guild, 'money', uss['money'] )
-                        funs.user_update(member.id, guild, 'inv', uss['inv'] )
-
-
-        except Exception:
-            pass
-
-class url_button(discord.ui.View):
-    def __init__(self, url:str, emoji:str, label:str):
-        super().__init__()
-        self.add_item(discord.ui.Button(emoji = emoji, label=label, url=url))
-
-class MainCog(commands.Cog):
+class economy(commands.Cog):
     def __init__(self, bot):
-        global servers
         self.bot = bot
 
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        global start_time
-
-        channel = self.bot.get_channel(config.start_channel)
-        ping = self.bot.latency
-        ping_emoji = "🟩🔳🔳🔳🔳"
-
-        ping_list = [
-            {"ping": 0.100000000000000, "emoji": "🟧🟩🔳🔳🔳"},
-            {"ping": 0.150000000000000, "emoji": "🟥🟧🟩🔳🔳"},
-            {"ping": 0.200000000000000, "emoji": "🟥🟥🟧🟩🔳"},
-            {"ping": 0.250000000000000, "emoji": "🟥🟥🟥🟧🟩"},
-            {"ping": 0.300000000000000, "emoji": "🟥🟥🟥🟥🟧"},
-            {"ping": 0.350000000000000, "emoji": "🟥🟥🟥🟥🟥"}]
-
-        for ping_one in ping_list:
-            if ping > ping_one["ping"]:
-                ping_emoji = ping_one["emoji"]
-
-        time2 = time.time()
-
-        await channel.send(f"Бот {self.bot.user} онлайн - Команд: {len(self.bot.commands)}\n{ping_emoji} `{ping * 1000:.0f}ms`\nВремя на запуск: {funs.time_end(time2 - start_time)}")
-        print(f"Бот {self.bot.user} онлайн - Команд: {len(self.bot.commands)}\n{ping_emoji} {ping * 1000:.0f}ms\nВремя на запуск: {funs.time_end(time2 - start_time)}")
-
-
-        self.change_stats.start()
-        self.manage_check.start()
-
-    @tasks.loop(seconds = 15)
-    async def change_stats(self):
-        await self.bot.change_presence( status = discord.Status.online, activity = discord.Game(name = random.choice(stat_list)))
-
-    @tasks.loop(seconds=1)
-    async def manage_check(self):
-        if time.strftime('%S') == '00':
-
-            m_t = time.time()
-            guilds = servers.find({ "mute_members": { '$ne':{} } })
-            for server in guilds:
-                for member in server['mute_members']:
-                    if int(time.time()) >= server['mute_members'][member]:
-                        a = server['mute_members'].copy()
-                        a.pop(member)
-                        servers.update_one({'server':server['server']},{'$set': {'mute_members':a}})
-                        try:
-                            await self.bot.get_guild(server['server']).get_member(int(member)).remove_roles(self.bot.get_guild(server['server']).get_role(int(server['mod']['muterole'])))
-                        except Exception:
-                            pass
-
-            m_t = int(time.time() - m_t)
-
-            i_t = time.time()
-            guilds = servers.find({ "roles_income": {"$exists": True} })
-            for server in guilds:
-                guild = self.bot.get_guild(server['server'])
-                if guild != None:
-                    for r_i in server['roles_income']:
-                        r = server['roles_income'][r_i]
-                        if int(time.time()) >= int(r['time']):
-                            role = guild.get_role(int(r_i))
-                            for member in role.members:
-                                user = funs.user_check(member, guild)
-                                if user != False:
-                                    funs.user_update(member.id, guild, 'money', int(user['money'] + r['money']))
-
-                            server['roles_income'][r_i].update({'time': time.time() + r['cooldown'] })
-                            servers.update_one({'server':server['server']},{'$set': {'roles_income': server['roles_income'] }})
-
-            i_t = int(time.time() - i_t)
-
-            b_t = time.time()
-            guilds = servers.find({ "banner_status": True })
-
-            def trans_paste(fg_img,bg_img,alpha=10,box=(0,0)):
-                fg_img_trans = Image.new("RGBA",fg_img.size)
-                fg_img_trans = Image.blend(fg_img_trans,fg_img,alpha)
-                bg_img.paste(fg_img_trans,box,fg_img_trans)
-                return bg_img
-
-            for g in guilds:
-                serv = self.bot.get_guild(g['server'])
-                if serv != None:
-                    # await otl.send(f'Сервер {serv} найден')
-                    try:
-                        if serv.premium_subscription_count < 7:
-                            servers.update_one({'server':g['server']},{'$set':{'banner_status': False}})
-                        if serv.premium_subscription_count >= 7:
-                            try:
-                                offset = timezone(timedelta(hours=g['banner']['time']))
-                                hour = int(str(datetime.now(offset)).split()[1][:-19])
-                                ttime = str(datetime.now(offset)).split()[1][:-16]
-                            except Exception:
-                                offset = datetime.timezone(datetime.timedelta(hours=g['banner']['time']))
-                                hour = int(str(datetime.datetime.now(offset)).split()[1][:-19])
-                                ttime = str(datetime.datetime.now(offset)).split()[1][:-16]
-                            # await otl.send(f'Сервер {serv} - достаточно бустов')
-
-
-                            if g['banner']['met'] == 'time':
-                                # await otl.send(f'Сервер {serv} - time')
-
-                                #gps
-
-                                if g['banner']['gps'] == 'center':
-                                    xgps = -300
-                                    ygps = -200
-
-                                if g['banner']['gps'] == 'center-top':
-                                    xgps = -300
-                                    ygps = -400
-
-                                if g['banner']['gps'] == 'center-bottom':
-                                    xgps = -300
-                                    ygps = 0
-
-                                if g['banner']['gps'] == 'lower-left-corner':
-                                    xgps = -600
-                                    ygps = 0
-
-                                if g['banner']['gps'] == 'upper-left-corner':
-                                    xgps = -600
-                                    ygps = -400
-
-                                if g['banner']['gps'] == 'bottom-right-corner':
-                                    xgps = 0
-                                    ygps = 0
-
-                                if g['banner']['gps'] == 'upper-right-corner':
-                                    xgps = 0
-                                    ygps = -400
-
-                                # await otl.send(f'Сервер {serv} - gps установлен')
-
-                                pl = Image.new('RGBA', (960, 540), (38, 32, 48))
-                                response = requests.get(g['banner']['url'], stream = True)
-                                response = Image.open(io.BytesIO(response.content))
-                                response = response.convert("RGBA")
-                                img = response.resize((960, 540), Image.ANTIALIAS) # улучшение качества
-                                img.save(f'{serv.id}.png', format = "PNG")
-                                img = Image.open(f'{serv.id}.png')
-                                img = response.convert("RGBA")
-                                try:
-                                    os.remove(f'{serv.id}.png')
-                                except Exception:
-                                    pass
-                                # await otl.send(f'Сервер {serv} - манипуляция с изображением')
-
-                                idraw = ImageDraw.Draw(img)
-                                headline = ImageFont.truetype("fonts/ChangaOne-Regular.ttf", size = 70)
-                                idraw.text((690 + xgps, 430 + ygps), f"{ttime}", font = headline)
-                                img = Image.composite(img, pl, img)
-                                # await otl.send(f'Сервер {serv} - шрифт установлен')
-
-
-                                if hour >= 0 and hour < 3 or hour >= 12 and hour < 15:
-                                    text_image = Image.open(f"elements/time 12 {g['banner']['color']}.png")
-
-                                if hour >= 3 and hour < 6 or hour >= 15 and hour < 18:
-                                    text_image = Image.open(f"elements/time 3 {g['banner']['color']}.png")
-
-                                if hour >= 6 and hour < 9 or hour >= 18 and hour < 21:
-                                    text_image = Image.open(f"elements/time 6 {g['banner']['color']}.png")
-
-                                if hour >= 9 and hour < 12 or hour >= 21 and hour < 23:
-                                    text_image = Image.open(f"elements/time 9 {g['banner']['color']}.png")
-
-                                img = trans_paste(text_image, img, 1.0, (xgps, ygps))
-
-                                # await otl.send(f'Сервер {serv} - элемент найден')
-
-                                try:
-                                    img.save(f'banner {serv.id} id.png')
-                                    with open(f'banner {serv.id} id.png', 'rb') as f:
-                                        icon = f.read()
-                                    await serv.edit(banner = icon)
-                                    os.remove(f'banner {serv.id} id.png')
-                                except Exception:
-                                    pass
-
-                                # await otl.send(f'Сервер {serv} - установлен')
-
-                            if g['banner']['met'] == 'top-lvl':
-
-                                #gps
-                                if g['banner']['gps'] == 'center':
-                                    xgps = -80
-                                    ygps = -100
-
-                                if g['banner']['gps'] == 'center-top':
-                                    xgps = -80
-                                    ygps = -230
-
-                                if g['banner']['gps'] == 'center-bottom':
-                                    xgps = -80
-                                    ygps = 0
-
-                                if g['banner']['gps'] == 'lower-left-corner':
-                                    xgps = 100
-                                    ygps = 0
-
-                                if g['banner']['gps'] == 'upper-left-corner':
-                                    xgps = -250
-                                    ygps = 0
-
-                                if g['banner']['gps'] == 'bottom-right-corner':
-                                    xgps = 80
-                                    ygps = 0
-
-                                if g['banner']['gps'] == 'upper-right-corner':
-                                    xgps = 80
-                                    ygps = -230
-
-                                top = list(sorted(g['users'].items(),key=lambda x: x[1]['lvl'],reverse=True))
-                                top_user = list(top[0])
-                                us = serv.get_member(int(top_user[0]))
-
-                                def prepare_mask(size, antialias = 2):
-                                    mask = Image.new('L', (size[0] * antialias, size[1] * antialias), 0)
-                                    ImageDraw.Draw(mask).ellipse((0, 0) + mask.size, fill=255)
-                                    mask = mask.filter(ImageFilter.GaussianBlur(2.5))
-                                    return mask.resize(size, Image.ANTIALIAS)
-
-                                def crop(im, s):
-                                    w, h = im.size
-                                    k = w / s[0] - h / s[1]
-
-                                    if k > 0:
-                                        im = im.crop(((w - h) / 2, 0, (w + h) / 2, h))
-                                    elif k < 0:
-                                        im = im.crop((0, (h - w) / 2, w, (h + w) / 2))
-
-                                    return im.resize(s, Image.ANTIALIAS)
-
-                                pl = Image.new('RGBA', (960, 540), (38, 32, 48))
-                                response = requests.get(g['banner']['url'], stream = True)
-                                response = Image.open(io.BytesIO(response.content))
-                                img = response.convert("RGBA")
-                                img = response.resize((960, 540), Image.ANTIALIAS) # улучшение качества
-
-                                img.save(f'{serv.id}.png', format = "PNG")
-                                img = Image.open(f'{serv.id}.png')
-                                img = response.convert("RGBA")
-                                try:
-                                    os.remove(f'{serv.id}.png')
-                                except Exception:
-                                    pass
-
-                                text_image = Image.open(f"elements/top-lvl-element-{g['banner']['color']}.png")
-                                img = trans_paste(text_image, img, 1.0, (xgps, ygps))
-
-                                idraw = ImageDraw.Draw(img)
-                                f2 = ImageFont.truetype("fonts/20421.ttf", size = 42)
-                                f1 = ImageFont.truetype("fonts/BBCT.ttf", size = 32)
-
-                                name = us.name
-                                if len(name) <= 14:
-                                    pass
-                                else:
-                                    n = len(name) - 14
-                                    name = name[:-n] + "..."
-
-                                idraw.text((420 + xgps, 380 + ygps), f"{name}", font = f2)
-                                idraw.text((720 + xgps, 285 + ygps), f"{ttime}", font = f1)
-
-                                im = img
-                                try:
-                                    url = str(us.avatar.url)
-                                    response1 = requests.get(url, stream = True)
-                                    response1 = Image.open(io.BytesIO(response1.content))
-
-                                except Exception:
-                                    byteImgIO = io.BytesIO()
-                                    url = str(us.avatar.url)[:-9]
-                                    response = requests.get(url, stream = True)
-                                    response.raw.decode_content = True
-                                    response1 = Image.open(response.raw)
-
-                                response1 = response1.convert("RGBA")
-                                response1 = response1.resize((50, 50), Image.ANTIALIAS)
-                                size = (100, 100)
-
-                                im = response1
-                                im = crop(im, size)
-                                im.putalpha(prepare_mask(size, 4))
-
-                                bg_img = img
-                                fg_img = im
-                                img = trans_paste(fg_img, bg_img, 1.0, (300 + xgps, 350+ ygps, 400 + xgps, 450+ ygps))
-
-                                try:
-                                    img.save(f'banner {serv.id} id.png')
-                                    with open(f'banner {serv.id} id.png', 'rb') as f:
-                                        icon = f.read()
-                                    await serv.edit(banner = icon)
-                                    os.remove(f'banner {serv.id} id.png')
-                                except Exception:
-                                    pass
-
-                            if g['banner']['met'] == 'stat' or g['banner']['met'] == 'stat-nb':
-
-                                #gps
-                                if g['banner']['gps'] == 'center':
-                                    xgps = 0
-                                    ygps = -100
-
-                                if g['banner']['gps'] == 'center-top':
-                                    xgps = 0
-                                    ygps = -230
-
-                                if g['banner']['gps'] == 'center-bottom':
-                                    xgps = 0
-                                    ygps = 0
-
-                                if g['banner']['gps'] == 'lower-left-corner':
-                                    xgps = -250
-                                    ygps = 0
-
-                                if g['banner']['gps'] == 'upper-left-corner':
-                                    xgps = -250
-                                    ygps = -230
-
-                                if g['banner']['gps'] == 'bottom-right-corner':
-                                    xgps = 250
-                                    ygps = 0
-
-                                if g['banner']['gps'] == 'upper-right-corner':
-                                    xgps = 250
-                                    ygps = -230
-
-                                ms = 0
-                                for i in serv.voice_channels:
-                                    ms += len(i.members)
-
-                                mm = serv.member_count
-
-                                pl = Image.new('RGBA', (960, 540), (38, 32, 48))
-                                response = requests.get(g['banner']['url'], stream = True)
-                                response = Image.open(io.BytesIO(response.content))
-                                img = response.convert("RGBA")
-                                img = response.resize((960, 540), Image.ANTIALIAS) # улучшение качества
-
-                                img.save(f'{serv.id}.png', format = "PNG")
-                                img = Image.open(f'{serv.id}.png')
-                                img = response.convert("RGBA")
-                                try:
-                                    os.remove(f'{serv.id}.png')
-                                except Exception:
-                                    pass
-                                if g['banner']['met'] == 'stat':
-                                    text_image = Image.open(f"elements/stat-element-{g['banner']['color']}.png")
-                                else:
-                                    text_image = Image.open(f"elements/stat-element-{g['banner']['color']}-no_b.png")
-                                img = trans_paste(text_image, img, 1.0, (xgps, ygps))
-
-                                idraw = ImageDraw.Draw(img)
-                                f1 = ImageFont.truetype("fonts/BBCT.ttf", size = 40)
-
-
-                                idraw.text((530 + xgps,285+ ygps), f"{mm}", font = f1)
-                                idraw.text((480 + xgps,360+ ygps), f"{ttime}", font = f1)
-                                idraw.text((500 + xgps,440+ ygps), f"{serv.premium_subscription_count}", font = f1)
-
-
-                                try:
-                                    img.save(f'banner {serv.id} id.png')
-                                    with open(f'banner {serv.id} id.png', 'rb') as f:
-                                        icon = f.read()
-                                    await serv.edit(banner = icon)
-                                    os.remove(f'banner {serv.id} id.png')
-                                except Exception:
-                                    pass
-
-                            if g['banner']['met'] == 'voice-stat' or g['banner']['met'] == 'voice-stat-nb':
-
-                                #gps
-                                if g['banner']['gps'] == 'center':
-                                    xgps = 20
-                                    ygps = -100
-
-                                if g['banner']['gps'] == 'center-top':
-                                    xgps = 20
-                                    ygps = -230
-
-                                if g['banner']['gps'] == 'center-bottom':
-                                    xgps = 20
-                                    ygps = 0
-
-                                if g['banner']['gps'] == 'lower-left-corner':
-                                    xgps = -250
-                                    ygps = 0
-
-                                if g['banner']['gps'] == 'upper-left-corner':
-                                    xgps = -250
-                                    ygps = -230
-
-                                if g['banner']['gps'] == 'bottom-right-corner':
-                                    xgps = 270
-                                    ygps = 0
-
-                                if g['banner']['gps'] == 'upper-right-corner':
-                                    xgps = 270
-                                    ygps = -230
-
-                                ms = 0
-                                for i in serv.voice_channels:
-                                    ms += len(i.members)
-
-                                mm = serv.member_count
-
-                                pl = Image.new('RGBA', (960, 540), (38, 32, 48))
-                                response = requests.get(g['banner']['url'], stream = True)
-                                response = Image.open(io.BytesIO(response.content))
-                                img = response.convert("RGBA")
-                                img = response.resize((960, 540), Image.ANTIALIAS) # улучшение качества
-
-                                img.save(f'{serv.id}.png', format = "PNG")
-                                img = Image.open(f'{serv.id}.png')
-                                img = response.convert("RGBA")
-                                try:
-                                    os.remove(f'{serv.id}.png')
-                                except Exception:
-                                    pass
-
-                                if g['banner']['met'] == 'voice-stat':
-                                    text_image = Image.open(f"elements/voice-stat-element-{g['banner']['color']}.png")
-                                else:
-                                    text_image = Image.open(f"elements/voice-stat-element-{g['banner']['color']}-no_b.png")
-                                img = trans_paste(text_image, img, 1.0, (xgps, ygps))
-
-                                idraw = ImageDraw.Draw(img)
-                                f1 = ImageFont.truetype("fonts/BBCT.ttf", size = 50)
-
-
-                                idraw.text((400 + xgps,310+ ygps), f"{mm}", font = f1)
-                                idraw.text((400 + xgps,410+ ygps), f"{ms}", font = f1)
-
-
-                                try:
-                                    img.save(f'banner {serv.id} id.png')
-                                    with open(f'banner {serv.id} id.png', 'rb') as f:
-                                        icon = f.read()
-                                    await serv.edit(banner = icon)
-                                    os.remove(f'banner {serv.id} id.png')
-                                except Exception:
-                                    pass
-
-                            if g['banner']['met'] == 'common':
-
-                                #gps
-                                if g['banner']['gps'] == 'center':
-                                    xgps = 0
-                                    ygps = -200
-
-                                if g['banner']['gps'] == 'center-top':
-                                    xgps = 0
-                                    ygps = -350
-
-                                if g['banner']['gps'] == 'center-bottom':
-                                    xgps = 0
-                                    ygps = 0
-
-                                if g['banner']['gps'] not in ['center', 'center-top', 'center-bottom']:
-                                    xgps = 0
-                                    ygps = 0
-
-                                ms = 0
-                                for i in serv.voice_channels:
-                                    ms += len(i.members)
-
-                                mm = serv.member_count
-
-                                pl = Image.new('RGBA', (960, 540), (38, 32, 48))
-                                response = requests.get(g['banner']['url'], stream = True)
-                                response = Image.open(io.BytesIO(response.content))
-                                img = response.convert("RGBA")
-                                img = response.resize((960, 540), Image.ANTIALIAS) # улучшение качества
-
-                                img.save(f'{serv.id}.png', format = "PNG")
-                                img = Image.open(f'{serv.id}.png')
-                                img = response.convert("RGBA")
-                                try:
-                                    os.remove(f'{serv.id}.png')
-                                except Exception:
-                                    pass
-
-                                text_image = Image.open(f"elements/common-{g['banner']['color']}.png")
-                                img = trans_paste(text_image, img, 1.0, (xgps, ygps))
-
-                                idraw = ImageDraw.Draw(img)
-                                f1 = ImageFont.truetype("fonts/BBCT.ttf", size = 60)
-
-                                idraw.text((818 + xgps,450+ ygps), f"{ms}", font = f1)
-                                idraw.text((430 + xgps,450+ ygps), f"{mm}", font = f1)
-                                idraw.text((40 + xgps,450+ ygps), f"{ttime}", font = f1)
-
-
-                                try:
-                                    img.save(f'banner {serv.id} id.png')
-                                    with open(f'banner {serv.id} id.png', 'rb') as f:
-                                        icon = f.read()
-                                    await serv.edit(banner = icon)
-                                    os.remove(f'banner {serv.id} id.png')
-                                except Exception:
-                                    pass
-
-                    except Exception:
-                        pass
-
-            b_t = int(time.time() - b_t)
-
-            channel = await self.bot.fetch_channel(884499936476024913)
-            emb = discord.Embed(description=f"Проверка мьютов: {funs.time_end(m_t)}\nПроверка ролей дохода: {funs.time_end(i_t)}\nУстановка баннера: {funs.time_end(b_t)}", color=0xE52B50)
-            await channel.send(embed = emb)
-
-
-    @commands.Cog.listener()
-    async def on_member_join(self, member):
-
-        server = servers.find_one({"server": member.guild.id})
-
-        if server['send']['joinsend'] != 777777777777777777 or server['send']['joinsend'] != None:
-
-            if server['send']['joinsend'] == 'dm':
-                channel = member
+    @commands.command(usage = '(met) (@member) (amout) (met2)', description = 'Редактирование пользователя.', help = 'Управление')
+    async def edit_user(self,ctx, met:str, member:discord.Member, amout:int, met2:str):
+        if funs.roles_check(ctx.author, ctx.guild.id) == False:
+            await ctx.send("У вас недостаточно прав для использования этой команды!")
+            return
+        server = servers.find_one({"server": ctx.guild.id})
+
+        if amout <= 0:
+            await ctx.send(f"Возьми одно яблоко и добавь к нему {amout} яблок. Есть тут смысл?")
+            return
+        if met in ['money', 'lvl', 'xp', 'hp', 'hpmax', 'mana', 'manamax']:
+            user = funs.user_check(member, ctx.guild)
+            if met2 == 'add' or met2 == 'remove':
+                if met2 == 'add':
+                    funs.user_update(member.id, ctx.guild, met, user[met] + amout)
+                if met2 == 'remove':
+                    if user[met] - amout <= 0:
+                        funs.user_update(member.id, ctx.guild, met, 0)
+                    else:
+                        funs.user_update(member.id, ctx.guild, met, user[met] - amout)
             else:
-                channel = self.bot.get_channel(server['send']['joinsend'])
-
-            if channel != None:
-                if server['send']['avatar_join_url'] != "avatar_url_none":
-
-                    ust = server['send']
-
-                    try:
-                        ust['join_type']
-                    except:
-                        ust.update({'join_type': "png"})
-
-                    url = server['send']['avatar_join_url']
-
-                    if ust['join_type'] == "png":
-
-                        response = requests.get(url, stream = True)
-                        response = Image.open(io.BytesIO(response.content))
-                        response = response.convert("RGBA")
-                        alpha = response.resize((960, 470), Image.ANTIALIAS) # улучшение качества
-
-                    if ust['join_type'] == "gif":
-
-                        response = requests.get(url, stream=True)
-                        response.raw.decode_content = True
-                        img = Image.open(response.raw)
-
-                        alpha = Image.open('elements/alpha.png')
-                        alpha = alpha.resize((960, 470), Image.ANTIALIAS) # улучшение качества
-
-
-                    idraw = ImageDraw.Draw(alpha)
-                    name = member.name
-                    tag = member.discriminator
-
-
-                    headline = ImageFont.truetype("fonts/20421.ttf", size = 50)
-                    big = ImageFont.truetype("fonts/NotoSans-Bold.ttf", size = 100)
-
-                    l = len(name)
-                    if l < 11:
-                        number = 11
-                    if l >= 11:
-                        number = 9
-
-                    if server['send']['join_position_avatar'] == 0:
-
-                        wp1 = 245          #x
-                        wp2 = 275          #y
-
-                        tp2 = 400
-                        tp1 = int(400 - l * number) #текст
-
-                        size = (250,250)        #y
-                        ap1 = int(960 / 2 - size[0] / 2)         #x
-                        ap2 = 30          #y
-
-                    if server['send']['join_position_avatar'] == 1:
-
-                        wp1 = 300          #x
-                        wp2 = 170          #y
-
-                        tp2 = 280 #y
-                        tp1 = 305 #текст имени  x
-
-                        size = (250,250)
-                        ap1 = 20         #x
-                        ap2 = 115          #y
-
-                    if server['welcome']['wel_fill'] == None:
-                        idraw.text((wp1, wp2), f"WELCOME", font = big)
-                    else:
-                        idraw.text((wp1, wp2), f"WELCOME", font = big, fill = f"{server['welcome']['wel_fill']}")
-
-                    if server['welcome']['nam_fill'] == None:
-                        idraw.text((tp1, tp2), f"{name}#{tag}", font = headline)
-                    else:
-                        idraw.text((tp1, tp2), f"{name}#{tag}", font = headline,fill = f"{server['welcome']['nam_fill']}")
-
-                    url = str(member.avatar.url)
-
-                    try:
-                        response1 = requests.get(url, stream = True)
-                        response1 = Image.open(io.BytesIO(response1.content))
-
-                    except Exception:
-                        byteImgIO = io.BytesIO()
-                        response = requests.get(url, stream = True)
-                        response.raw.decode_content = True
-                        response1 = Image.open(response.raw)
-
-                    response1 = response1.convert("RGB")
-                    response1 = response1.resize((200, 200), Image.ANTIALIAS)
-
-                    def trans_paste(fg_img,bg_img,alpha=10,box=(0,0)):
-                        fg_img_trans = Image.new("RGBA",fg_img.size)
-                        fg_img_trans = Image.blend(fg_img_trans,fg_img,alpha)
-                        bg_img.paste(fg_img_trans,box,fg_img_trans)
-                        return bg_img
-
-                    def prepare_mask(size, antialias = 2):
-                        mask = Image.new('L', (size[0] * antialias, size[1] * antialias), 0)
-                        ImageDraw.Draw(mask).ellipse((0, 0) + mask.size, fill=255)
-                        return mask.resize(size, Image.ANTIALIAS)
-
-                    def crop(im, s):
-                        w, h = im.size
-                        k = w / s[0] - h / s[1]
-
-                        if k > 0:
-                            im = im.crop(((w - h) / 2, 0, (w + h) / 2, h))
-                        elif k < 0:
-                            im = im.crop((0, (h - w) / 2, w, (h + w) / 2))
-
-                        return im.resize(s, Image.ANTIALIAS)
-
-                    im = response1
-                    im = crop(im, size)
-                    im.putalpha(prepare_mask(size, 4))
-
-                    def make_ellipse_mask(size, x0, y0, x1, y1, blur_radius):
-                        img = Image.new("L", size, color=0)
-                        draw = ImageDraw.Draw(img)
-                        draw.ellipse((x0, y0, x1, y1), fill=255)
-                        return img.filter(ImageFilter.GaussianBlur(radius=blur_radius))
-
-                    overlay_image = alpha.filter(ImageFilter.GaussianBlur(radius=15))
-                    if server['welcome']['el_fill'] == None:
-                        mask_image = make_ellipse_mask((960, 470), ap1 - 10, ap2 - 10, ap1 + size[0] + 10, ap2 + size[1] + 10, 1)
-                        alpha = Image.composite(overlay_image, alpha, mask_image)
-                    else:
-                        idraw.ellipse((ap1 - 10, ap2 - 10, ap1 + size[0] + 10, ap2 + size[1] + 10), fill = f"{server['welcome']['el_fill']}")
-
-                    #аватарка
-                    bg_img = alpha
-                    fg_img = im
-                    im = trans_paste(fg_img, bg_img, 1.0, (ap1, ap2, ap1 + size[0], ap2 + size[0]))
-
-                    if server['welcome']['wel_text'] == None:
-                        text = f"Welcome {name}#{tag} to {member.guild.name}"
-                    else:
-                        text = server['welcome']['wel_text']
-                        text = funs.text_replase(text, member)
-
-                    if ust['join_type'] == "png":
-
-
-                        image = alpha
-                        output = BytesIO()
-                        image.save(output, 'png')
-                        image_pix=BytesIO(output.getvalue())
-
-                        file = discord.File(fp = image_pix, filename="welcome_card.png")
-                        ul = 'png'
-
-                    if ust['join_type'] == "gif":
-                        fs = []
-                        for frame in ImageSequence.Iterator(img):
-                            frame = frame.convert("RGBA")
-
-                            frame = frame.resize((960, 470), Image.ANTIALIAS)
-
-                            bg_img = frame
-                            fg_img = alpha
-                            img = trans_paste(fg_img, bg_img, 1.0)
-
-                            b = io.BytesIO()
-                            frame.save(b, format="GIF",optimize=True, quality=75)
-                            frame = Image.open(b)
-                            fs.append(frame)
-
-
-                        fs[0].save('welcome_card.gif', save_all=True, append_images=fs[1:], loop = 0, optimize=True, quality=75)
-
-                        file = discord.File(fp = "welcome_card.gif", filename="welcome_card.gif")
-                        ul = 'gif'
-
-
-                    try:
-                        if server['welcome']['emb'] == False:
-                            await channel.send(f"{text}", file = file)
-
-                        if server['welcome']['emb'] == True:
-                            emb = discord.Embed(description = text, color= server['embed_color'])
-                            emb.set_image(url=f"attachment://welcome_card.{ul}")
-                            await channel.send(file=file, embed = emb)
-
-                    except Exception:
-                        pass
-
-                    try:
-                        os.remove(f'welcome_card.{ul}')
-                    except Exception:
-                        pass
-
-        try:
-            if server['nick_change'] != None:
-
-                if funs.user_check(member, member.guild, 'dcheck', 'save_users') == False:
-                    ret = False
-
-                if funs.user_check(member, member.guild, 'dcheck', 'save_users') == True:
-                    l_user = funs.user_check(member, member.guild)
-
-                    try:
-                        l_user['name']
-                        ret = True
-                    except Exception:
-                        ret = False
-
-                if ret == False:
-                    name = funs.text_replase(server['nick_change'], member)
-                    try:
-                        await member.edit(nick = name)# изменение никнейма при насройке изменения
-                    except Exception:
-                        pass
-        except Exception:
-            pass
-
-        if funs.user_check(member, member.guild, 'dcheck', 'save_users') == True:
-            l_user = funs.user_check(member, member.guild)
-            s_user = funs.user_check(member, member.guild, None, 'save_users')
-
-            if server['save']['name_save'] == True:
-                try:
-                    await member.edit(nick = s_user['name'])# изменение никнейма при сохранении
-                    funs.user_update(member.id, member.guild, 'name', '-', 'pop', 'save_users')
-                except Exception:
-                    pass
-
-            if server['save']['roles_save'] == True:
-                try:
-                    if s_user['roles'] != []:
-                        for id in s_user['roles']:
-                            try:
-                                role = member.guild.get_role(int(id))
-                                await member.add_roles(role)
-                            except Exception:
-                                pass
-                        funs.user_update(member.id, member.guild, 'roles', '-', 'pop', 'save_users')
-                except Exception:
-                    pass
-
-        try:
-            if server['join_roles'] != []:
-                for id in server['join_roles']:
-                    try:
-                        role = member.guild.get_role(int(id))
-                        await member.add_roles(role)
-                    except Exception:
-                        pass
-        except Exception:
-            pass
-
-        #лог
-        if server['mod']['log_channel'] != {}:
-            if 'member_join' in server['mod']['log_channel']['logging'] or 'all' in server['mod']['log_channel']['logging'] or 'member' in server['mod']['log_channel']['logging']:
-
-                channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-
-                one_day_ago = datetime.now() - timedelta(days=1)
-                if member.created_at > one_day_ago: #меньше одного дня
-                    emb = discord.Embed(description="Пользователь присоединился к серверу", color=0xE52B50)
-                    emb.add_field(name="Оповещение",value=f"Аккаунт создан меньше одного дня назад!", inline=False)
-                else: #больше одного дня
-                    emb = discord.Embed(description="Пользователь присоединился к серверу", color=0x76E212)
-
-                if member.nick == None:
-                    nick = f"Имя: {member.name}#{member.discriminator}\nУпоминание: {member.mention}"
-                else:
-                    nick = f"Имя: {member.name}#{member.discriminator}\nНикнейм: {member.nick}\nУпоминание: {member.mention}"
-
-                emb.add_field(name="Информация",value=f"Аккаунт создан: {member.created_at.strftime('%X, %d %B, %Y')}\n{nick}", inline=False)
-                emb.set_thumbnail(url= member.avatar.url)
-                emb.set_footer(text=f"ID: {member.id}")
-                await channel.send(embed=emb)
-
-
-    @commands.Cog.listener()
-    async def on_member_remove(self, member):
-        server = servers.find_one({"server": member.guild.id})
-
-        if server['send']['leavensend'] != 777777777777777777 or server['send']['leavensend'] != None:
-
-            channel = self.bot.get_channel(server['send']['leavensend'])
-
-            if channel != None:
-                if server['send']['avatar_leave_url'] != "avatar_url_none":
-
-                    ust = server['send']
-                    try:
-                        ust['leave_type']
-                    except:
-                        ust.update({'leave_type': "png"})
-
-                    url = server['send']['avatar_leave_url']
-
-                    if ust['leave_type'] == "png":
-
-                        response = requests.get(url, stream = True)
-                        response = Image.open(io.BytesIO(response.content))
-                        response = response.convert("RGBA")
-                        alpha = response.resize((960, 470), Image.ANTIALIAS) # улучшение качества
-
-                    if ust['leave_type'] == "gif":
-
-                        response = requests.get(url, stream=True)
-                        response.raw.decode_content = True
-                        img = Image.open(response.raw)
-
-                        alpha = Image.open('elements/alpha.png')
-                        alpha = alpha.resize((960, 470), Image.ANTIALIAS) # улучшение качества
-
-
-                    idraw = ImageDraw.Draw(alpha)
-                    name = member.name
-                    tag = member.discriminator
-
-
-                    headline = ImageFont.truetype("fonts/20421.ttf", size = 50)
-                    big = ImageFont.truetype("fonts/NotoSans-Bold.ttf", size = 100)
-
-                    l = len(name)
-                    if l < 11:
-                        number = 11
-                    if l >= 11:
-                        number = 9
-
-                    if server['send']['leave_position_avatar'] == 0:
-
-                        wp1 = 245          #x
-                        wp2 = 275          #y
-
-                        tp2 = 400
-                        tp1 = int(400 - l * number) #текст
-
-                        size = (250,250)        #y
-                        ap1 = int(960 / 2 - size[0] / 2)         #x
-                        ap2 = 30          #y
-
-                    if server['send']['leave_position_avatar'] == 1:
-
-                        wp1 = 300          #x
-                        wp2 = 170          #y
-
-                        tp2 = 280 #y
-                        tp1 = 305 #текст имени  x
-
-                        size = (250,250)
-                        ap1 = 20         #x
-                        ap2 = 115          #y
-
-                    if server['goodbye']['wel_fill_l'] == None:
-                        idraw.text((wp1, wp2), f"GOODBYE", font = big)
-                    else:
-                        idraw.text((wp1, wp2), f"GOODBYE", font = big, fill = f"{server['goodbye']['wel_fill_l']}")
-
-                    if server['goodbye']['nam_fill_l'] == None:
-                        idraw.text((tp1, tp2), f"{name}#{tag}", font = headline)
-                    else:
-                        idraw.text((tp1, tp2), f"{name}#{tag}", font = headline,fill = f"{server['goodbye']['nam_fill_l']}")
-
-                    url = str(member.avatar.url)
-
-                    try:
-                        response1 = requests.get(url, stream = True)
-                        response1 = Image.open(io.BytesIO(response1.content))
-
-                    except Exception:
-                        byteImgIO = io.BytesIO()
-                        response = requests.get(url, stream = True)
-                        response.raw.decode_content = True
-                        response1 = Image.open(response.raw)
-
-                    response1 = response1.convert("RGB")
-                    response1 = response1.resize((200, 200), Image.ANTIALIAS)
-
-                    def trans_paste(fg_img,bg_img,alpha=10,box=(0,0)):
-                        fg_img_trans = Image.new("RGBA",fg_img.size)
-                        fg_img_trans = Image.blend(fg_img_trans,fg_img,alpha)
-                        bg_img.paste(fg_img_trans,box,fg_img_trans)
-                        return bg_img
-
-                    def prepare_mask(size, antialias = 2):
-                        mask = Image.new('L', (size[0] * antialias, size[1] * antialias), 0)
-                        ImageDraw.Draw(mask).ellipse((0, 0) + mask.size, fill=255)
-                        return mask.resize(size, Image.ANTIALIAS)
-
-                    def crop(im, s):
-                        w, h = im.size
-                        k = w / s[0] - h / s[1]
-
-                        if k > 0:
-                            im = im.crop(((w - h) / 2, 0, (w + h) / 2, h))
-                        elif k < 0:
-                            im = im.crop((0, (h - w) / 2, w, (h + w) / 2))
-
-                        return im.resize(s, Image.ANTIALIAS)
-
-                    im = response1
-                    im = crop(im, size)
-                    im.putalpha(prepare_mask(size, 4))
-
-                    def make_ellipse_mask(size, x0, y0, x1, y1, blur_radius):
-                        img = Image.new("L", size, color=0)
-                        draw = ImageDraw.Draw(img)
-                        draw.ellipse((x0, y0, x1, y1), fill=255)
-                        return img.filter(ImageFilter.GaussianBlur(radius=blur_radius))
-
-                    overlay_image = alpha.filter(ImageFilter.GaussianBlur(radius=15))
-                    if server['goodbye']['el_fill_l'] == None:
-                        mask_image = make_ellipse_mask((960, 470), ap1 - 10, ap2 - 10, ap1 + size[0] + 10, ap2 + size[1] + 10, 1)
-                        alpha = Image.composite(overlay_image, alpha, mask_image)
-                    else:
-                        idraw.ellipse((ap1 - 10, ap2 - 10, ap1 + size[0] + 10, ap2 + size[1] + 10), fill = f"{server['goodbye']['el_fill_l']}")
-
-                    #аватарка
-                    bg_img = alpha
-                    fg_img = im
-                    im = trans_paste(fg_img, bg_img, 1.0, (ap1, ap2, ap1 + size[0], ap2 + size[0]))
-
-                    if server['goodbye']['lea_text'] == None:
-                        text = f"Goodbye {name}#{tag} to {member.guild.name}"
-                    else:
-                        text = server['goodbye']['lea_text']
-                        text = funs.text_replase(text, member)
-
-                    if ust['leave_type'] == "png":
-
-                        image = alpha
-                        output = BytesIO()
-                        image.save(output, 'png')
-                        image_pix=BytesIO(output.getvalue())
-
-                        file = discord.File(fp = image_pix, filename="goodbye_card.png")
-                        ul = 'png'
-
-                    if ust['leave_type'] == "gif":
-                        fs = []
-                        for frame in ImageSequence.Iterator(img):
-                            frame = frame.convert("RGBA")
-
-                            frame = frame.resize((960, 470), Image.ANTIALIAS)
-
-                            bg_img = frame
-                            fg_img = alpha
-                            img = trans_paste(fg_img, bg_img, 1.0)
-
-                            b = io.BytesIO()
-                            frame.save(b, format="GIF",optimize=True, quality=75)
-                            frame = Image.open(b)
-                            fs.append(frame)
-
-
-                        fs[0].save('goodbye_card.gif', save_all=True, append_images=fs[1:], loop = 0, optimize=True, quality=75)
-
-                        file = discord.File(fp = "goodbye_card.gif", filename="goodbye_card.gif")
-                        ul = 'gif'
-
-
-                    try:
-                        if server['goodbye']['emb'] == False:
-                            await channel.send(f"{text}", file = file)
-
-                        if server['goodbye']['emb'] == True:
-                            emb = discord.Embed(description = text, color= server['embed_color'])
-                            emb.set_image(url=f"attachment://goodbye_card.{ul}")
-                            await channel.send(file=file, embed = emb)
-
-                    except Exception:
-                        pass
-
-                    try:
-                        os.remove(f'goodbye_card.{ul}')
-                    except Exception:
-                        pass
-
-        if server['save']['roles_save'] == True or server['save']['name_save'] == True:
-            server['save_users'].update({ str(member.id): {} })
-            servers.update_one({'server':member.guild.id},{'$set':{'save_users': server['save_users'] }})
-
-        if funs.user_check(member, member.guild, 'dcheck') == True:
-            if server['save']['date_save'] == False:
-
-                server['users'].pop(str(member.id))
-                servers.update_one({'server':member.guild.id},{'$set':{'users': server['users'] }})
-
-        if server['save']['name_save'] == True:
-            if member.nick == None:
-                funs.user_update(member.id, member.guild, 'name', member.name, 'update', 'save_users')
-            else:
-                funs.user_update(member.id, member.guild, 'name', member.nick, 'update', 'save_users')
-
-        if server['save']['roles_save'] == True:
-            roles_list_ids = []
-
-            for i in member.roles:
-                if i != member.guild.default_role:
-                    roles_list_ids.append(i.id)
-
-            if roles_list_ids != []:
-                funs.user_update(member.id, member.guild, 'roles', roles_list_ids, 'update', 'save_users')
-
-        #лог
-        if server['mod']['log_channel'] != {}:
-            if 'member_remove' in server['mod']['log_channel']['logging'] or 'all' in server['mod']['log_channel']['logging'] or 'member' in server['mod']['log_channel']['logging']:
-
-                channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-                emb = discord.Embed(description= f"Пользователь {member.name}#{member.discriminator} покинул сервер", color=0xFFDB8B)
-                emb.set_thumbnail(url= member.avatar.url)
-                emb.set_footer(text=f"ID: {member.id}")
-                await channel.send(embed=emb)
-
-
-
-    @commands.Cog.listener()
-    async def on_guild_join(self,guild):
-        funs.insert_server(guild)
-
-    @commands.Cog.listener()
-    async def on_guild_remove(self, guild):
-        servers.delete_one({"server": guild.id})
-
-    @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
-        normal = False
-        channel = self.bot.get_channel(config.error_channel)
-
-        if isinstance(error, commands.CommandNotFound):
-            normal = True
-            pass
-
-        elif isinstance(error, commands.CommandOnCooldown):
-            seconds = error.retry_after
-            time_end = funs.time_end(seconds)
-            e = discord.Embed(color=0xf03e65)
-            e.add_field(name = 'Перезарядка:', value = f'Попробуйте через {time_end}')
-            e.set_thumbnail(url = "https://cdn.discordapp.com/attachments/707663547928412250/735467950563393617/632693649767137280.gif" )
-            await ctx.send(embed = e)
-            normal = True
-
-        elif isinstance(error, commands.MissingRequiredArgument):
-            com = ctx.command
-            emb = discord.Embed(description = f"Правильное использование: **{ctx.prefix}{com.name}** `{com.usage}`\n Аргумент `{error.param.name}` не указан!" ,color= 15744613 ).set_footer(text = '() - обязательный аргумент, [] - необязательный аргумент')
+                await ctx.send("Выберите метод add/remove")
+                return
+
+            user = funs.user_check(member, ctx.guild)
+            emb = discord.Embed(title="Пользователь Обновлён", description=f"Пользователь: {member.mention}\nОбновлено: {met}\nМетод: {met2}\nУ пользователя: {user[met]}",color=server['embed_color'])
             await ctx.send(embed = emb)
-            normal = True
-
-        elif str(error)=="Command raised an exception: TypeError: 'NoneType' object is not subscriptable":
-            await ctx.send(f"Объект не найден!")
-            normal = True
-
-        elif str(error)=="Command raised an exception: Forbidden: 403 Forbidden (error code: 50005): Cannot edit a message authored by another user":
-            await ctx.send(f"Не возможно изменить сообщение другово пользователя!")
-            normal = True
-
-        elif str(error)=="Command raised an exception: NotFound: 404 Not Found (error code: 10008): Unknown Message":
-            await ctx.send("Сообщение не найдено!")
-            normal = True
-
-
-        elif str(error)=="Command raised an exception: Forbidden: 403 Forbidden (error code: 50013): Missing Permissions":
-            try:
-                await ctx.send("У бота не достаточно прав!")
-            except Exception:
-                pass
-            normal = True
-
-
-        elif str(error)=="Command raised an exception: AttributeError: 'NoneType' object has no attribute 'id'":
-            await ctx.send("'Ничего' не может иметь 'id'")
-            normal = False
-
-
-        elif isinstance(error, commands.MissingPermissions):
-            await ctx.send("У вас недостаточно прав!")
-            normal = True
-
-
-        elif isinstance(error, commands.BadArgument):
-            com = ctx.command
-            emb = discord.Embed(description = f"Правильное использование: **{ctx.prefix}{com.name}** `{com.usage}`" ,color= 15744613 ).set_footer(text = '() - обязательный аргумент, [] - необязательный аргумент')
-            await ctx.send(embed = emb)
-            normal = True
 
         else:
-            print(error)
-            await channel.send(f"Ошибка: `{error}`")
-
-            try:
-                ctx.command = self.bot.get_command(ctx.invoked_with.lower())
-                await channel.send(f"Команда: {ctx.command.name}\nСервер: {ctx.guild.id}\nПользователь: {ctx.author.id}\n Ошибка: `{error}` ")
-            except Exception:
-                await channel.send(f"Ошибка: `{error}`")
-
-        if normal == False:
-            await channel.send(f"🎈")
+            await ctx.send("Выберите что вы изменятете bank/money/lvl/xp/hp/hpmax/mana/manamax")
 
 
+    @commands.command(usage = '(@member) (amout)', description = 'Передача монет пользователю.', help = 'Взаимодействие', aliases = ['дать_монеты'])
+    async def give_money(self,ctx,member:discord.Member, amout):
+        if ctx.author.id == member.id:
+            await ctx.send(f"Есть смысл дарить подарок самому себе?")
+            return
 
-    @commands.Cog.listener()
-    async def on_voice_state_update(self, member, before, after):
-        global voice_dict
+        if amout != 'all' and int(amout) <= 0:
+            await ctx.send(f"Возьми одно яблоко и добавь к нему {amout} яблок. Есть тут смысл?")
+            return
 
-        rr = ['🎍', '🎋', '💫', '🌪', ' 🔥', '🌟', '⚡️', '☄️', '💥', '🌚', '🌞', '🍬', '🍭', '🍡', '🌷', '🐾', '🍹', '🍸', '🍱', '🎆', '🎭', '💎', '🎨', '🍕', '🍻', '🍩']
-        server = servers.find_one({"server": member.guild.id})
-        serv = server['server']
-        if server['voice']["voice_category"] != None:
-            mainCategory = member.guild.get_channel(server['voice']["voice_category"])
+        user = funs.user_check(ctx.author, ctx.guild)
 
-            if after.channel != None and before.channel != None and after.channel.id == server['voice']["voice_channel"] and str(before.channel.id) in list(server['voice']['private_voices'].keys()):
-                await member.move_to(before.channel)
+        if amout == 'all':
+            amout = user['money']
 
-            else:
-                await voice_check(member.guild)
+        try:
+            amout = int(amout)
+        except Exception:
+            await ctx.send("Укажите число или all")
+            return
 
-                if before.channel != None and str(before.channel.id) in list(server['voice']['private_voices'].keys()) and after.channel != None or after.channel != None and after.channel.id == server['voice']["voice_channel"] and before.channel != None or after.channel == None:
-                    try:
-                        cc = server['voice']['private_voices'][f'{before.channel.id}']
-                        if len(before.channel.members) < 1:
-                            await before.channel.delete()
-                            v = server['voice']
-                            v['private_voices'].pop(f'{before.channel.id}')
-                            servers.update_one({'server': server['server']},{'$set': {'voice': v}})
-                    except Exception:
-                        pass
+        if user['money'] < amout:
+            await ctx.send(f"У вас нету столько монет в кошельке!")
+            return
 
-                if after.channel != None and after.channel.id == server['voice']["voice_channel"]:
-                    voice = server['voice']
-                    r = random.choice(rr)
-                    try:
-                        channel2 = await after.channel.guild.create_voice_channel(name=f"{r} {member.display_name}",category=mainCategory)
-                        voice['private_voices'].update({f"{channel2.id}": member.id})
+        user2 = funs.user_check(member, ctx.guild)
 
-                        servers.update_one({'server': server['server']},{'$set': {'voice': voice}})
-                        await member.move_to(channel2)
-                        await channel2.set_permissions(member, manage_channels=True, mute_members=True, deafen_members=True, manage_permissions=True)
-                    except Exception:
-                        pass
+        funs.user_update(ctx.author.id, ctx.guild, "money", user['money'] - amout)
+        funs.user_update(member.id, ctx.guild, "money", user2['money'] + amout)
+
+        emb = discord.Embed(description=f"{ctx.author.mention} вы передали {member.mention} {amout} монет!", color=0x450fa8)
+        emb.set_author(name = "Магическая транзакция")
+        await ctx.send(embed = emb)
+
+    @commands.command(usage = '(@member)', description = 'Сброс монет пользователя.', help = 'Управление')
+    async def reset_money(self,ctx, member:discord.Member):
+        if funs.roles_check(ctx.author, ctx.guild.id) == False:
+            await ctx.send("У вас недостаточно прав для использования этой команды!")
+            return
+        funs.user_update(member.id, ctx.guild, "money", 0)
+        server = servers.find_one({"server": ctx.guild.id})
+
+        emb = discord.Embed(description=f"Все монеты пользователя {member.mention} были сброшены!", color=server['embed_color'])
+        await ctx.send(embed = emb)
+
+    @commands.command(usage = '-', description = 'Сброс монет всех пользователей.', help = 'Управление')
+    async def reset_economy(self,ctx):
+        if funs.roles_check(ctx.author, ctx.guild.id) == False:
+            await ctx.send("У вас недостаточно прав для использования этой команды!")
+            return
+        server = servers.find_one({"server": ctx.guild.id})
+        for user in server['users']:
+            funs.user_update(user, ctx.guild, "money", 0)
+
+        emb = discord.Embed(description=f"Экономика была полностью сброшена!", color=0x450fa8)
+        await ctx.send(embed = emb)
+
+    @commands.command(aliases=['top','лидеры','топ'], usage = '(name) [number_page]', description = 'Лидеры.', help = 'Взаимодействие')
+    async def leaderboard(self,ctx, topname:str = 'lvl', numberpage:int = 1):
+        if topname not in ['lvl', 'money', 'voice']:
+            await ctx.send("Укажите действительный топ! (lvl, money, voice)")
+            return
+
+        server = servers.find_one({"server": ctx.guild.id})
+        cc = server['economy']['currency']
+
+        solutions = ['◀', '▶', '📱', '❌']
+        member = ctx.author
+        reaction = 'a'
+
+        met = 'pc'
+
+        if topname == 'lvl':
+            top = list(sorted(server['users'].items(),key=lambda x: x[1]['lvl'],reverse=True))
+        elif topname == 'money':
+            top = list(sorted(server['users'].items(),key=lambda x: x[1]['money'],reverse=True))
+        elif topname == 'voice':
+            top = list(sorted(server['users'].items(),key=lambda x: x[1]['voice_time'],reverse=True))
+
+        if len(top) % 5 != 0:
+            l = int(len(top) / 5 + 1)
+        else:
+            l = int(len(top) / 5)
+
+        if numberpage > l or numberpage < 1:
+            await ctx.send("Такой страницы нет!")
+            return
+
+        def top_embed(numberpage):
+            nonlocal ctx
+            nonlocal cc
+            nonlocal l
+            nonlocal met
+
+            num1 = 0
+            num2 = 0
+            page = numberpage
+            text = ''
+
+            if numberpage != 1:
+                numberpage *= 5
+                numberpage -= 5
+
+                if numberpage > 4:
+                    numberpage += 1
+
+            if len(top) <= 5:
+                if topname == 'lvl':
+                    emb = discord.Embed(title = 'Топ лидеров по уровню', description = '',color=0x450fa8)
+                    for i in top:
+                        num1 += 1
+                        user_lvl = i[1]['lvl']
+                        user_name = ctx.guild.get_member(int(i[0]))
+                        if met == 'tel':
+                            text = text + f'{num1}. {user_name}: {user_lvl} lvl\n'
+                        if met == 'pc':
+                            emb.add_field(name = '```        Место        ```', value = f'```{num1}```')
+                            emb.add_field(name = '```             Имя             ```', value = f'```{user_name}```')
+                            emb.add_field(name = '```    Уровень    ```', value = f'```{user_lvl}```')
+
+                elif topname == 'money':
+                    emb = discord.Embed(title = f'Топ лидеров по наличным {cc}', description = '',color=0x450fa8)
+                    for i in top:
+                        num1 += 1
+                        user_m = i[1]['money']
+                        user_name = ctx.guild.get_member(int(i[0]))
+                        if met == 'tel':
+                            text = text + f'{num1}. {user_name}: {user_m}{cc}\n'
+                        if met == 'pc':
+                            emb.add_field(name = '```        Место        ```', value = f'```{num1}```')
+                            emb.add_field(name = '```             Имя             ```', value = f'```{user_name}```')
+                            emb.add_field(name = '```     Монеты     ```', value = f'```{user_m}```')
+
+                elif topname == 'voice':
+                    emb = discord.Embed(title = 'Топ лидеров по активности в войсе', description = '',color=0x450fa8)
+                    for i in top:
+                        num1 += 1
+                        user_v = funs.time_end(i[1]['voice_time'])
+                        user_name = ctx.guild.get_member(int(i[0]))
+                        if met == 'tel':
+                            text = text + f'{num1}. {user_name}: {user_v}\n'
+                        if met == 'pc':
+                            emb.add_field(name = '```        Место        ```', value = f'```{num1}```')
+                            emb.add_field(name = '```             Имя             ```', value = f'```{user_name}```')
+                            emb.add_field(name = '```     Активность     ```', value = f'```{user_v}```')
+
+            elif len(top) > 5:
+                if topname == 'lvl':
+                    emb = discord.Embed(title = 'Топ лидеров по уровню', description = '',color=0x450fa8)
+                    for i in top:
+                        num1 += 1
+                        if num1 >= numberpage and num2 < 5:
+                            num2 += 1
+                            user_lvl = i[1]['lvl']
+                            user_name = ctx.guild.get_member(int(i[0]))
+                            if met == 'tel':
+                                text = text + f'{num1}. {user_name}: {user_lvl} lvl\n'
+                            if met == 'pc':
+                                emb.add_field(name = '```       Место       ```', value = f'```{num1}```')
+                                emb.add_field(name = '```         Имя         ```', value = f'```{user_name}```')
+                                emb.add_field(name = '```    Уровень    ```', value = f'```{user_lvl}```')
+
+                elif topname == 'money':
+                    emb = discord.Embed(title = 'Топ лидеров по наличным', description = '',color=0x450fa8)
+                    for i in top:
+                        num1 += 1
+                        if num1 >= numberpage and num2 < 5:
+                            num2 += 1
+                            user_m = i[1]['money']
+                            user_name = ctx.guild.get_member(int(i[0]))
+                            if met == 'tel':
+                                text = text + f'{num1}. {user_name}: {user_m}{cc}\n'
+                            if met == 'pc':
+                                emb.add_field(name = '```        Место        ```', value = f'```{num1}```')
+                                emb.add_field(name = '```             Имя             ```', value = f'```{user_name}```')
+                                emb.add_field(name = '```     Монеты     ```', value = f'```{user_m}```')
+
+                elif topname == 'voice':
+                    emb = discord.Embed(title = f'Топ лидеров по активости в войсе', description = '',color=0x450fa8)
+                    for i in top:
+                        num1 += 1
+                        if num1 >= numberpage and num2 < 5:
+                            num2 += 1
+                            user_v = funs.time_end(i[1]['voice_time'])
+                            user_name = ctx.guild.get_member(int(i[0]))
+                            if met == 'tel':
+                                text = text + f'{num1}. {user_name}: {user_v}\n'
+                            if met == 'pc':
+                                emb.add_field(name = '```        Место        ```', value = f'```{num1}```')
+                                emb.add_field(name = '```             Имя             ```', value = f'```{user_name}```')
+                                emb.add_field(name = '```     Активность     ```', value = f'```{user_v}```')
+
+            if met == 'tel':
+                emb.add_field(name = '_____', value = text)
+            emb.set_footer(text=f"Страница {page}/{l}")
+            emb.set_thumbnail(url = "https://img.icons8.com/nolan/2x/prize.png")
+            return emb
 
 
-        if before.channel is None and after.channel is not None:
-            t1 = time.time()
-            voice_time(after.channel.guild, member, t1, 'add')
+        msg = await ctx.send(embed = top_embed(numberpage))
 
-        if before.channel is not None and after.channel is None:
-            t2 = time.time()
-            voice_time(before.channel.guild, member, t2, 'delete')
+        def check( reaction, user):
+            nonlocal msg
+            return user == ctx.author and str(reaction.emoji) in solutions and str(reaction.message) == str(msg)
 
-        if server['voice']["randomc_channel"] != None and after.channel != None and after.channel.id == server['voice']["randomc_channel"]:
-            serv = after.channel.guild
+        async def rr():
+            nonlocal reaction
+            nonlocal numberpage
+            nonlocal l
+            nonlocal met
+            if str(reaction.emoji) == '◀':
+                await msg.remove_reaction('◀', member)
+                numberpage -= 1
+                if numberpage < 1:
+                    numberpage = 1
 
-            def ch(channels, server):
-                ch = []
-                for i in channels:
-                    if type(i) == discord.channel.VoiceChannel:
-                        if server['voice']['rc_bl_channels'] == None or i not in server['voice']['rc_bl_channels']:
-                            if i.id != server['voice']["randomc_channel"]:
-                                if i.user_limit > len(i.members) or i.user_limit == 0:
-                                    ch.append(i)
-                return ch
+                await msg.edit(embed = top_embed(numberpage))
 
-            if len(ch(serv.channels, server)) != 0:
-                channels = []
-                for i in ch(serv.channels, server):
-                    if len(i.members) != 0:
-                        channels.append(i)
 
-                if len(channels) > 0:
-                    channel = random.choice(channels)
-                    await member.move_to(channel)
+            elif str(reaction.emoji) == '▶':
+                await msg.remove_reaction('▶', member)
+                numberpage += 1
+                if numberpage > l:
+                    numberpage = l
+
+                await msg.edit(embed = top_embed(numberpage))
+
+            elif str(reaction.emoji) == '📱':
+                await msg.remove_reaction('📱', member)
+                if met == 'pc':
+                    met = 'tel'
                 else:
+                    met = 'pc'
+                await msg.edit(embed = top_embed(numberpage))
 
-                    channel = random.choice(ch(serv.channels, server))
-                    await member.move_to(channel)
+            elif str(reaction.emoji) == '❌':
+                await msg.clear_reactions()
+                return
 
-
-        if server['mod']['log_channel'] != {}:
-            counter = 0
-            log = server['mod']['log_channel']['logging']
-            channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-            emb = discord.Embed(title = f'Обновление статуса войс-канала', color=0xFFDB8B )
-
-            if 'voice_connect' in log or 'all' in log or 'voice' in log:
-                if before.channel == None and after.channel != None:
-                    emb.add_field(name = ' | Пользователь присоединился', value = f'Пользователь {member.mention} подключился к каналу {after.channel.mention}', inline = True)
-                    counter += 1
-
-            if 'voice_disconnect' in log or 'all' in log or 'voice' in log:
-                if before.channel != None and after.channel == None:
-                    emb.add_field(name = ' | Пользователь отключился', value = f'Пользователь {member.mention} отключился из {before.channel.mention}', inline = True)
-                    counter += 1
-
-            if 'voice_reconnect' in log or 'all' in log or 'voice' in log:
-                if before.channel != None and after.channel != None:
-                    emb.add_field(name = ' | Пользователь переподключился', value = f'Пользователь {member.mention} переподключился из {before.channel.mention} в {after.channel.mention}', inline = True)
-                    counter += 1
-
-            if counter != 0:
-                await channel.send(embed = emb)
-
-
-
-    @commands.Cog.listener()
-    async def on_raw_reaction_add(self, payload):
-
-        async def rr(l, func, message, payload, num):
-            roles = []
-            server = servers.find_one({"server":payload.guild_id})
-
+        async def reackt():
+            nonlocal reaction
             try:
-                for i in l[1]:
-                    roles.append(message.guild.get_role(i))
-                if func == 'add':
-                    await payload.member.add_roles(*roles, reason="Добавление роли за реакцию.")
-                elif func == 'remove':
-                    await payload.member.remove_roles(*roles, reason="Удаление роли за реакцию.")
-                elif func == 'verify':
-                    await payload.member.add_roles(*roles, reason="Добавление роли за верификацию.")
-                    await message.remove_reaction(payload.emoji.name, payload.member)
-                elif func == 'limit':
-                    if len(l[3]) >= l[2]:
-                        await message.remove_reaction(payload.emoji.name, payload.member)
-                        return
-                    else:
-                        rrs = server['rr'].copy()
-                        list = rrs[str(payload.message_id)]['emojis'][num][3]
-                        list.append(payload.member.id)
-                        servers.update_one({'server': payload.guild_id },{'$set': {'rr':rrs}})
+                reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check = check)
+            except asyncio.TimeoutError:
+                await msg.clear_reactions()
+            else:
+                await rr(), await reackt()
 
-                    if server['rr'][str(payload.message_id)]['limit_func'] == 'add':
-                        await payload.member.add_roles(*roles, reason="Добавление роли за реакцию.")
-                    if server['rr'][str(payload.message_id)]['limit_func'] == 'remove':
-                        await payload.member.remove_roles(*roles, reason="Удаление роли за реакцию.")
+        for x in solutions:
+            await msg.add_reaction(x)
+        await reackt()
 
+    @commands.command(usage = '-', description = 'Создание продукта в магазин.', help = 'Магазин')
+    async def add_product(self,ctx):
+
+        if funs.roles_check(ctx.author, ctx.guild.id) == False:
+            await ctx.send("У вас недостаточно прав для использования этой команды!")
+            return
+
+        server = servers.find_one({"server": ctx.guild.id})
+
+        if server['premium'] == True:
+            premit = 100
+        else:
+            premit = 50
+
+        if len(server['economy']['gl_shop']) > premit:
+            await ctx.send(f'Превышен лимит предметов которые можно добавить в магазин ({premit})')
+            return
+
+        product = {}
+
+        def embed(items = 'Не указано', name = 'Не указано', price = 'Не указано', description = 'Не указано', access_role = 'Не указано', access_balance = 'Не указано'):
+            nonlocal server
+
+            emb = discord.Embed(description = "**Создание товара**", color=server['embed_color'])
+
+            if items != 'Не указано' and items != "Укажите продаваемые предметы, Пример: 1 23 1":
+                emb.add_field(name = "Покупаемые(й) предмет(ы)", value = ', '.join(str(x) for x in items))
+            else:
+                emb.add_field(name = "Покупаемые(й) предмет(ы)", value = items)
+
+            emb.add_field(name = "Название продукта", value = name)
+            emb.add_field(name = "Цена продукта", value = price)
+            emb.add_field(name = "Описание продукта", value = description)
+            emb.add_field(name = "Требуемая роль для покупки", value = access_role)
+            emb.add_field(name = "Требуемый баланс для покупки", value = access_balance)
+            emb.set_footer(text = 'Отправляйте сообщения в чат без использованеи команд, на одно указание у вас 60 сек.')
+
+            return emb
+
+        message = await ctx.send(embed = embed())
+
+        try:
+            await message.edit(embed = embed( "Укажите продаваемые предметы, Пример: 1 23 1" ))
+            ms2 = await ctx.send(embed = discord.Embed(title = "Предметы", description = f"Вам требуется создать предмет с помощью команды {ctx.prefix}create_item\nПосле вы сможете продать предметы.\nЧто бы увеличить количетсво продаваемого предмета, укажите его id повторно.\nПример: 1 1 3 (покупать получет 2 предмета с id 1 и 1 предмет с id 3)", color=server['embed_color']))
+            msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
+        except asyncio.TimeoutError:
+            await ctx.send("Время вышло.")
+            return
+        else:
+            try:
+                await msg.delete()
+                await ms2.delete()
             except Exception:
                 pass
 
-
-        guild = self.bot.get_guild(payload.guild_id)
-        channel = guild.get_channel(payload.channel_id)
-        message = await channel.fetch_message(payload.message_id)
-        server = servers.find_one({"server":payload.guild_id})
-        emoji = payload.emoji
-        member = payload.member
-
-        try:
-            mm = server['rr'][str(message.id)]
-            mr = True
-        except Exception:
-            mr = False
-
-        if mr == True:
-            num = 0
-            for i in server['rr'][str(message.id)]['emojis']:
-                l = i
-                if emoji.name in i or emoji.id in i:
-                    try:
-                        roles = []
-                        for i in server['rr'][str(message.id)]['allow roles']:
-                            roles.append(message.guild.get_role(i))
-                        if list(set(roles) & set(payload.member.roles)) != []:
-                            await rr(l, server['rr'][str(message.id)]["func"], message, payload, num)
-                        else:
-                            await message.remove_reaction(emoji, payload.member)
-                            return
-
-                    except Exception:
-                        await rr(l, server['rr'][str(message.id)]["func"], message, payload, num)
-                    num += 1
-
-        if mr == False:
-            if server['tickets'] != {}:
-                if payload.member.bot != True:
-                    if message.id == server['tickets']['t_message']:
-                        if str(emoji) == '💬':
-                            ml = []
-                            for nn in list(server['tickets']['tick'].items()):
-                                ml.append(nn[1]['member'])
-                            if member.id in ml:
-                                await message.remove_reaction('💬', member)
-                            else:
-                                await message.remove_reaction('💬', member)
-                                category = await self.bot.fetch_channel(server['tickets']['category'])
-                                if len(category.text_channels) == 50:
-                                    await member.send(f'🌌 Галактика чем то недовольна!\nВ данный момент активно 50 тикетов, пожалуйста подождите и попробуйте позже ещё раз!\nЕсли у вас серьёзная преблема, обратитесь к администрации!')
-
-                                if len(category.text_channels) < 50:
-                                    emb = discord.Embed(title = f'Управление', description = f'Если вы хотите закрыть билет, нажмите ✅', color= server['embed_color'] )
-                                    overwrites = {
-                                                guild.default_role: discord.PermissionOverwrite(view_channel=False),
-                                                guild.me: discord.PermissionOverwrite(read_messages=True, manage_messages=True),
-                                                payload.member: discord.PermissionOverwrite(read_messages=True, send_messages=True),
-                                                }
-                                    channel = await guild.create_text_channel(name=f"ticket {server['tickets']['t_n']+1}", category = category,  overwrites=overwrites, reason = "ticket create")
-                                    msg = await channel.send(f'{member.mention}',embed = emb)
-                                    await msg.add_reaction("✅")
-                                    server['tickets']['t_n'] = server['tickets']['t_n']+1
-                                    server['tickets']['tick'].update({ str(msg.id): {'member': member.id, 'status': 'open'} })
-                                    servers.update_one({'server': guild.id},{"$set": {'tickets': server['tickets'] }})
-
-                    else:
-                        try:
-                            try:
-                                m = server['tickets']['tick'][str(message.id)]
-                            except:
-                                m = None
-
-                            if m != None:
-                                if m['status'] == 'open':
-                                    ms = m['member']
-                                    if str(emoji) == '✅':
-                                        if member.id == ms or funs.roles_check(member, guild.id) == True:
-                                            bm = guild.get_member(ms)
-                                            await message.delete()
-
-                                            overwrites = {
-                                                        guild.default_role: discord.PermissionOverwrite(view_channel=False),
-                                                        bm: discord.PermissionOverwrite(read_messages=False, send_messages = False),
-                                                        guild.me: discord.PermissionOverwrite(read_messages=True, manage_messages=True)
-                                                        }
-
-                                            await message.channel.edit(overwrites = overwrites)
-
-                                            emb = discord.Embed(title = f'Тикет закрыт', description = f'Тикет пользователя {bm.mention} был закрыт\n\nУдалить канал > 🧨\nСохранить историю > 📜\nОграничить доступ к тикетам > ❌', color= server['embed_color'] )
-                                            msg = await message.channel.send(embed = emb)
-
-                                            server['tickets']['tick'].update({ str(msg.id): {'status': 'close', 'member': bm.id} })
-
-                                            del server['tickets']['tick'][str(message.id)]
-                                            servers.update_one({'server': guild.id},{"$set": {'tickets': server['tickets'] }})
-
-                                            await msg.add_reaction("🧨")
-                                            await msg.add_reaction("📜")
-                                            await msg.add_reaction("❌")
-
-
-                                if m['status'] == 'close':
-                                    if str(emoji) == '🧨':
-                                        await message.channel.delete(reason = 'ticket remove')
-                                        del server['tickets']['tick'][str(message.id)]
-
-                                    elif str(emoji) == '📜':
-                                        await message.delete()
-                                        del server['tickets']['tick'][str(message.id)]
-
-                                    elif str(emoji) == '❌':
-
-                                        try:
-                                            server['tickets']['bl'].append(server['tickets']['tick'][str(message.id)]['member'])
-                                        except :
-                                            server['tickets'].update({ 'bl':[server['tickets']['tick'][str(message.id)]['member']] })
-
-                                        emb = discord.Embed(title = f'Тикет закрыт', description = f'Тикет пользователя {bm.mention} был закрыт\n\nУдалить канал > 🧨\nСохранить историю > 📜\n`Ограничен доступ к тикетам!`', color= server['embed_color'] )
-                                        await message.channel.edit(embed = emb)
-
-                                    servers.update_one({'server': guild.id},{"$set": {'tickets': server['tickets'] }})
-
-
-                        except Exception:
-                            pass
-
-
-
-            if server['pizza_board'] != {}:
-                if payload.member.bot != True:
-                    if message.author.bot != True:
-                        if str(emoji) == '🍕':
-
-                            r_l = 0
-                            for i in message.reactions:
-                                if str(i) == '🍕':
-                                    break
-                                else:
-                                    r_l += 1
-
-                            if server['pizza_board']['count'] <= message.reactions[r_l].count:
-                                pizz_channel = await self.bot.fetch_channel(server['pizza_board']['channel'])
-                                try:
-                                    pzz_mes =  await pizz_channel.fetch_message(server['pizza_board']['messages'][str(message.id)]['m_id'])
-
-                                    emb = discord.Embed(title = f'Сообщение достойное пиццы!', description = f'{ message.content}', color=0xFF8B1F )
-
-                                    emb.set_author(name = message.author.name, icon_url = message.author.avatar.url)
-
-                                    if message.attachments != []:
-                                        if message.attachments[0].content_type in ['image/jpeg', 'image/png', 'image/gif']:
-                                            emb.set_image(url = message.attachments[0].url)
-
-                                    await pzz_mes.edit(content = f"<:n_pizza:871093811626000414> {message.reactions[r_l].count} ➜ {message.channel.mention}", embed = emb, view= url_button(url= message.jump_url, emoji = '▶', label = 'Прыг!'))
-
-                                except :
-                                    emb = discord.Embed(title = f'Сообщение достойное пиццы!', description = f'{ message.content}', color=0xFF8B1F )
-
-                                    emb.set_author(name = message.author.name, icon_url = message.author.avatar.url)
-
-                                    if message.attachments != []:
-                                        if message.attachments[0].content_type in ['image/jpeg', 'image/png', 'image/gif']:
-                                                emb.set_image(url = message.attachments[0].url)
-
-                                    if message.content != '':
-                                        pzz_mes = await pizz_channel.send(f"<:n_pizza:871093811626000414> {message.reactions[r_l].count} ➜ {message.channel.mention}", embed = emb, view= url_button(url= message.jump_url, emoji = '▶', label = 'Прыг!'))
-
-                                        try:
-                                            server['pizza_board']['messages'].update({str(message.id): {'m_id': pzz_mes.id}})
-                                        except:
-                                            server['pizza_board'].update({'messages': {str(message.id): {'m_id': pzz_mes.id}}})
-                                        servers.update_one({"server": payload.guild_id}, {"$set": {"pizza_board": server['pizza_board']}})
-
-
-    @commands.Cog.listener()
-    async def on_raw_reaction_remove(self, payload):
-
-        async def rr(l, func, message, payload, num):
-            guild = self.bot.get_guild(payload.guild_id)
-            member = guild.get_member(payload.user_id)
-            roles = []
+            act = []
             try:
-
-                for i in l[1]:
-                    roles.append(message.guild.get_role(i))
-                if func == 'add':
-                    await member.remove_roles(*roles, reason="Удаление роли за снятие реакции.")
-                elif func == 'remove':
-                    await member.add_roles(*roles, reason="Добавление роли за снятие реакции.")
-                elif func == 'limit':
-                    if len(l[3]) > l[2]:
-                        return
-                    else:
-                        try:
-                            rrs = server['rr'].copy()
-                            list = rrs[str(payload.message_id)]['emojis'][num][3]
-                            list.remove(member.id)
-                            servers.update_one({'server': payload.guild_id },{'$set': {'rr':rrs}})
-                        except Exception:
-                            pass
-
-                    if server['rr'][str(payload.message_id)]['limit_func'] == 'remove':
-                        await member.add_roles(*roles, reason="Добавление роли за удаление реакцию.")
-                    if server['rr'][str(payload.message_id)]['limit_func'] == 'add':
-                        await member.remove_roles(*roles, reason="Удаление роли за снятие реакции.")
-
+                try:
+                    act1 = msg.content.split()
+                    for i in act1:
+                        act.append(int(i))
+                except Exception:
+                    await ctx.send("Требовалось указать __число__, повторите настройку ещё раз.")
+                    return
+                for i in act:
+                    server['items'][str(i)]
             except Exception:
+                await ctx.send("Требовалось указать __id__ (число) существующего предмета, повторите настройку ещё раз.")
                 return
 
-        channel = await self.bot.fetch_channel(payload.channel_id)
-        message = await channel.fetch_message(payload.message_id)
-        server = servers.find_one({"server":payload.guild_id})
+
+            product.update({ 'items': act })
 
         try:
-            mm = server['rr'][str(message.id)]
+            await message.edit(embed = embed(product['items'], f'Укажите название продукта: (не более 50 символов)'))
+            msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
+        except asyncio.TimeoutError:
+            await ctx.send("Время вышло.")
+            return
+        else:
+            try:
+                await msg.delete()
+            except Exception:
+                pass
+            if len(message.content) > 50:
+                await ctx.send("Название больше 50-ти символов")
+                return
+            product.update({ 'name': msg.content})
+
+        try:
+            await message.edit(embed = embed(product['items'], product['name'], f"Укажите стоимость `{product['name']}`"))
+            msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
+        except asyncio.TimeoutError:
+            await ctx.send("Время вышло.")
+            return
+        else:
+            try:
+                await msg.delete()
+            except Exception:
+                pass
+
+            try:
+                act = int(msg.content)
+            except Exception:
+                await ctx.send("Требовалось указать __число__!")
+                return
+
+            product.update({ 'price': act})
+
+        try:
+            await message.edit(embed = embed(product['items'], product['name'], f"{server['economy']['currency']}{product['price']}", f'Укажите описание продукта или `none`: (макс 150 символов)'))
+            msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
+        except asyncio.TimeoutError:
+            await ctx.send("Время вышло.")
+            return
+        else:
+            try:
+                await msg.delete()
+            except Exception:
+                pass
+            description = str(msg.content)
+            if description == 'none':
+                product.update({ 'description': None})
+            elif len(description) > 0 and len(description) < 151:
+                product.update({ 'description': msg.content})
+            else:
+                await ctx.send("Требовалось указать описание (макс 50 символов) или `none`, повторите настройку ещё раз!")
+                return
+
+        try:
+            await message.edit(embed = embed(product['items'], product['name'], f"{server['economy']['currency']}{product['price']}", product['description'], f"Укажите [id](https://support.discord.com/hc/ru/articles/206346498-%D0%93%D0%B4%D0%B5-%D0%BC%D0%BD%D0%B5-%D0%BD%D0%B0%D0%B9%D1%82%D0%B8-ID-%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D0%B5%D0%BB%D1%8F-%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80%D0%B0-%D1%81%D0%BE%D0%BE%D0%B1%D1%89%D0%B5%D0%BD%D0%B8%D1%8F-) роли требуемой для покупки или `none`"))
+            msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
+        except asyncio.TimeoutError:
+            await ctx.send("Время вышло.")
+            return
+        else:
+            try:
+                await msg.delete()
+            except Exception:
+                pass
+
+            if msg.content == 'none':
+                product.update({ 'access_role': None})
+
+            else:
+                try:
+                    act = int(msg.content)
+                except Exception:
+                    await ctx.send("Требовалось указать id роли, повторите настройку ещё раз.")
+                    return
+                role = ctx.guild.get_role(act)
+                try:
+                    act = role.id
+                except Exception:
+                    await ctx.send("Требовалось указать id существующей роли, повторите настройку ещё раз.")
+                    return
+
+                product.update({ 'access_role': act})
+
+        try:
+            await message.edit(embed = embed(product['items'], product['name'], f"{server['economy']['currency']}{product['price']}", product['description'], product['access_role'], "Укажите требуемый баланс для покупки или `none`"))
+            msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
+        except asyncio.TimeoutError:
+            await ctx.send("Время вышло.")
+            return
+        else:
+            try:
+                await msg.delete()
+            except Exception:
+                pass
+
+            if msg.content == 'none':
+                product.update({ 'access_balance': None})
+            else:
+                try:
+                    act = int(msg.content)
+                except Exception:
+                    await ctx.send("Требовалось указать __число__!")
+                    return
+
+                product.update({ 'access_balance': act})
+
+        try:
+            l = server['economy']['gl_shop']
+            list = []
+            for i in l.keys():
+                list.append(int(i))
+            l = max(list)+1
         except Exception:
+            l = 1
+
+        await message.edit(embed = embed(product['items'], product['name'], f"{server['economy']['currency']}{product['price']}", product['description'], product['access_role'], product['access_balance']))
+
+        await ctx.send(f"Предмет с id {l} добавлен в магазин!")
+
+        server = servers.find_one({"server": ctx.guild.id})
+        il = server['economy']
+        il['gl_shop'].update({f'{l}': product})
+        servers.update_one({'server':ctx.guild.id},{"$set":{'economy': il}})
+
+    @commands.command(usage = '(id)', description = 'Удаление продукта.', help = 'Магазин')
+    async def remove_product(self,ctx, id:int):
+        if funs.roles_check(ctx.author, ctx.guild.id) == False:
+            await ctx.send("У вас недостаточно прав для использования этой команды!")
             return
 
-        emoji = payload.emoji
-        server = servers.find_one({"server": payload.guild_id})
+        server = servers.find_one({"server": ctx.guild.id})
+        il = server['economy']
 
-        num = 0
-        for i in server['rr'][str(message.id)]['emojis']:
-            l = i
-            if emoji.name in i or emoji.id in i:
-                await rr(l, server['rr'][str(message.id)]["func"], message, payload, num)
-            num = 0
+        try:
+            del il['gl_shop'][str(id)]
+            servers.update_one({'server':ctx.guild.id},{"$set":{'economy': il}})
+            await ctx.send("Продукт с таким id был удалён")
+        except KeyError:
+            await ctx.send("Продукт с таким id не был найден, проверьте правильность указания id")
+
+    @commands.command(usage = '(id) (key) (args)', description = 'Изменение продукта.', help = 'Магазин')
+    async def edit_product(self,ctx, id:int, key, *args):
+        if funs.roles_check(ctx.author, ctx.guild.id) == False:
+            await ctx.send("У вас недостаточно прав для использования этой команды!")
+            return
+
+        server = servers.find_one({"server": ctx.guild.id})
+        il = server['economy']
+        try:
+            il['gl_shop'][str(id)]
+        except KeyError:
+            await ctx.send("Продукт с таким id не был найден, проверьте правильность указания id")
+            return
+
+        if key not in ['items', 'name', 'price', 'description', 'access_role', 'access_balance']:
+            await ctx.send("У продукта нету такого параметра, укажите 1 из этого списка: items, name, price, description, access_role, access_balance")
+            return
 
 
-    @commands.Cog.listener()
-    async def on_member_update(self, before, after):
+        if key == 'items':
 
-        async def on_nitro_boost(booster):
-            server = servers.find_one({"server": booster.guild.id})
-            if server["boost"]["send"] == None:
+            al = []
+            for i in args:
+                al.append(i)
+
+            items = []
+            for id in al:
+                try:
+                    server['items'][str(id)]
+                    items.append(id)
+                except KeyError:
+                    pass
+
+            if len(items) != 0:
+                il['gl_shop'][str(id)].update({f'{key}': items})
+                servers.update_one({'server':ctx.guild.id},{"$set":{'economy': il}})
+
+        elif key == 'name':
+            if len(str(args)) > 50:
+                await ctx.send("Название больше 150-ти символов!")
                 return
 
-            channel = await self.bot.fetch_channel(server["boost"]["send"])
+            il['gl_shop'][str(id)].update({f'{key}': len(str(args))})
+            servers.update_one({'server':ctx.guild.id},{"$set":{'economy': il}})
 
-            if server['boost']['description'] != None:
-                text = funs.text_replase(server['boost']['description'], booster)
-            else:
-                text = f"Огромное спасибо {booster.mention}, что помог серверу!"
+        elif key == 'price':
 
-            emb = discord.Embed(title = 'Бустит сервер!', description =f"{text}", color=server['embed_color'] )
-            emb.set_author(icon_url = 'https://images-ext-1.discordapp.net/external/t8PQC99J_sKLcmwB6EVhtlmiIq8iG47SHE_gDJcQeOU/https/i.imgur.com/GdS5i6t.gif', name = booster)
-            emb.set_thumbnail(url= booster.avatar.url)
-            if server["boost"]["url"] != None:
-                emb.set_image(url = server["boost"]["url"])
-            if server["boost"]["footer"] != None:
-                emb.set_footer(text = funs.text_replase(server['boost']['footer'], booster))
+            al = []
+            for i in args:
+                al.append(i)
 
-            await channel.send(embed = emb)
+            try:
+                pr = int(al[0])
+            except Exception:
+                await ctx.send("Требовалось указать цену, число!")
+                return
 
-            if server['boost']['reward'] != []:
-                user = funs.user_check(booster, booster.guild)
-                for i in server['boost']['reward']:
-                    user['inv'].append(funs.creat_item(booster.guild.id, i))
-                funs.user_update(booster.id, booster.guild, 'inv', user['inv'])
+            if pr < 0:
+                await ctx.send("Цена не может быть меньше 0!")
+                return
 
+            il['gl_shop'][str(id)].update({f'{key}': pr})
+            servers.update_one({'server':ctx.guild.id},{"$set":{'economy': il}})
 
-        if after.premium_since != None and before.premium_since != after.premium_since and before.premium_since != None:
-            await on_nitro_boost(before)
 
-        #log
-        try:
-            server = servers.find_one({"server": after.guild.id})
+        elif key == 'description':
+            if len(str(args)) > 150:
+                await ctx.send("Описание не может быть больше 150-ти символов!")
+                return
 
-            if server['mod']['log_channel'] != {}:
-                counter = 0
-                log = server['mod']['log_channel']['logging']
-                channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-                emb = discord.Embed(title = f'Обновление пользователя', description = f'Пользователь {before.mention} был обновлён', color=0xE28112 )
+            il['gl_shop'][str(id)].update({f'{key}': len(str(args))})
+            servers.update_one({'server':ctx.guild.id},{"$set":{'economy': il}})
 
-                if 'member_status' in log or 'all' in log or 'member' in log:
-                    if before.status != after.status:
+        elif key == 'access_role':
+            al = []
+            for i in args:
+                al.append(i)
 
-                        emb.add_field(name = ' | Пользователь обновил статус', value = f'Изначальный статус: `{ before.status}`\nСейчас статус: `{after.status }`', inline = True)
-                        counter += 1
+            try:
+                role = ctx.guild.get_role(int(al[0]))
+            except Exception:
+                await ctx.send("Требовалось указать id существующей роли!")
+                return
 
-                if 'member_nick' in log or 'all' in log or 'member' in log:
-                    if before.nick != after.nick:
+            il['gl_shop'][str(id)].update({f'{key}': role.id})
+            servers.update_one({'server':ctx.guild.id},{"$set":{'economy': il}})
 
-                        emb.add_field(name = ' | Обновление никнейма пользователя', value = f'Изначальный ник: `{ before.nick}`\nСейчас ник: `{after.nick}`', inline = True)
-                        counter += 1
+        elif key == 'access_balance':
 
-                if 'member_roles' in log or 'all' in log or 'member' in log:
-                    if before.roles != after.roles:
+            al = []
+            for i in args:
+                al.append(i)
 
-                        drf = list( (set(after.roles) | set(before.roles)) - (set(after.roles) & set(before.roles)) )
-                        ddr = [] #удалённые роли
-                        adr = [] #добавленые роли
+            try:
+                pr = int(al[0])
+            except Exception:
+                await ctx.send("Требовалось указать баланс доступа, число!")
+                return
 
-                        for i in drf:
-                            if i in before.roles and i not in after.roles:
-                                ddr.append(i)
-                            if i in after.roles and i not in before.roles:
-                                adr.append(i)
+            if pr < 0:
+                await ctx.send("Баланс не может быть меньше 0!")
+                return
 
-                        if ddr != []:
-                            text = ''
-                            for i in ddr:
-                                text += f'{i.mention} '
+            il['gl_shop'][str(id)].update({f'{key}': pr})
+            servers.update_one({'server':ctx.guild.id},{"$set":{'economy': il}})
 
-                            emb.add_field(name = ' | Удалённые роли у пользователя', value = text, inline = True)
-                            counter += 1
-
-                        if adr != []:
-                            text = ''
-                            for i in adr:
-                                text += f'{i.mention} '
-
-                            emb.add_field(name = ' | Добавленные роли у пользователя', value = text, inline = True)
-                            counter += 1
-
-                if 'member_top_role' in log or 'all' in log or 'member' in log:
-                    if before.top_role != after.top_role:
-
-                        emb.add_field(name = ' | Высшая роль пользователя изменилась', value = f'Изначальный роль: `{ before.top_role}`\nСейчас роль: `{after.top_role}`', inline = True)
-                        counter += 1
-
-
-                if counter != 0:
-                    await channel.send(embed = emb)
-        except Exception:
-            pass
-
-
-
-    #log
-
-    @commands.Cog.listener()
-    async def on_guild_channel_update(self, before, after):
-
-        try:
-            if type(before) == discord.channel.CategoryChannel:
-                words = ["категории", 'Категория', 'была обновлена.']
-
-            else:
-                words = ['канала', 'Канал', 'был обновлён.']
-
-            server = servers.find_one({"server": before.guild.id})
-
-            if server['mod']['log_channel'] != {}:
-                counter = 0
-                log = server['mod']['log_channel']['logging']
-                channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-                emb = discord.Embed(title = f'Обновление {words[0]}', description = f'{words[1]} {before.mention} {words[2]}', color=0xE28112 )
-
-                if 'channel_name' in log or 'all' in log or 'channel' in log:
-                    if before.name != after.name:
-                        emb.add_field(name = ' | Обновление названия', value = f'Изначальное название: `{ before.name }`\nСейчас называется: `{ after.name }`', inline = True)
-                        counter += 1
-
-                if 'channel_category' in log or 'all' in log or 'channel' in log:
-                    if before.category != after.category:
-                        emb.add_field(name = ' | Обновление категории', value = f'Изначальная категория: `{ before.category }`\nСейчас в категории: `{ after.category }`', inline = True)
-                        counter += 1
-
-                if 'channel_rights' in log or 'all' in log or 'channel' in log:
-                    if before.overwrites != after.overwrites:
-
-                        dr = {}
-                        for i in dict(before.overwrites):
-                            n = []
-                            for b in dict(before.overwrites)[i]:
-                                n.append(b)
-                            dr.update({str(i.id): n})
-
-                        dr2 = {}
-                        for i in dict(after.overwrites):
-                            n = []
-                            for b in dict(after.overwrites)[i]:
-                                n.append(b)
-                            dr2.update({str(i.id): n})
-
-                        afd = {}
-
-                        for x in dr2:
-                            md = {}
-                            for nx in dr2[str(x)]:
-                                md.update({ str(list(nx)[0]) : list(nx)[1]})
-                            afd.update({x: md})
-
-                        drf = {} #совпадения двух словарей
-                        ddr = [] #удалённые роли
-                        adr = {} #добавленые роли
-
-                        for key in dr:
-                            try:
-                                if dr2[key] != dr[key]:
-                                    drf.update({key: list((set(dr2[key]) | set(dr[key])) - (set(dr2[key]) & set(dr[key]))) })
-
-                            except KeyError:
-                                ddr.append(key)
-
-                        #добавленные роли
-                        for key2 in dr2:
-                            try:
-                                dr[key2]
-                            except KeyError:
-                                for l in dr2[key2]:
-                                    if list(l)[1] != None:
-                                        try:
-                                            adr[key2].append( list(l))
-                                        except KeyError:
-                                            adr.update({ key2: [ list(l) ] })
-
-                        if adr != {}:
-                            text = ''
-                            op = ''
-                            for i in adr:
-                                if before.guild.get_member(int(i)) != None:
-                                    memb = before.guild.get_member(int(i))
-                                    text += f'{memb.mention} '
-                                    op == 'пользователя'
-
-
-                                if before.guild.get_role(int(i)) != None:
-                                    rol = before.guild.get_role(int(i))
-                                    text += f'{rol.mention} '
-                                    op = 'роли'
-
-                                for n in adr[i]:
-                                    text += f'| `{n[0]}` {n[1]}\n'
-
-                            emb.add_field(name = f' | Добавление прав для {op}', value = text.replace('True','<:n:869159450588635196>').replace('False','<:f:869169592201777224>'), inline = True)
-                            counter += 1
-
-                        if ddr != []:
-                            text = ''
-                            counter2 = 0
-                            op = ''
-                            for i in ddr:
-
-                                if before.guild.get_member(int(i)) != None:
-                                    memb = before.guild.get_member(int(i))
-                                    text += f'{memb.mention}\n'
-                                    op == 'пользователя'
-
-                                if before.guild.get_role(int(i)) != None:
-                                    rol = before.guild.get_role(int(i))
-                                    text += f'{rol.mention}\n'
-                                    op = 'роли'
-
-
-                            emb.add_field(name = f' | Удаление прав у {op}', value = text, inline = True)
-                            counter += 1
-
-                        if drf != {}:
-
-                            text = ''
-                            op = ''
-                            for i in drf:
-                                if before.guild.get_member(int(i)) != None:
-                                    memb = before.guild.get_member(int(i))
-                                    text += f'Пользователь {memb.mention} \n'
-
-
-                                if before.guild.get_role(int(i)) != None:
-                                    rol = before.guild.get_role(int(i))
-                                    text += f'Роль {rol.mention} \n'
-
-                                counter2 = 0
-                                for n in drf[i]:
-                                    if afd[i][n[0]] != n[1]:
-                                        counter2 += 1
-
-                                        text += f'{n[1]} ➜ {afd[i][n[0]]} | `{n[0]}`\n'
-
-                            emb.add_field(name = f' | Имзенение прав', value = f'{text}'.replace('True','<:n:869159450588635196>').replace('False','<:f:869169592201777224>').replace('None','<:m:869169622618873906>'), inline = True)
-                            counter += 1
-
-
-                if 'channel_roles' in log or 'all' in log or 'channel' in log:
-                    if before.changed_roles != after.changed_roles:
-                        nd = ''
-                        yd = ''
-
-                        for i in before.changed_roles:
-                            if i not in after.changed_roles:
-                                nd = i.mention
-
-                        for i in after.changed_roles:
-                            if i not in before.changed_roles:
-                                yd = i.mention
-
-                        if yd != '':
-                            emb.add_field(name = ' | Роль добавлена в права доступа', value = f'{yd}', inline = True)
-                            counter += 1
-                        if nd != '':
-                            emb.add_field(name = ' | Роль убрана из прав доступа', value = f'{nd}', inline = True)
-                            counter += 1
-
-
-                if 'channel_permissions_synced' in log or 'all' in log or 'channel' in log:
-                    if before.permissions_synced != after.permissions_synced:
-                        if after.permissions_synced == True:
-                            words = 'Права канала были синхронизированы с категорией'
-                        else:
-                            words = 'Права канала более не синхронизированы с категорией'
-
-                        emb.add_field(name = ' | Синхронизация', value = words, inline = True)
-                        counter += 1
-
-                if 'channel_position' in log or 'all' in log or 'channel' in log:
-                    if before.position != after.position:
-                        emb.add_field(name = f' | Измениение позиции {words[0]}', value = f'Изначальная позиция: {before.position}\nСейчас позиция: {after.position}', inline = True)
-                        counter += 1
-                if type(after) == discord.channel.TextChannel:
-
-                    if 'channel_slowmode' in log or 'all' in log or 'channel' in log:
-                        if before.slowmode_delay != after.slowmode_delay:
-                            emb.add_field(name = f' | Медленный режим изменён', value = f'Изначальная ожидание: {funs.time_end(before.slowmode_delay)}\nСейчас ожидание: {funs.time_end(after.slowmode_delay)}', inline = True)
-                            counter += 1
-
-                    if 'channel_topic' in log or 'all' in log or 'channel' in log:
-                        if before.topic != after.topic:
-                            emb.add_field(name = f' | Изменение темы', value = f'Изначальная тема: `{before.topic}`\nСейчас тема: `{after.topic}`', inline = True)
-                            counter += 1
-
-                    if 'channel_nsfw' in log or 'all' in log or 'channel' in log:
-                        if before.is_nsfw() != after.is_nsfw():
-                            emb.add_field(name = f' | Изменение nsfw', value = f'Изначально: {before.is_nsfw()}\nСейчас: {after.is_nsfw()}'.replace('True','<:n:869159450588635196>').replace('False','<:f:869169592201777224>'), inline = True)
-                            counter += 1
+        await ctx.send("Продукт изменён!")
 
-                if type(after) in [discord.channel.VoiceChannel, discord.channel.StageChannel]:
 
-                    if 'channel_bitrate' in log or 'all' in log or 'channel' in log:
-                        if before.bitrate != after.bitrate:
-                            emb.add_field(name = f' | Изменение битрейта', value = f'Изначальный битрейт: `{before.bitrate}`\nСейчас битрейт: `{after.bitrate}`', inline = True)
-                            counter += 1
-
-                    if 'channel_rtc_region' in log or 'all' in log or 'channel' in log:
-                        if before.rtc_region != after.rtc_region:
-                            emb.add_field(name = f' | Изменение региона', value = f'Изначальный регион: `{before.rtc_region}`\nСейчас регион: `{after.rtc_region}`', inline = True)
-                            counter += 1
+    @commands.command(usage = '[page]', description = 'Магазин.', help = 'Магазин')
+    async def shop(self,ctx, numberpage:int = 1):
 
-                if type(after) == discord.channel.VoiceChannel:
+        server = servers.find_one({"server": ctx.guild.id})
+        cc = server['economy']['currency']
+        solutions = ['◀', '▶', '❌']
+        member = ctx.author
+        reaction = 'a'
 
-                    if 'channel_user_limit' in log or 'all' in log or 'channel' in log:
-                        if before.user_limit != after.user_limit:
-                            emb.add_field(name = f' | Изменение лимита', value = f'Изначальный лимит: `{before.user_limit}`\nСейчас лимит: `{after.user_limit}`', inline = True)
-                            counter += 1
+        if server['economy']['gl_shop'] == {}:
+            await ctx.send("Тут пусто!")
+            return
 
-                if counter != 0:
-                    await channel.send(embed = emb)
-        except Exception:
-            pass
+        top = list(sorted(server['economy']['gl_shop'].items(),key=lambda x: x[1]['price'],reverse=True))
 
+        if len(top) % 10 != 0:
+            l = int(len(top) / 10 + 1)
+        else:
+            l = int(len(top) / 10)
 
-    @commands.Cog.listener()
-    async def on_guild_channel_create(self, channel):
+        if numberpage > l or numberpage < 1:
+            await ctx.send("Такой страницы нет!")
+            return
 
-        try:
-            server = servers.find_one({"server": channel.guild.id})
+        def embed(numberpage):
+            nonlocal cc
+            nonlocal l
+            nonlocal ctx
+            nonlocal server
 
-            if server['mod']['log_channel'] != {}:
-
-                if 'channel_create' in server['mod']['log_channel']['logging'] or 'all' in server['mod']['log_channel']['logging'] or 'channel' in server['mod']['log_channel']['logging']:
-
-                    dr = {}
-                    drf = {} #совпадения двух словарей
-                    for i in dict(channel.overwrites):
-                        n = []
-                        for b in dict(channel.overwrites)[i]:
-                            n.append(b)
-                        dr.update({str(i.id): n})
-
-                    for key in dr:
-                        for l in dr[key]:
-                            if list(l)[1] != None:
-                                try:
-                                    drf[key].append( list(l))
-                                except KeyError:
-                                    drf.update({ key: [ list(l) ] })
-
-                    text = ''
-                    for i in drf:
-                        if channel.guild.get_member(int(i)) != None:
-                            memb = channel.guild.get_member(int(i))
-                            text += f'\nПользователь {memb.mention}'
-
-
-                        if channel.guild.get_role(int(i)) != None:
-                            rol = channel.guild.get_role(int(i))
-                            text += f'\nРоль {rol.mention}'
-
-                        for n in drf[i]:
-
-                            if n[1] == True:
-                                tf = '<:n:869159450588635196>'
-                            if n[1] == False:
-                                tf = "<:f:869169592201777224>"
-                            if n[1] == None:
-                                tf = '<:m:869169622618873906>'
-
-                            text += f'\n{tf} | `{n[0]}`'
-
-
-                    if type(channel) == discord.channel.CategoryChannel:
-                        words = f'Категория была создана'
-                        words2 = f'Категория {channel.name} была создана'
-
-                        inf = f'Название: `{channel.name}`\n ID: `{channel.id}`\n Позиция: `{channel.position}`'
-
-                    if type(channel) == discord.channel.TextChannel:
-                        words = f"Текстовой-канал был создан"
-                        words2 = f"Текстовой-канал {channel.mention} был создан"
-
-                        inf = f'Название: `{channel.name}`\n ID: `{channel.id}`\n Позиция: `{channel.position}`\n Категория: `{channel.category}`'
-
-                    if type(channel) == discord.channel.VoiceChannel:
-                        words = f"Войс-канал был создан"
-                        words2 = f"Войс-канал {channel.mention} был создан"
-
-                        inf = f'Название: `{channel.name}`\n ID: `{channel.id}`\n Позиция: `{channel.position}`\n Категория: `{channel.category}`'
-
-                    if type(channel) == discord.channel.StageChannel:
-                        words = f"Трибуна была создана"
-                        words2 = f"Трибуна {channel.mention} была создана"
-
-                        inf = f'Название: `{channel.name}`\n ID: `{channel.id}`\n Позиция: `{channel.position}`\n Категория: `{channel.category}`'
-
-
-                    channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-                    emb = discord.Embed(title = f'{words}', description = f'{words2}', color=0xFFDB8B )
-                    if text != '':
-                        emb.add_field(name = f' | Назначенные права', value = f'{text}', inline = True)
-                    emb.add_field(name = f' | Информация', value = f'{inf}', inline = True)
-                    await channel.send(embed = emb)
-        except Exception:
-            pass
-
-    @commands.Cog.listener()
-    async def on_guild_channel_delete(self, channel):
-
-
-        try:
-            server = servers.find_one({"server": channel.guild.id})
-
-            if server['mod']['log_channel'] != {}:
-                if 'channel_delete' in server['mod']['log_channel']['logging'] or 'all' in server['mod']['log_channel']['logging'] or 'channel' in server['mod']['log_channel']['logging']:
-
-                    if type(channel) == discord.channel.CategoryChannel:
-                        words = f'Категория была удалена'
-                        words2 = f'Категория {channel.name} была удалена'
-
-                        inf = f'Название: `{channel.name}`\n ID: `{channel.id}`\n Позиция: `{channel.position}`'
-
-                    if type(channel) == discord.channel.TextChannel:
-                        words = f"Текстовой-канал был удалён"
-                        words2 = f"Текстовой-канал {channel.mention} был удалён"
-
-                        inf = f'Название: `{channel.name}`\n ID: `{channel.id}`\n Позиция: `{channel.position}`\n Категория: `{channel.category}`'
-
-                    if type(channel) == discord.channel.VoiceChannel:
-                        words = f"Войс-канал был удалён"
-                        words2 = f"Войс-канал {channel.mention} был удалён"
-
-                        inf = f'Название: `{channel.name}`\n ID: `{channel.id}`\n Позиция: `{channel.position}`\n Категория: `{channel.category}`'
-
-                    if type(channel) == discord.channel.StageChannel:
-                        words = f"Трибуна была удалена"
-                        words2 = f"Трибуна {channel.mention} была удалена"
-
-                        inf = f'Название: `{channel.name}`\n ID: `{channel.id}`\n Позиция: `{channel.position}`\n Категория: `{channel.category}`'
-
-                    channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-                    emb = discord.Embed(title = f'{words}', description = f'{words2}', color=0xFDE910 )
-                    emb.add_field(name = f' | Информация', value = f'{inf}', inline = True)
-                    await channel.send(embed = emb)
-
-        except Exception:
-            pass
-
-    @commands.Cog.listener()
-    async def on_member_ban(self, guild, user):
-        try:
-            server = servers.find_one({"server": guild.id})
-
-            if server['mod']['log_channel'] != {}:
-                log = server['mod']['log_channel']['logging']
-                if 'member_ban' in log or 'all' in log or 'member' in log:
-                    channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-                    emb = discord.Embed(title = f'Бан пользователя', description = f'Пользователь {user.mention} был забанен', color=0xE52B50 )
-                    await channel.send(embed = emb)
-        except Exception:
-            pass
-
-    @commands.Cog.listener()
-    async def on_member_unban(self, guild, user):
-
-        try:
-            server = servers.find_one({"server": guild.id})
-
-            if server['mod']['log_channel'] != {}:
-                log = server['mod']['log_channel']['logging']
-                if 'member_unban' in log or 'all' in log or 'member' in log:
-                    channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-                    emb = discord.Embed(title = f'Разбан пользователя', description = f'Пользователь {user.mention} был разбанен', color=0xE52B50 )
-                    await channel.send(embed = emb)
-        except Exception:
-            pass
-
-    @commands.Cog.listener()
-    async def on_guild_emojis_update(self, guild, before, after):
-
-        try:
-            server = servers.find_one({"server": guild.id})
-            if server['mod']['log_channel'] != {}:
-                lem = list((set(before) | set(after)) - (set(before) & set(after)))
-
-                counter = 0
-                log = server['mod']['log_channel']['logging']
-                channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-
-                for i in lem:
-
-                    if i not in before and i in after:
-                        if 'emoji_create' in log or 'all' in log or 'emoji' in log:
-                            emb = discord.Embed(title = f'Обновление эмоджи', description = f'Эмоджи {i} был добавлен\nID: {i.id}\n[URL]({i.url})', color=0xFFDB8B )
-                            counter += 1
-
-                    if i in before and i not in after:
-                        if 'emoji_delete' in log or 'all' in log or 'emoji' in log:
-                            emb = discord.Embed(title = f'Обновление эмоджи', description = f'Эмоджи {i} был удалён', color=0xFFDB8B )
-                            counter += 1
-
-
-                if counter != 0:
-                    await channel.send(embed = emb)
-        except Exception:
-            pass
-
-    @commands.Cog.listener()
-    async def on_invite_create(self, invite):
-
-        try:
-            server = servers.find_one({"server": invite.guild.id})
-            if server['mod']['log_channel'] != {}:
-
-                log = server['mod']['log_channel']['logging']
-                channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-                if 'invite_create' in log or 'all' in log or 'invite' in log:
-                    if invite.max_age == 0:
-                        ttime = 'infinity'
+            num1 = 0
+            num2 = 0
+            page = numberpage
+            text = ''
+
+            if numberpage != 1:
+                numberpage *= 10
+                numberpage -= 10
+
+                if numberpage > 9:
+                    numberpage += 1
+
+            if len(top) <= 10:
+                emb = discord.Embed(title = 'Магазин предметов', description = f'Для покупки пропишите `{ctx.prefix}buy (id)`\nДля информации о продукте пропишите `{ctx.prefix}pr_info (id)`\nid указан перед названием продукта.',color=server['embed_color'])
+                for i in top:
+                    num1 += 1
+                    if i[1]['description'] == None:
+                        text = f"{cc}{i[1]['price']}"
                     else:
-                        ttime = funs.time_end(invite.max_age)
-
-                    emb = discord.Embed(title = f'Приглашение создано', description = f'Код приглашения: `{invite.code}`\nПригласивший: {invite.inviter.mention}\nЛимит времени: {ttime}\nЛимит использования: {invite.max_uses}\nВременное членство: {invite.temporary}'.replace('True','<:n:869159450588635196>').replace('False','<:f:869169592201777224>'), color=0x0000FF )
-                    await channel.send(embed = emb)
-        except Exception:
-            pass
-
-    @commands.Cog.listener()
-    async def on_invite_delete(self, invite):
+                        text = f"{cc}{i[1]['price']}\n{i[1]['description']}"
+                    emb.add_field(name = f"ID {i[0]} | {i[1]['name']}", value = text, inline = True)
 
 
-        try:
-            server = servers.find_one({"server": invite.guild.id})
-            if server['mod']['log_channel'] != {}:
+            elif len(top) > 10:
+                emb = discord.Embed(title = 'Магазин предметов', description = f'Для покупки пропишите `{ctx.prefix}buy (id)`\nДля информации о продукте пропишите `{ctx.prefix}pr_info (id)`\nid указан перед названием продукта.',color=server['embed_color'])
+                for i in top:
+                    num1 += 1
+                    if num1 >= numberpage and num2 < 10:
+                        num2 += 1
+                        if i[1]['description'] == None:
+                            text = f"{cc}{i[1]['price']}"
+                        else:
+                            text = f"{cc}{i[1]['price']}\n{i[1]['description']}"
+                        emb.add_field(name = f"ID {i[0]} | {i[1]['name']}", value = text, inline = True)
 
-                log = server['mod']['log_channel']['logging']
-                channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-                if 'invite_delete' in log or 'all' in log or 'invite' in log:
-                    emb = discord.Embed(title = f'Приглашение удалено', description = f'Код приглашения: `{invite.code}`', color=0x0000FF )
-                    await channel.send(embed = emb)
-        except Exception:
-            pass
+            emb.set_footer(text=f"Страница {page}/{l}")
 
-    @commands.Cog.listener()
-    async def on_message_edit(self, before, after):
+            return emb
 
-        try:
-            server = servers.find_one({"server": before.guild.id})
-            if server['mod']['log_channel'] != {}:
-                if before.author.bot == True:
+        msg = await ctx.send(embed = embed(numberpage))
+
+        def check( reaction, user):
+            nonlocal msg
+            return user == ctx.author and str(reaction.emoji) in solutions and str(reaction.message) == str(msg)
+
+        async def rr():
+            nonlocal reaction
+            nonlocal numberpage
+            nonlocal l
+            if str(reaction.emoji) == '◀':
+                await msg.remove_reaction('◀', member)
+                numberpage -= 1
+                if numberpage < 1:
+                    numberpage = 1
+
+                await msg.edit(embed = embed(numberpage))
+
+
+            elif str(reaction.emoji) == '▶':
+                await msg.remove_reaction('▶', member)
+                numberpage += 1
+                if numberpage > l:
+                    numberpage = l
+
+                await msg.edit(embed = embed(numberpage))
+
+            elif str(reaction.emoji) == '❌':
+                await msg.clear_reactions()
+                return
+
+        async def reackt():
+            nonlocal reaction
+            try:
+                reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check = check)
+            except asyncio.TimeoutError:
+                await msg.clear_reactions()
+            else:
+                await rr(), await reackt()
+
+        for x in solutions:
+            await msg.add_reaction(x)
+        await reackt()
+
+    @commands.command(usage = '(id)', description = 'Покупка продукта.', help = 'Магазин', aliases = ['купить'])
+    async def buy(self,ctx, id:int):
+        server = servers.find_one({"server": ctx.guild.id})
+        list_keys = list(server['economy']['gl_shop'].keys())
+        if str(id) not in list_keys:
+            await ctx.send("Продукта с таким id нет в магазине")
+            return
+
+        product = server['economy']['gl_shop'][str(id)]
+        items = []
+        for i in product['items']:
+            items.append(i)
+        user = funs.user_check(ctx.author, ctx.guild)
+
+        if user['money'] < product['price']:
+            await ctx.send(f"У вас не достаточно {server['economy']['currency']}монет для покупки данного продукта!")
+            return
+
+        if product['access_role'] != None:
+            role = ctx.guild.get_role(product['access_role'])
+            if role not in ctx.author.roles:
+                await ctx.send(f"У вас нет роли {role.name} для покупки данного продукта!")
+                return
+
+        if product['access_balance'] != None:
+            if product['access_balance'] > user['money']:
+                await ctx.send(f"Этот продукт можно купить имея баланс >= {server['economy']['currency']}{product['access_balance']}")
+                return
+
+        user['money'] = user['money'] - product['price']
+        if funs.user_update(ctx.author.id, ctx.guild, 'money', user['money']) == True:
+            for i in product['items']:
+                user['inv'].append(funs.creat_item(ctx.guild.id, i))
+
+            if funs.user_update(ctx.author.id, ctx.guild, 'inv', user['inv']) == True:
+                await ctx.send(f"Продукт был куплен!")
+
+    @commands.command(usage = '(id)', description = 'Просмотр информации о продукте.', help = 'Магазин')
+    async def pr_info(self,ctx, id:int):
+        server = servers.find_one({"server": ctx.guild.id})
+        list_keys = list(server['economy']['gl_shop'].keys())
+        if str(id) not in list_keys:
+            await ctx.send("Продукта с таким id нет в магазине")
+            return
+
+        product = server['economy']['gl_shop'][str(id)]
+        user = funs.user_check(ctx.author, ctx.guild)
+
+        if len(product['items']) == 1:
+
+            item = server['items'][str(product['items'][0])]
+
+            ttype = item['type']
+            ttype = ttype.replace('eat', f'🍖 | Еда')
+            ttype = ttype.replace('point', f'<:mana:780352235246452756> | Зелье')
+            ttype = ttype.replace('case', f'<:chest:827218232783405097> | Сундук сокровищ')
+            ttype = ttype.replace('armor', f'<:armor:827220888130682880> | Броня')
+            ttype = ttype.replace('pet', f'<:pet:780381475207905290> | Питомец')
+            ttype = ttype.replace('material', f'<:leather:783036521099034626> | Материал')
+            ttype = ttype.replace('recipe', f'<:recipe:827221967886745600> | Рецепт')
+            ttype = ttype.replace('role', f'<:icons8pokeball96:779718625459437608> | Роль')
+
+            quality = item['quality']
+            if quality == 'n':
+                quality = '<:normal_q:781531816993620001>'
+            elif quality == 'u':
+                quality = '<:unusual_q:781531868780691476>'
+            elif quality == 'r':
+                quality = '<:rare_q:781531919140651048>'
+            elif quality == 'o':
+                quality = '<:orate_q:781531996866084874>'
+            elif quality == 'l':
+                quality = '<:legendary_q:781532085130100737>'
+
+            if item['type']== 'eat':
+                act_title = 'Питательность'
+
+            if item['type'] == 'point':
+                if item['style'] == 'heal':
+                    act_title = 'Восстановление здоровья'
+                if item['style'] == 'mana':
+                    act_title = 'Восстановление маны'
+
+            if item['type'] == 'case':
+                act_title = 'Сундук удачи'
+
+            if item['type'] == 'armor':
+                if item['style'] == 'add':
+                    act_title = 'Добавление брони'
+                if item['style'] == 'set':
+                    act_title = 'Установка брони'
+
+            if item['type'] == 'weapon':
+                act_title = 'Урон'
+
+            if item['type'] == 'pet':
+                style = item['style']
+                if style == 'hp+':
+                    act_title = 'Бонус к здоровью'
+                if style == 'mana+':
+                    act_title = 'Бонус к мане'
+                if style == 'damage+':
+                    act_title = 'Бонус к урону'
+                if style == 'armor+':
+                    act_title = 'Бонус к защите'
+                if style == 'heal+':
+                    act_title = 'Бонус восстановления здоровья'
+                if style == 'mn+':
+                    act_title = 'Бонус восстановления маны'
+
+            if item['type'] == 'recipe':
+                act_title = 'Рецепт'
+                act  = f"Материалы: {product['items']}\nСоздаёт: {server['items'][str(product['create']['name'])]}"
+
+            if item['type'] == 'role':
+                if item['style'] == 'add':
+                    act_title = 'Добавление роли'
+                if item['style'] == 'remove':
+                    act_title = 'Удаление роли'
+
+            emb = discord.Embed(title = f"Продукт | {product['name']}", description = f"Тип предмета: {ttype}\nНазвание: {item['name']}\nКачество: {quality}\n{act_title}: {item['act']}\nЦена: {product['price']}\nРоль для покупки: <@&{product['access_role']}>\nТребуемый баланс: {product['access_balance']}".replace('<@&None>', '-').replace('None', '0'), color=server['embed_color'])
+            if item['image'] != 'none':
+                emb.set_thumbnail(url = item['image'])
+            if item['description'] != None:
+                emb.add_field(name ='Описание', value = item['description'], inline = False)
+
+            await ctx.send(embed = emb)
+
+
+        if len(product['items']) != 1:
+            embeds = {}
+
+            em = discord.Embed(title = f"Продукт | {product['name']}", description = f"Продукт содержит в себе объекты с id: {', '.join(str(i) for i in product['items'])}\nЦена: {product['price']}\nРоль для покупки: <@&{product['access_role']}>\nТребуемый баланс: {server['economy']['currency']}{product['access_balance']}".replace('<@&None>', '-').replace('None', '0'), color=server['embed_color'])
+
+            embeds.update({ '1' : em})
+
+            for i in product['items']:
+                print(i)
+                item = server['items'][str(i)]
+
+                type = item['type']
+                ttype = item['type']
+                ttype = ttype.replace('eat', f'🍖 | Еда')
+                ttype = ttype.replace('point', f'<:mana:780352235246452756> | Зелье')
+                ttype = ttype.replace('case', f'<:chest:827218232783405097> | Сундук сокровищ')
+                ttype = ttype.replace('armor', f'<:armor:827220888130682880> | Броня')
+                ttype = ttype.replace('pet', f'<:pet:780381475207905290> | Питомец')
+                ttype = ttype.replace('material', f'<:leather:783036521099034626> | Материал')
+                ttype = ttype.replace('recipe', f'<:recipe:827221967886745600> | Рецепт')
+                ttype = ttype.replace('role', f'<:icons8pokeball96:779718625459437608> | Роль')
+
+                quality = item['quality']
+                if quality == 'n':
+                    quality = '<:normal_q:781531816993620001>'
+                elif quality == 'u':
+                    quality = '<:unusual_q:781531868780691476>'
+                elif quality == 'r':
+                    quality = '<:rare_q:781531919140651048>'
+                elif quality == 'o':
+                    quality = '<:orate_q:781531996866084874>'
+                elif quality == 'l':
+                    quality = '<:legendary_q:781532085130100737>'
+
+                if item['type']== 'eat':
+                    act_title = 'Питательность'
+
+                if item['type'] == 'point':
+                    if item['style'] == 'heal':
+                        act_title = 'Восстановление здоровья'
+                    if item['style'] == 'mana':
+                        act_title = 'Восстановление маны'
+
+                if item['type'] == 'case':
+                    act_title = 'Сундук удачи'
+
+                if item['type'] == 'armor':
+                    if item['style'] == 'add':
+                        act_title = 'Добавление брони'
+                    if item['style'] == 'set':
+                        act_title = 'Установка брони'
+
+                if item['type'] == 'weapon':
+                    act_title = 'Урон'
+
+                if item['type'] == 'pet':
+                    style = item['style']
+                    if style == 'hp+':
+                        act_title = 'Бонус к здоровью'
+                    if style == 'mana+':
+                        act_title = 'Бонус к мане'
+                    if style == 'damage+':
+                        act_title = 'Бонус к урону'
+                    if style == 'armor+':
+                        act_title = 'Бонус к защите'
+                    if style == 'heal+':
+                        act_title = 'Бонус восстановления здоровья'
+                    if style == 'mn+':
+                        act_title = 'Бонус восстановления маны'
+
+                if item['type'] == 'recipe':
+                    act_title = 'Рецепт'
+                    ct = act
+                    act  = f"Материалы: {ct['items']}\nСоздаёт: {server['items'][str(ct['create']['name'])]}"
+
+                if item['type'] == 'role':
+                    if item['style'] == 'add':
+                        act_title = 'Добавление роли'
+                    if item['style'] == 'remove':
+                        act_title = 'Удаление роли'
+
+                emb = discord.Embed(title = f"Продукт | {product['name']}", description = f"Тип предмета: {ttype}\nНазвание: {item['name']}\nКачество: {quality}\n{act_title}: {item['act']}", color=server['embed_color'])
+                if item['image'] != 'none':
+                    emb.set_thumbnail(url = item['image'])
+                if item['description'] != None:
+                    emb.add_field(name ='Описание', value = item['description'], inline = False)
+
+
+
+                l = int(max(embeds.keys()))+1
+
+                embeds.update({ str(l) : emb})
+
+            msg = await ctx.send(embed = embeds['1'].set_footer(text = f'1 \ {l} | Покупка 🛒 | Просмотр ◀ ▶'))
+            solutions = ['◀', '🛒', '▶', '❌']
+            member = ctx.author
+            reaction = 'a'
+            numberpage = 1
+
+            def check( reaction, user):
+                nonlocal msg
+                return user == ctx.author and str(reaction.emoji) in solutions and str(reaction.message) == str(msg)
+
+            async def rr(reaction):
+                nonlocal numberpage
+                nonlocal ctx
+                nonlocal server
+                nonlocal product
+                nonlocal embeds
+                if str(reaction.emoji) == '◀':
+                    await msg.remove_reaction('◀', member)
+                    numberpage -= 1
+                    if numberpage < 1:
+                        numberpage = int(max(embeds.keys()))
+
+                    await msg.edit(embed = embeds[str(numberpage)].set_footer(text = f'{numberpage} \ {l} | Покупка 🛒 | Просмотр ◀ ▶') )
+                    return True
+
+
+                if str(reaction.emoji) == '▶':
+                    await msg.remove_reaction('▶', member)
+                    numberpage += 1
+                    if numberpage > int(max(embeds.keys())):
+                        numberpage = 1
+
+                    await msg.edit(embed = embeds[str(numberpage)].set_footer(text = f'{numberpage} \ {l} | Покупка 🛒 | Просмотр ◀ ▶') )
+                    return True
+
+                elif str(reaction.emoji) == '🛒':
+                    await msg.remove_reaction('🛒', member)
+
+                    items = []
+                    for i in product['items']:
+                        items.append(i)
+                    user = funs.user_check(ctx.author, ctx.guild)
+
+                    if user['money'] < product['price']:
+                        await ctx.send(f"У вас не достаточно {server['economy']['currency']}монет для покупки данного продукта!")
+                        return True
+
+                    if product['access_role'] != None:
+                        role = ctx.guild.get_role(product['access_role'])
+                        if role not in ctx.author.roles:
+                            await ctx.send(f"У вас нет роли {role.name} для покупки данного продукта!")
+                            return True
+
+                    if product['access_balance'] != None:
+                        if product['access_balance'] > user['money']:
+                            await ctx.send(f"Этот продукт можно купить имея баланс >= {server['economy']['currency']}{product['access_balance']}")
+                            return True
+
+                    user['money'] = user['money'] - product['price']
+                    if funs.user_update(ctx.author.id, ctx.guild, 'money', user['money']) == True:
+                        for i in product['items']:
+                            user['inv'].append(funs.creat_item(ctx.guild.id, i))
+
+                        if funs.user_update(ctx.author.id, ctx.guild, 'inv', user['inv']) == True:
+                            await ctx.send(f"Продукт был куплен!")
+                            return True
+
+
+                if str(reaction.emoji) == '❌':
+                    await msg.clear_reactions()
+                    return False
+
+            async def reackt():
+                nonlocal reaction
+                try:
+                    reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check = check)
+                except asyncio.TimeoutError:
+                    await msg.clear_reactions()
+                else:
+                    await rr(reaction), await reackt()
+
+            for x in solutions:
+                await msg.add_reaction(x)
+            await reackt()
+
+
+    @commands.command(usage = '-', description = 'Ежедневная награда.', help = 'Взаимодействие', aliases = ['ежедневка'])
+    async def daily(self,ctx):
+        user = funs.user_check(ctx.author, ctx.guild)
+        server = servers.find_one({"server": ctx.guild.id})
+
+        if user['cache']['week_act'][1] == None or user['cache']['week_act'][1]+1 == int(time.strftime("%j")):
+            if user['cache']['week_act'][0] == 7:
+                user['cache'].update({'week_act': [1, int(time.strftime("%j"))] })
+                funs.user_update(ctx.author.id, ctx.guild, 'cache', user['cache'])
+            else:
+                user['cache'].update({'week_act': [user['cache']['week_act'][0]+1, int(time.strftime("%j"))] })
+                funs.user_update(ctx.author.id, ctx.guild, 'cache', user['cache'])
+
+        elif user['cache']['week_act'][1]+1 != int(time.strftime("%j")):
+            user['cache'].update({'week_act': [1, int(time.strftime("%j"))] })
+            funs.user_update(ctx.author.id, ctx.guild, 'cache', user['cache'])
+
+        if len(server['economy']['daily_reward']) == 0:
+            reward = 200
+            reward_percent = 1.05
+        else:
+            reward = server['economy']['daily_reward']['reward']
+            reward_percent = server['economy']['daily_reward']['reward_percent']
+
+        url = f"https://ic.wampi.ru/2021/08/07/pizza_day_{user['cache']['week_act'][0]}.gif"
+
+        if user['cache']['week_act'][0] == 1:
+            u_r = int(reward)
+            text = '<:heart:780373079439572993> Используйте Котика каждый день что бы получить бонус к награде!'
+        else:
+            u_r = int(reward * reward_percent * user['cache']['week_act'][0])
+            text = f"<:icons8pokeball96:779718625459437608> Бонус: х{int(reward_percent * user['cache']['week_act'][0])}"
+
+        emb = discord.Embed(title = f"Ежедневный котик", description = f"<:foot:779718609177411635> Ежедневный котик принёс вам: {u_r}{server['economy']['currency']}\n{text}", color=server['embed_color'])
+        emb.set_image(url=url)
+        emb.set_thumbnail(url= 'https://i.pinimg.com/originals/94/14/3b/94143bc201d8b4942c252a19c0db605c.gif')
+        await ctx.send(embed = emb)
+
+        funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] + u_r)
+
+    @commands.command(aliases = ['21point','21очко'], usage = '(amout) [@member]', description = 'Игра "Собери 21"', help = 'Игры')
+    async def blackjack(self,ctx, amout:int, member: discord.Member = None):
+        user = funs.user_check(ctx.author, ctx.guild)
+        if member != None:
+            user2 = funs.user_check(member, ctx.guild)
+            if user2['money'] < amout:
+                await ctx.send(f'У соперника нету столько монет!')
+                return
+        server = servers.find_one({"server": ctx.guild.id})
+
+        if amout < server['economy']['games']['blackjack']['mini'] or amout > server['economy']['games']['blackjack']['max']:
+            await ctx.send(f"Укажите сумму в периоде с {server['economy']['games']['blackjack']['mini']} до {server['economy']['games']['blackjack']['max']}")
+            return
+
+        if user['money'] < amout:
+            await ctx.send(f'У вас нет столько монет!')
+            return
+
+        if ctx.author == member:
+            member = None
+        if member != None:
+            solutions = ['✅', '❌']
+            reaction = 'a'
+            msg = await ctx.send(f'{member.mention} вы приглашены сыграть в `собери 21`, нажмите ✅ для начала!')
+
+            def check( reaction, user):
+                nonlocal msg
+                return user == member and str(reaction.emoji) in solutions and str(reaction.message) == str(msg)
+
+            async def reackt():
+                nonlocal reaction
+                try:
+                    reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check = check)
+                except asyncio.TimeoutError:
+                    await msg.clear_reactions()
+                    return False
+                else:
+                    if str(reaction.emoji) == '✅':
+                        await msg.clear_reactions()
+                        return True
+
+                    elif str(reaction.emoji) == '❌':
+                        await msg.clear_reactions()
+                        return False
+
+            for x in solutions:
+                await msg.add_reaction(x)
+
+            if await reackt() == True:
+                try:
+                    await msg.delete()
+                except Exception:
+                    pass
+                pass
+            else:
+                try:
+                    await msg.delete()
+                except Exception:
+                    pass
+                return
+
+
+        deck = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]*4
+        random.shuffle(deck)
+
+        def deal(deck):
+            hand = []
+            for i in range(2):
+                random.shuffle(deck)
+                card = deck.pop()
+                if card == 11:card = "J"
+                if card == 12:card = "Q"
+                if card == 13:card = "K"
+                if card == 14:card = "A"
+                hand.append(card)
+            return hand
+
+        mem1_hand = []
+        mem2_hand = []
+        mem1_hand = deal(deck)
+        mem2_hand = deal(deck)
+
+        def total(hand):
+            total = 0
+            for card in hand:
+                if card == "J" or card == "Q" or card == "K":
+                    total += 10
+                elif card == "A":
+                    if total >= 11:
+                        total += 1
+                    else:
+                        total += 11
+                else:
+                    total += int(card)
+            return total
+
+        def hit(hand):
+            card = deck.pop()
+            if card == 11:card = "J"
+            if card == 12:card = "Q"
+            if card == 13:card = "K"
+            if card == 14:card = "A"
+            hand.append(card)
+            return hand
+
+        def score(dealer_hand, player_hand):
+            if total(player_hand) == 21:
+                return 'player 1 win'
+            elif total(dealer_hand) == 21:
+                return 'player 2 win'
+            elif total(player_hand) > 21:
+                return 'player 2 win'
+            elif total(dealer_hand) > 21:
+                return 'player 1 win'
+            else:
+                return False
+
+        def win_check(dealer_hand, player_hand):
+            if total(player_hand) == 21:
+                return 'player 1 win'
+            elif total(dealer_hand) == 21:
+                return 'player 2 win'
+            elif total(player_hand) > 21:
+                return 'player 2 win'
+            elif total(dealer_hand) > 21:
+                return 'player 1 win'
+            elif total(player_hand) < total(dealer_hand):
+                return 'player 2 win'
+            elif total(player_hand) > total(dealer_hand):
+                return 'player 1 win'
+            elif total(player_hand) == total(dealer_hand):
+                return 'friendship'
+            else:
+                return False
+
+        def emb(feet = None):
+            nonlocal member, ctx
+            nonlocal mem1_hand, mem2_hand
+            nonlocal server
+            emb = discord.Embed(title = "Собери 21", description = 'Цель собрать 21 очко и обыграть соперника, введите `hit` если хотите взять ещё карту, `stand` если готовы остановится.', color=server['embed_color'])
+            if member == None:
+                pl2 = 'Бот-Дилер'
+            else:
+                pl2 = member.name
+            h2 = ", ".join(str(i) for i in mem2_hand)
+            h1 = ", ".join(str(i) for i in mem1_hand)
+            emb.add_field(name = f'Игрок 2: {pl2}', value = f'Карты: {h2}\nОчки: {total(mem2_hand)}')
+            emb.add_field(name = f'Игрок 1: {ctx.author.name}', value = f'Карты: {h1}\nОчки: {total(mem1_hand)}')
+            if win_check(mem2_hand, mem1_hand) != False:
+                if feet == None:
+                    if win_check(mem2_hand, mem1_hand) == 'player 1 win':
+                        win = ctx.author.mention
+                    if win_check(mem2_hand, mem1_hand) == 'player 2 win':
+                        win = pl2
+                    if win_check(mem2_hand, mem1_hand) == 'friendship':
+                        win = 'Дружба'
+                    emb.add_field(name = f'Победитель', value = f'{win}')
+            if feet != None:
+                emb.add_field(name = f'Ход игрока', value = f'{feet}')
+            return emb
+
+        message = await ctx.send(embed = emb())
+
+        async def game_bot():
+            nonlocal member, ctx
+            nonlocal mem1_hand, mem2_hand
+            try:
+                await message.edit(embed = emb('Игрок 1'))
+                msg = await self.bot.wait_for('message', timeout=20.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
+            except asyncio.TimeoutError:
+                await ctx.send("Время вышло.")
+                pass
+            else:
+
+                try:
+                    await msg.delete()
+                except Exception:
+                    pass
+
+                if msg.content == 'hit':
+                    mem1_hand = hit(mem1_hand)
+                    if score(mem2_hand, mem1_hand) == 'player 1 win' or score(mem2_hand, mem1_hand) == 'player 2 win':
+                        return
+
+            await message.edit(embed = emb('Игрок 2'))
+            while total(mem2_hand) < total(mem1_hand):
+                mem2_hand = hit(mem2_hand)
+                if score(mem2_hand, mem1_hand) == 'player 1 win' or score(mem2_hand, mem1_hand) == 'player 2 win':
                     return
 
-                log = server['mod']['log_channel']['logging']
-                channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-                if 'message_edit' in log or 'all' in log or 'message' in log:
-                    emb = discord.Embed(title = f'Сообщение изменено', description = f'Автор сообщения: {after.author.mention}\nКанал: {after.channel.mention}\nСообщение: [Jump]({after.jump_url})', color=0xFFDB8B )
-                    emb.add_field(name = f' | Изначальное сообщение', value = f'`{before.content}`', inline = True)
-                    emb.add_field(name = f' | Сейчас сообщение', value = f'`{after.content}`', inline = True)
-                    await channel.send(embed = emb)
-        except Exception:
-            pass
+        async def game_2_players():
+            nonlocal member, ctx
+            nonlocal mem1_hand, mem2_hand
+            for i in range(2):
+                if score(mem2_hand, mem1_hand) == False:
+                    try:
+                        await message.edit(embed = emb('Игрок 1'))
+                        msg = await self.bot.wait_for('message', timeout=20.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
+                    except asyncio.TimeoutError:
+                        await ctx.send("Время вышло для игрока 1")
+                        pass
+                    else:
+                        try:
+                            await msg.delete()
+                        except Exception:
+                            pass
 
-    @commands.Cog.listener()
-    async def on_message_delete(self, message):
-
-
-        try:
-            server = servers.find_one({"server": message.guild.id})
-            if server['mod']['log_channel'] != {}:
-                if message.author.bot == True:
+                        if msg.content == 'hit':
+                            mem1_hand = hit(mem1_hand)
+                else:
                     return
 
-                log = server['mod']['log_channel']['logging']
-                channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-                if 'message_delete' in log or 'all' in log or 'message' in log:
+                if score(mem2_hand, mem1_hand) == False:
+                    try:
+                        await message.edit(embed = emb('Игрок 2'))
+                        msg = await self.bot.wait_for('message', timeout=20.0, check=lambda message: message.author == member and message.channel.id == ctx.channel.id)
+                    except asyncio.TimeoutError:
+                        await ctx.send("Время вышло для игрока 2")
+                        pass
+                    else:
+                        try:
+                            await msg.delete()
+                        except Exception:
+                            pass
 
-                    emb = discord.Embed(title = f'Сообщение удалено', description = f'Автор: {message.author.mention}\nКанал: {message.channel.mention}\nID: {message.id}\nСообщение: `{message.content}`', color=0xFFDB8B )
-                    await channel.send(embed = emb)
-        except Exception:
+                        if msg.content == 'hit':
+                            mem2_hand = hit(mem2_hand)
+                else:
+                    return
+
+        if win_check(mem2_hand, mem1_hand) != 'player 1 win' or win_check(mem2_hand, mem1_hand) != 'player 2 win':
+            if member == None:
+                funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - amout )
+                await game_bot()
+            else:
+                funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - amout )
+                funs.user_update(member.id, ctx.guild, 'money', user2['money'] - amout)
+                await game_2_players()
+
+        await message.edit(embed = emb())
+
+        if win_check(mem2_hand, mem1_hand) == 'player 1 win':
+            if member == None:
+                funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] + int(amout * server['economy']['games']['blackjack']['percent']))
+                await ctx.send(f"Награда {int(amout * server['economy']['games']['blackjack']['percent'])}{server['economy']['currency']}")
+            if member != None:
+                funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] + int(amout * server['economy']['games']['blackjack']['percent']))
+                await ctx.send(f"Игрок 1 выйграл {int(amout * server['economy']['games']['blackjack']['percent'])}")
+
+        if win_check(mem2_hand, mem1_hand) == 'player 2 win':
+            if member == None:
+                pass
+            if member != None:
+                funs.user_update(member.id, ctx.guild, 'money', user2['money'] + int(amout * server['economy']['games']['blackjack']['percent']) )
+                await ctx.send(f"Игрок 2 выйграл {int(amout * server['economy']['games']['blackjack']['percent'] )}")
+
+        if win_check(mem2_hand, mem1_hand) == 'friendship':
             pass
 
-    @commands.Cog.listener()
-    async def on_guild_update(self, before, after):
+    @commands.command(usage = '(amout) [repets]', description = 'Игра в слоты.', help = 'Игры', aliases = ['слоты'])
+    async def slots(self,ctx, amout:int, repet:int = 1):
+        user = funs.user_check(ctx.author, ctx.guild)
+        server = servers.find_one({"server": ctx.guild.id})
+        if user['money'] < amout * repet:
+            await ctx.send(f'У вас нет столько монет!')
+            return
+
+        if amout < server['economy']['games']['blackjack']['mini'] or amout > server['economy']['games']['blackjack']['max']:
+            await ctx.send(f"Укажите сумму в периоде с {server['economy']['games']['blackjack']['mini']} до {server['economy']['games']['blackjack']['max']}")
+            return
+
+        if repet < 0:
+            await ctx.send('Укажите число повторных игр больше 0!')
+
+        def r(list, n1, n2, n3):
+            if list[n1] == list[n2] and list[n2] == list[n3]:
+                return True
+            else:
+                return False
+
+        def p_w(list, n1, n2, n3):
+            if list[n1] == list[n2] or list[n1] == list[n2] or list[n2] == list[n3]:
+                if list[n1] == list[n2] and list[n2] == list[n3]:
+                    return False
+                else:
+                    return True
+
+        slots = ['🍡','🍬','🍧','🍭','🍱','🍫','🍩']*5
+        random.shuffle(slots)
+
+        if repet == 1:
+            user_slots = []
+            for i in range(9):
+                user_slots += slots.pop()
+
+            s = user_slots
+            win = False
+            p_win = False
+            if r(user_slots, 3,4,5) == True:
+                win = True
+            elif r(user_slots, 0,3,6) == True:
+                win = True
+            elif r(user_slots, 1,4,7) == True:
+                win = True
+            elif r(user_slots, 2,5,8) == True:
+                win = True
+            elif r(user_slots, 0,1,2) == True:
+                win = True
+            elif r(user_slots, 6,7,8) == True:
+                win = True
+            elif r(user_slots, 0,4,8) == True:
+                win = True
+            elif r(user_slots, 2,4,6) == True:
+                win = True
+
+            elif p_w(user_slots, 0,1,2) == True:
+                p_win = True
+            elif p_w(user_slots, 3,4,5) == True:
+                p_win = True
+            elif p_w(user_slots, 6,7,8) == True:
+                p_win = True
+
+            text = f'[  |  SLOTS  |  ]\n {s[0]} | {s[1]} | {s[2]} \n\n {s[3]} | {s[4]} | {s[5]} \n\n {s[6]} | {s[7]} | {s[8]} \n| -------------- |\n\n'
+
+            if win == True:
+                funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - amout)
+                text += f"Вы сорвали куш! Ваша награда составляет {int(amout * server['economy']['games']['slots']['percent'])}{server['economy']['currency']}"
+                funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] + int(amout * server['economy']['games']['slots']['percent']))
+            elif p_win == True:
+                text += f'Вы выбили 2 из 3, монеты остаются у вас!'
+            else:
+                text += 'Вы проиграли!'
+                funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - amout)
+
+            await ctx.send(text)
+
+        if repet > 1:
+            wins = 0
+            p_wins = 0
+            u_money = amout * repet
+            for i in range(repet):
+                slots = ['🍡','🍬','🍧','🍭','🍱','🍫','🍩']*5
+                random.shuffle(slots)
+                user_slots = []
+                for i in range(9):
+                    user_slots += slots.pop()
+
+                if r(user_slots, 3,4,5) == True:
+                    wins += 1
+                    u_money += int(amout * server['economy']['games']['slots']['percent'])
+                elif r(user_slots, 0,3,6) == True:
+                    wins += 1
+                    u_money += int(amout * server['economy']['games']['slots']['percent'])
+                elif r(user_slots, 1,4,7) == True:
+                    wins += 1
+                    u_money += int(amout * server['economy']['games']['slots']['percent'])
+                elif r(user_slots, 2,5,8) == True:
+                    wins += 1
+                    u_money += int(amout * server['economy']['games']['slots']['percent'])
+                elif r(user_slots, 0,1,2) == True:
+                    wins += 1
+                    u_money += int(amout * server['economy']['games']['slots']['percent'])
+                elif r(user_slots, 6,7,8) == True:
+                    wins += 1
+                    u_money += int(amout * server['economy']['games']['slots']['percent'])
+                elif r(user_slots, 0,4,8) == True:
+                    wins += 1
+                    u_money += int(amout * server['economy']['games']['slots']['percent'])
+                elif r(user_slots, 2,4,6) == True:
+                    wins += 1
+                    u_money += int(amout * server['economy']['games']['slots']['percent'])
+
+                elif p_w(user_slots, 0,1,2) == True:
+                    p_wins += 1
+                elif p_w(user_slots, 3,4,5) == True:
+                    p_wins += 1
+                elif p_w(user_slots, 6,7,8) == True:
+                    p_wins += 1
+                else:
+                    u_money -= amout
+
+            emd = discord.Embed(title = f"Слоты", description = f"Побед: {wins}\nИгры без потерь: {p_wins}\nПроигрыши: {repet - wins - p_wins}\nВозрат монет: {u_money}", color=server['embed_color'])
+            await ctx.send(embed = emd)
+            funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - (amout * repet))
+            funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] + u_money)
+
+    @commands.command(usage = '(number) (money) (@member)', description = 'Игра в шанс.', help = 'Игры', aliases = ['шанс'])
+    async def chance(self, ctx, number:int = None, money:int = None, member:discord.Member = None ):
+
+        kk = self.bot.get_emoji(778533802342875136)
+        user = funs.user_check(ctx.author, ctx.guild)
+        mem = funs.user_check(member.id, ctx.guild)
+        server = servers.find_one({"server": ctx.guild.id})
+        if number == None or money == None or member == None:
+            emb = discord.Embed(description = f'Правильный ввод команды: \n`{ctx.prefix}duel (число от 1 до 100) (ставка от 10 до 100к) (@пользователь)`', color=server['embed_color'])
+            emb.set_author(icon_url = '{}'.format(ctx.author.avatar_url), name = '{}'.format(ctx.author))
+            await ctx.send(embed = emb)
+            return
+
+        if number > 100 or number < 1:
+            emb = discord.Embed(description = f'Укажите число от 1 до 100', color=server['embed_color'])
+            emb.set_author(icon_url = '{}'.format(ctx.author.avatar_url), name = '{}'.format(ctx.author))
+            await ctx.send(embed = emb)
+            return
+
+        if money < server['economy']['games']['chance']['mini'] or money > server['economy']['games']['chance']['max']:
+            emb = discord.Embed(description = f"Укажите колличество монет от {server['economy']['games']['chance']['mini']} до {server['economy']['games']['chance']['max']}", color=server['embed_color'])
+            emb.set_author(icon_url = '{}'.format(ctx.author.avatar_url), name = '{}'.format(ctx.author))
+            await ctx.send(embed = emb)
+            return
+
+        if money > user['money']:
+            emb = discord.Embed(description = f'У вас нет столько монеток', color=server['embed_color'])
+            emb.set_author(icon_url = '{}'.format(ctx.author.avatar_url), name = '{}'.format(ctx.author))
+            await ctx.send(embed = emb)
+            return
+
+        if money > mem['money']:
+            emb = discord.Embed(description = f'У {member.mention} нет столько монеток', color=server['embed_color'])
+            emb.set_author(icon_url = '{}'.format(ctx.author.avatar_url), name = '{}'.format(ctx.author))
+            await ctx.send(embed = emb)
+            return
+
+        if ctx.author == member:
+            emb = discord.Embed(description = f'Игра в шанс с самим собой не возможен', color=server['embed_color'])
+            emb.set_author(icon_url = '{}'.format(ctx.author.avatar_url), name = '{}'.format(ctx.author))
+            await ctx.send(embed = emb)
+            return
 
 
-        try:
-            server = servers.find_one({"server": before.id})
+        solutions = ['✔', '❌']
+        reaction = 'a'
+        emb2 = discord.Embed(description = f'<@{member.id}> вы готовы принять шанс от <@{ctx.author.id}>?`', color=server['embed_color'])
+        emb2.set_author(icon_url = '{}'.format(ctx.author.avatar_url), name = '{}'.format(ctx.author))
 
-            if server['mod']['log_channel'] != {}:
-                counter = 0
-                log = server['mod']['log_channel']['logging']
-                channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-                emb = discord.Embed(title = f'Обновление сервера', description = f'Сервер был обновлён', color=0xE28112 )
+        async def text():
+            nonlocal mess
+            nonlocal number
+            nonlocal user
+            nonlocal server
+            await mess.clear_reactions()
+            emb3 = discord.Embed(description = f'<@{member.id}> введите число от `1 до 100`', color=server['embed_color'])
+            emb3.set_author(icon_url = '{}'.format(member.avatar_url), name = '{}'.format(member)).set_footer(text='В чат без использования команд')
+            await mess.edit(embed = emb3)
+            try:
+                msg = await self.bot.wait_for('message', timeout=30.0, check=lambda message: message.author == member)
+            except asyncio.TimeoutError:
+                emb5 = discord.Embed(description = f'Время вышло', color=server['embed_color'])
+                await mess.edit(embed = emb5)
+                return
+            else:
+                try:
+                    number2 = int(msg.content)
+                except Exception:
+                    await ctx.send('Укажите __число__!')
+                    return
 
-                if 'guild_afk_channel' in log or 'all' in log or 'guild' in log:
-                    if before.afk_channel != after.afk_channel:
-                        emb.add_field(name = ' | Обновление AFK канала', value = f'Изначальный канал: {before.afk_channel}\nСейчас канал: { after.afk_channel }', inline = True)
-                        counter += 1
+                if number2 < int(101) and number2 > int(0) or number2 != number2:
+                    funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] -money)
+                    funs.user_update(member.id, ctx.guild, 'money', mem['money'] -money)
 
-                if 'guild_afk_timeout' in log or 'all' in log or 'guild' in log:
-                    if before.afk_timeout != after.afk_timeout:
-                        emb.add_field(name = ' | Обновление AFK тайм-аут', value = f'Изначальный тайм-аут: `{funs.time_end(before.afk_timeout)}`\nСейчас тайм-аут: `{ funs.time_end(after.afk_timeout) }`', inline = True)
-                        counter += 1
+                    r1 = random.randint(1,100)
+                    emb4 = discord.Embed(title = 'Шанс', color=server['embed_color']).add_field(name = f'Организатор:', value = f"Имя: <@{ctx.author.id}>\n Число: {number}"
+                    ).set_thumbnail(url ="https://thumbs.gfycat.com/PlasticTestyBushbaby-size_restricted.gif")
+                    emb4.add_field(name = f'Котик', value = f"Котик выбрал число: {r1}")
+                    emb4.add_field(name = f'Дуэлянт:', value = f"Имя: <@{member.id}>\n Число: {msg.content}")
 
-                if 'guild_banner' in log or 'all' in log or 'guild' in log:
-                    if before.banner.url != after.banner.url:
-                        emb.add_field(name = ' | Обновление баннера', value = f'Изначальный баннер: [url]({before.banner.url})\nСейчас баннер: [url]({ after.banner.url })', inline = True)
-                        counter += 1
+                    if number > r1:
+                        number = number - r1
+                    else:
+                        number = r1 - number
 
-                if 'guild_bitrate_limit' in log or 'all' in log or 'guild' in log:
-                    if before.bitrate_limit != after.bitrate_limit:
-                        emb.add_field(name = ' | Обновление максимального битрейта', value = f'Изначальный м.бит.: `{before.bitrate_limit}`\nСейчас м.бит.: `{ after.bitrate_limit }`', inline = True)
-                        counter += 1
+                    if number2 > r1:
+                        number2 = number2 - r1
+                    else:
+                        number2 = r1 - number2
 
-                if 'guild_default_notifications' in log or 'all' in log or 'guild' in log:
-                    if before.default_notifications != after.default_notifications:
-                        if before.default_notifications == discord.NotificationLevel.only_mentions:
-                            bdn = "Только упоминания"
-                            adn = "Все сообщения"
-                        else:
-                            adn = "Только упоминания"
-                            bdn = "Все сообщения"
+                    if number2 < number:
+                        emb4.add_field(name = f"Победитель: ",value = f'<@{member.id}>\n Выйгрыш: {money} монеток{kk}', inline = False)
+                        funs.user_update(member.id, ctx.guild, 'money', mem['money'] + money*2)
+                    else:
+                        emb4.add_field(name = f"Победитель: ",value = f'<@{ctx.author.id}>\n Выйгрыш: {money} монеток{kk}', inline = False)
+                        funs.user_update( ctx.author.id, ctx.guild, 'money', mem['money'] + money*2)
 
-                        emb.add_field(name = ' | Обновление уведомлений', value = f'Изначальные уведомления: `{bdn}`\nСейчас уведомления: `{adn}`', inline = True)
-                        counter += 1
-
-                if 'guild_description' in log or 'all' in log or 'guild' in log:
-                    if before.description != after.description:
-                        emb.add_field(name = ' | Обновление описания', value = f'Изначальное описание: `{before.description}`\nСейчас описание: `{ after.description }`', inline = True)
-                        counter += 1
-
-                if 'guild_mfa_level' in log or 'all' in log or 'guild' in log:
-                    if before.mfa_level != after.mfa_level:
-                        emb.add_field(name = ' | Обновление 2FA', value = f'Изначальный 2FA: `{before.mfa_level}`\nСейчас 2FA: `{after.mfa_level}`'.replace('1','<:n:869159450588635196>').replace('0','<:f:869169592201777224>'), inline = True)
-                        counter += 1
-
-                if 'guild_verification_level' in log or 'all' in log or 'guild' in log:
-                    if before.verification_level != after.verification_level:
-                        emb.add_field(name = ' | Обновление уровня проверки', value = f'Изначальный уровень: `{before.verification_level}`\nСейчас уровень: `{ after.verification_level }`', inline = True)
-                        counter += 1
-
-                if 'guild_splash' in log or 'all' in log or 'guild' in log:
-                    if before.splash.url != after.splash.url:
-                        emb.add_field(name = ' | Обновление фона приглашения', value = f'Изначальный фон: [url]({before.splash.url})\nСейчас фон: [url]({ after.splash.url })', inline = True)
-                        counter += 1
-
-                if 'guild_emoji_limit' in log or 'all' in log or 'guild' in log:
-                    if before.emoji_limit != after.emoji_limit:
-                        emb.add_field(name = ' | Обновление лимита эмоджи', value = f'Изначальный лимит: `{before.emoji_limit}`\nСейчас лимит: `{ after.emoji_limit }`', inline = True)
-                        counter += 1
-
-                if 'guild_content_filter' in log or 'all' in log or 'guild' in log:
-                    if before.explicit_content_filter != after.explicit_content_filter:
-                        emb.add_field(name = ' | Обновление фильтра контента', value = f'Изначально: `{before.explicit_content_filter}`\nСейчас: `{ after.explicit_content_filter }`', inline = True)
-                        counter += 1
-
-                if 'guild_filesize_limit' in log or 'all' in log or 'guild' in log:
-                    if before.filesize_limit != after.filesize_limit:
-                        emb.add_field(name = ' | Обновление максимального размера изображения', value = f'Изначальный размер: `{before.filesize_limit}`\nСейчас размер: `{ after.filesize_limit }`', inline = True)
-                        counter += 1
-
-                if 'guild_icon' in log or 'all' in log or 'guild' in log:
-                    if before.icon.url != after.icon.url:
-                        emb.add_field(name = ' | Обновление иконки сервера', value = f'Изначальная иконка: [url]({before.icon.url})\nСейчас иконка: [url]({ after.icon.url })', inline = True)
-                        counter += 1
-
-                if 'guild_name' in log or 'all' in log or 'guild' in log:
-                    if before.name != after.name:
-                        emb.add_field(name = ' | Обновление названия', value = f'Изначальное название: `{before.name}`\nСейчас название: `{ after.name }`', inline = True)
-                        counter += 1
-
-                if 'guild_owner' in log or 'all' in log or 'guild' in log:
-                    if before.owner_id != after.owner_id:
-                        emb.add_field(name = ' | Обновление создателя', value = f'Изначальный создатель: `{before.owner}`\nСейчас создатель: `{ after.owner }`', inline = True)
-                        counter += 1
+                    await mess.edit(embed = emb4)
 
 
-                if counter != 0:
-                    await channel.send(embed = emb)
-
-        except Exception:
-            pass
-
-    @commands.Cog.listener()
-    async def on_guild_role_create(self, role):
+                else:
+                    await ctx.send('Число должно быть больше 0-ля и меньше 100-та, а так же не совпадать с числом противника!')
+                    return
 
 
-        try:
-            server = servers.find_one({"server": role.guild.id})
-            if server['mod']['log_channel'] != {}:
+        def check( reaction, user):
+            nonlocal mess
+            return user == member and str(reaction.emoji) in solutions and str(reaction.message) == str(mess)
 
-                log = server['mod']['log_channel']['logging']
-                channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-                if 'role_create' in log or 'all' in log or 'role' in log:
-                    emb = discord.Embed(title = f'Роль создана', description = f'Роль {role.mention} была создана', color=0xFFDB8B )
-                    emb.add_field(name = ' | Информация', value = f'Название: `{role.name}`\nОтображение отдельно: {role.hoist}\nПозиция: {role.position}\nЦвет: {role.color}\nМожно упоминать: {role.mentionable}'.replace('True','<:n:869159450588635196>').replace('False','<:f:869169592201777224>'), inline = False)
-                    text1 = ''
-                    text2 = ''
-                    con = 0
-                    for i in role.permissions:
-                        text = ''
-                        text += f"{list(i)[1]} {i[0]}\n"
+        async def rr():
+            nonlocal reaction
+            if str(reaction.emoji) == '✔':
+                await mess.remove_reaction('✔', member)
+                await text()
+                pass
 
-                        text = text.replace('True', '<:n:869159450588635196>')
-                        text = text.replace('False', '<:f:869169592201777224>')
-                        con += 1
-                        if con <= 16:
-                            text1 += text
-                        else:
-                            text2 += text
+            elif str(reaction.emoji) == '❌':
+                await mess.clear_reactions()
+                return
 
-                    emb.add_field(name = ' | Права', value = text1, inline = True)
-
-                    if text2 != '':
-                        emb.add_field(name = ' | Права', value = text2, inline = True)
-
-                    await channel.send(embed = emb)
-        except Exception:
-            pass
-
-    @commands.Cog.listener()
-    async def on_guild_role_delete(self, role):
+        async def reackt():
+            nonlocal reaction
+            try:
+                reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check = check)
+            except asyncio.TimeoutError:
+                await mess.clear_reactions()
+            else:
+                await rr()
 
 
-        try:
-            server = servers.find_one({"server": role.guild.id})
-            if server['mod']['log_channel'] != {}:
+        mess = await ctx.send(embed = emb2)
 
-                log = server['mod']['log_channel']['logging']
-                channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-                if 'role_delete' in log or 'all' in log or 'role' in log:
-                    emb = discord.Embed(title = f'Роль удалена', description = f'Роль {role.name} была удалена', color=0xE52B50 )
+        for x in solutions:
+            await mess.add_reaction(x)
 
-                    await channel.send(embed = emb)
-        except Exception:
-            pass
-
-    @commands.Cog.listener()
-    async def on_guild_role_update(self, before, after):
+        await reackt()
 
 
-        try:
-            server = servers.find_one({"server": before.guild.id})
-            if server['mod']['log_channel'] != {}:
 
-                counter = 0
-                log = server['mod']['log_channel']['logging']
-                channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-                emb = discord.Embed(title = f'Роль обновлена', description = f'Роль {after.mention} была обновлена', color=0xE52B50 )
-
-                if 'role_color' in log or 'all' in log or 'guild' in log:
-                    if before.color != after.color:
-                        emb.add_field(name = ' | Обновление цвета', value = f'Изначальный цвет: {before.color}\nСейчас цвет: { after.color }', inline = True)
-                        counter += 1
-
-                if 'role_hoist' in log or 'all' in log:
-                    if before.hoist != after.hoist:
-                        emb.add_field(name = ' | Обновление отображения', value = f'Изначально: {before.hoist}\nСейчас: { after.hoist }'.replace('True','<:n:869159450588635196>').replace('False','<:f:869169592201777224>'), inline = True)
-                        counter += 1
-
-                if 'role_mentionable' in log or 'all' in log or 'guild' in log:
-                    if before.mentionable != after.mentionable:
-                        emb.add_field(name = ' | Обновление упоминания роли', value = f'Изначально: {before.mentionable}\nСейчас: { after.mentionable }'.replace('True','<:n:869159450588635196>').replace('False','<:f:869169592201777224>'), inline = True)
-                        counter += 1
-
-                if 'role_name' in log or 'all' in log or 'guild' in log:
-                    if before.name != after.name:
-                        emb.add_field(name = ' | Обновление названия', value = f'Изначально название: `{before.name}`\nСейчас название: `{ after.name }`', inline = True)
-                        counter += 1
-
-                if 'role_position' in log or 'all' in log or 'guild' in log:
-                    if before.position != after.position:
-                        emb.add_field(name = ' | Обновление позиции', value = f'Изначальная позиция: `{before.position}`\nСейчас позиция: `{ after.position }`', inline = True)
-                        counter += 1
-
-                if 'role_permissions' in log or 'all' in log or 'guild' in log:
-                    if before.permissions != after.permissions:
-                        text1 = ''
-                        text2 = ''
-                        aftlist = {}
-                        con = 0
-                        for i in after.permissions:
-                            aftlist.update({ str(list(i)[0]): list(i)[1] })
-
-                        for i in before.permissions:
-                            text = ''
-                            if str(aftlist[ str(list(i)[0]) ]) != str(list(i)[1]):
-                                text += f'{list(i)[1]} {list(i)[0]}\n'
-                                text = text.replace('False', '<:n:869159450588635196>')
-                                text = text.replace('True', '<:f:869169592201777224>')
-                                con += 1
-                                if con <= 16:
-                                    text1 += text
-                                else:
-                                    text2 += text
-
-                        emb.add_field(name = ' | Обновление прав', value = text1, inline = True)
-                        counter += 1
-
-                        if text2 != '':
-                            emb.add_field(name = ' | Обновление прав', value = text2, inline = True)
-                            counter += 1
-
-                if counter != 0:
-                    await channel.send(embed = emb)
-        except Exception:
-            pass
 
 def setup(bot):
-    bot.add_cog(MainCog(bot))
+    bot.add_cog(economy(bot))
