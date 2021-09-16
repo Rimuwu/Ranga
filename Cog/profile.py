@@ -279,10 +279,9 @@ class profile(commands.Cog):
         for i in server['items'].keys():
             items.append(server['items'][i])
 
-        for k in user['inv']:
-            i_d = k
-            i = k
-            # del i['iid']
+        for i in user['inv']:
+            u = i.copy()
+            del i['iid']
 
             if i in items:
                 if i['name'] in list(inv.keys()):
@@ -291,12 +290,11 @@ class profile(commands.Cog):
                     inv.update({ i['name']: { 'it':i, 'count': 1 } })
 
             if i not in items:
-                if f'{i["name"]} (#{i_d["iid"]})' in list(inv.keys()):
-                    inv.update({ f'{i["name"]} (#{i_d["iid"]})': { 'it':i, 'count': inv[i['name']]['count']+1 } })
+                if f'{i["name"]} (#{u["iid"]})' in list(inv.keys()):
+                    inv.update({ f'{i["name"]} (#{u["iid"]})': { 'it':i, 'count': inv[i['name']]['count']+1 } })
                 else:
-                    inv.update({ f'{i["name"]} (#{i_d["iid"]})': { 'it':i, 'count': 1 } })
+                    inv.update({ f'{i["name"]} (#{u["iid"]})': { 'it':i, 'count': 1 } })
 
-        # pprint.pprint(inv)
 
         if inv == {}:
             emb_i = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь', description = 'Тут пусто 🔎',color=0xf03e65)
