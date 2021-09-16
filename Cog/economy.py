@@ -1278,7 +1278,7 @@ class economy(commands.Cog):
                         return
 
             await message.edit(embed = emb('Игрок 2'))
-            while total(mem2_hand) < 17:
+            while total(mem2_hand) < total(mem1_hand):
                 mem2_hand = hit(mem2_hand)
                 if score(mem2_hand, mem1_hand) == 'player 1 win' or score(mem2_hand, mem1_hand) == 'player 2 win':
                     return
@@ -1323,10 +1323,13 @@ class economy(commands.Cog):
                 else:
                     return
 
-        if score(mem2_hand, mem1_hand) != 'player 1 win' or score(mem2_hand, mem1_hand) != 'player 2 win':
+        if win_check(mem2_hand, mem1_hand) != 'player 1 win' or win_check(mem2_hand, mem1_hand) != 'player 2 win':
             if member == None:
+                funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - amout )
                 await game_bot()
             else:
+                funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - amout )
+                funs.user_update(member.id, ctx.guild, 'money', user2['money'] - amout)
                 await game_2_players()
 
         await message.edit(embed = emb())
@@ -1336,17 +1339,15 @@ class economy(commands.Cog):
                 funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] + int(amout * server['economy']['games']['blackjack']['percent']))
                 await ctx.send(f"Награда {int(amout * server['economy']['games']['blackjack']['percent'])}{server['economy']['currency']}")
             if member != None:
-                funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] + int(amout * 2))
-                funs.user_update(member.id, ctx.guild, 'money', user2['money'] - amout)
+                funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] + int(amout * server['economy']['games']['blackjack']['percent']))
                 await ctx.send(f"Игрок 1 выйграл {int(amout * server['economy']['games']['blackjack']['percent'])}")
 
         if win_check(mem2_hand, mem1_hand) == 'player 2 win':
             if member == None:
-                funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - amout )
+                pass
             if member != None:
-                funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - amout)
-                funs.user_update(member.id, ctx.guild, 'money', user2['money'] + int(amout * 2) )
-                await ctx.send(f"Игрок 2 выйграл {int(amout * server['economy']['games']['blackjack']['percent'])}")
+                funs.user_update(member.id, ctx.guild, 'money', user2['money'] + int(amout * server['economy']['games']['blackjack']['percent']) )
+                await ctx.send(f"Игрок 2 выйграл {int(amout * server['economy']['games']['blackjack']['percent'] )}")
 
         if win_check(mem2_hand, mem1_hand) == 'friendship':
             pass
