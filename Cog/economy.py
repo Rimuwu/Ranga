@@ -1418,6 +1418,7 @@ class economy(commands.Cog):
             text = f'[  |  SLOTS  |  ]\n {s[0]} | {s[1]} | {s[2]} \n\n {s[3]} | {s[4]} | {s[5]} \n\n {s[6]} | {s[7]} | {s[8]} \n| -------------- |\n\n'
 
             if win == True:
+                funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - amout)
                 text += f"Вы сорвали куш! Ваша награда составляет {int(amout * server['economy']['games']['slots']['percent'])}{server['economy']['currency']}"
                 funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] + int(amout * server['economy']['games']['slots']['percent']))
             elif p_win == True:
@@ -1475,7 +1476,7 @@ class economy(commands.Cog):
 
             emd = discord.Embed(title = f"Слоты", description = f"Побед: {wins}\nИгры без потерь: {p_wins}\nПроигрыши: {repet - wins - p_wins}\nВозрат монет: {u_money}", color=server['embed_color'])
             await ctx.send(embed = emd)
-            funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - int(amout * server['economy']['games']['slots']['percent']) * repet)
+            funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - (amout * repet))
             funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] + u_money)
 
     @commands.command(usage = '(number) (money) (@member)', description = 'Игра в шанс.', help = 'Игры', aliases = ['шанс'])

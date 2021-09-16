@@ -109,7 +109,6 @@ class info(commands.Cog):
     @commands.command(aliases=["сервер","serverinfo","server info"], usage = '-', description = 'Информация о сервере')
     async def server(self,ctx):
         server = servers.find_one({"server": ctx.guild.id})
-        # member_by_status = Counter(str(m.status) for m in ctx.guild.members)
         faa = ctx.guild.mfa_level
         if faa == 1:
             msg = "Включён"
