@@ -1035,11 +1035,30 @@ class rpg(commands.Cog):
                 item.update({ 'name': name})
 
 
-            await message.edit(embed = embed(type, name, f"Укажите [id](https://support.discord.com/hc/ru/articles/206346498-%D0%93%D0%B4%D0%B5-%D0%BC%D0%BD%D0%B5-%D0%BD%D0%B0%D0%B9%D1%82%D0%B8-ID-%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D0%B5%D0%BB%D1%8F-%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80%D0%B0-%D1%81%D0%BE%D0%BE%D0%B1%D1%89%D0%B5%D0%BD%D0%B8%D1%8F-) роли `{name}`"))
-            act = await act(message, ctx)
-            if act == False:
+            try:
+                await message.edit(embed = embed(type, name, f"Укажите [id](https://support.discord.com/hc/ru/articles/206346498-%D0%93%D0%B4%D0%B5-%D0%BC%D0%BD%D0%B5-%D0%BD%D0%B0%D0%B9%D1%82%D0%B8-ID-%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D0%B5%D0%BB%D1%8F-%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80%D0%B0-%D1%81%D0%BE%D0%BE%D0%B1%D1%89%D0%B5%D0%BD%D0%B8%D1%8F-) роли `{name}`"))
+                msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
+            except asyncio.TimeoutError:
+                await ctx.send("Время вышло.")
                 return
             else:
+                try:
+                    await msg.delete()
+                except Exception:
+                    pass
+
+                try:
+                    act = int(msg.content)
+                except Exception:
+                    await ctx.send("Требовалось указать id роли, повторите настройку ещё раз.")
+                    return
+                role = ctx.guild.get_role(act)
+                try:
+                    act = role.id
+                except Exception:
+                    await ctx.send("Требовалось указать id существующей роли, повторите настройку ещё раз.")
+                    return
+
                 item.update({ 'act': act})
 
             text = "`add` - добавляет роль при использовании.\n`remove` - удаляет роль при использовании.\n"
@@ -1068,112 +1087,34 @@ class rpg(commands.Cog):
 
                 style = msg.content
 
-            try:
-                text = "Требуется указать __ссылку__ на изображение или `none`"
-                emb = discord.Embed(title = "Изображение:",
-                description = text, color=server['embed_color'])
-                msg1 = await ctx.send(embed = emb)
-                await message.edit(embed = embed(type, name, act, style, "Укажите изображение предмета:"))
-                msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
-            except asyncio.TimeoutError:
-                await ctx.send("Время вышло.")
+            await message.edit(embed = embed(type, name, act, style, "Укажите изображение предмета:"))
+            image = await image_f(message, ctx)
+            if image == False:
                 return
             else:
-                try:
-                    await msg.delete()
-                except Exception:
-                    pass
+                item.update({'image': image})
 
-                if msg.content != 'none':
-                    try:
-                        emb1 = discord.Embed(title = "Изображение", color=server['embed_color'])
-                        emb1.set_thumbnail(url = msg.content)
-                        msg2 = await ctx.send(embed = emb1)
-                    except Exception:
-                        await ctx.send("Требовалось указать __ссылку__, повторите настройку ещё раз.")
-                        return
 
-                item.update({'image': msg.content})
-                image = str(msg.content)
-                try:
-                    await msg1.delete()
-                    await msg2.delete()
-                except Exception:
-                    pass
-
-            try:
-                text = "**Качество предмета влияет на процент его выпадения и крафта**\n`n` - <:normal_q:781531816993620001>(normal) обычное качество, шанс выпадения/крафта 100%\n`u` - <:unusual_q:781531868780691476>(unusual) необычное качество, шанс выпадения/крафта 75%\n`r` - <:rare_q:781531919140651048>(rare) редкое качесвто, шанс выпадения/крафта 50%\n`o` - <:orate_q:781531996866084874>(orate) оратное качество, шанс выпадения/крафта 25%\n`l` - <:legendary_q:781532085130100737>(legendary) легендарное качество, шанс выпадения/крафта 10%"
-                emb = discord.Embed(title = "Качества:",
-                description = text, color=server['embed_color'])
-                msg1 = await ctx.send(embed = emb)
-                await message.edit(embed = embed(type, name, act, style, image, f"Укажите качество предмета: "))
-                msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
-            except asyncio.TimeoutError:
-                await ctx.send("Время вышло.")
+            await message.edit(embed = embed(type, name, act, style, image, f"Укажите качество предмета: "))
+            quality = await quality_f(message, ctx)
+            if quality == False:
                 return
             else:
-                try:
-                    await msg.delete()
-                    await msg1.delete()
-                except Exception:
-                    pass
+                item.update({'quality': quality})
 
-                if msg.content in ['n', 'normal', 'u', 'unusual', 'r', 'rare', 'o', 'orate', 'l', 'legendary']:
-                    if msg.content in ['n', 'normal']:
-                        quality = "n"
-                    elif msg.content in ['u', 'un normal']:
-                        quality = "u"
-                    elif msg.content in ['r', 'rare']:
-                        quality = "r"
-                    elif msg.content in ['o', 'orate',]:
-                        quality = "o"
-                    elif msg.content in ['l', 'legendary',]:
-                        quality = "l"
-                else:
-                    await ctx.send("Вы указали не действительное качество предмета, выберите 1 из (n, u, r, o, l) и повторите создание снова!")
-                    return
-
-                item.update({ 'quality': quality})
-
-            try:
-                await message.edit(embed = embed(type, name, act, style, image, quality, f'Укажите описание предмета или `none`: (макс 300 символов)'))
-                msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
-            except asyncio.TimeoutError:
-                await ctx.send("Время вышло.")
+            await message.edit(embed = embed(type, name, act, style, image, quality, f'Укажите описание предмета или `none`: (макс 300 символов)'))
+            description = await description_f(message, ctx)
+            if description == False:
                 return
             else:
-                try:
-                    await msg.delete()
-                except Exception:
-                    pass
-                description = str(msg.content)
-                if description == 'none':
-                    item.update({ 'description': None})
-                elif len(description) > 0 and len(description) < 301:
-                    item.update({ 'description': msg.content})
-                else:
-                    await ctx.send("Требовалось указать описание (макс 300 символов) или `none`, повторите настройку ещё раз!")
-                    return
+                item.update({'description': description})
 
-            try:
-                await message.edit(embed = embed(type, name, act, image, quality, description, f'Укажите описание предмета или `none`: (макс 2000 символов)'))
-                msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
-            except asyncio.TimeoutError:
-                await ctx.send("Время вышло.")
+            await message.edit(embed = embed(type, name, act, style, image, quality, description, f'Укажите описание предмета или `none`: (макс 2000 символов)'))
+            action_m = await action_m_f(message, ctx)
+            if action_m == False:
                 return
             else:
-                try:
-                    await msg.delete()
-                except Exception:
-                    pass
-                action_m = str(msg.content)
-                if action_m == 'none':
-                    item.update({ 'action_m': None})
-                elif len(action_m) > 0 and len(action_m) < 2001:
-                    item.update({ 'action_m': msg.content})
-                else:
-                    await ctx.send("Требовалось указать сообщение (макс 2к символов) или `none`, повторите настройку ещё раз!")
-                    return
+                item.update({'action_m': action_m})
 
             await message.edit(embed = embed( type, name, act, style, image, quality, description, action_m))
 
