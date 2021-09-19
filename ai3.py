@@ -461,7 +461,7 @@ class functions:
 
                                     'daily': {
                                         'type': 'users',
-                                        'time': 86400,
+                                        'time': 82800,
                                         'users': {},
                                              },
 
@@ -1209,6 +1209,13 @@ async def lvl_up_image(message, user, server):
 
         return im.resize(s, Image.ANTIALIAS)
 
+    def bl_f(im):
+        mask = Image.new('L',(720, 217))
+        ImageDraw.Draw(mask).polygon(xy=[(550, 0),(720, 0),(720,217),(450,217)], fill = 250)
+        mask = mask.filter(ImageFilter.BoxBlur(1.5))
+        im.paste(im.filter( ImageFilter.GaussianBlur(radius=12) ), mask=mask)
+        return im
+
 
     member = message.author
 
@@ -1291,6 +1298,7 @@ async def lvl_up_image(message, user, server):
 
 
     if ust['type'] == "png":
+        img = bl_f(img)
 
         bg_img = img
         fg_img = alpha
@@ -1308,8 +1316,8 @@ async def lvl_up_image(message, user, server):
         fs = []
         for frame in ImageSequence.Iterator(img):
             frame = frame.convert("RGBA")
-
             frame = frame.resize((720, 217), Image.ANTIALIAS)
+            frame = bl_f(frame)
 
             bg_img = frame
             fg_img = alpha
