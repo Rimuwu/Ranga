@@ -161,20 +161,80 @@ class rpg(commands.Cog):
                 msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
             except asyncio.TimeoutError:
                 await ctx.send("Время вышло.")
-                return
+                return False
             else:
                 try:
                     await msg.delete()
                 except Exception:
                     pass
-                action_m = str(msg.content)
-                if action_m == 'none':
+                description = str(msg.content)
+                if description == 'none':
                     return None
-                elif len(action_m) > 0 and len(action_m) < 2001:
+                elif len(description) > 0 and len(description) < 501:
                     return msg.content
                 else:
-                    await ctx.send("Требовалось указать сообщение (макс 2к символов) или `none`, повторите настройку ещё раз!")
+                    await ctx.send("Требовалось указать описание (макс 500 символов) или `none`, повторите настройку ещё раз!")
+                    return False
+
+        async def race_u_f(message, ctx, server):
+            try:
+                msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
+            except asyncio.TimeoutError:
+                await ctx.send("Время вышло.")
+                return False
+            else:
+                try:
+                    await msg.delete()
+                except Exception:
+                    pass
+
+                if msg.content == 'all' or msg.content == 'none':
                     return
+                else:
+                    races = list(server['races'].keys())
+                    c_races = msg.content.split()
+                    s = list(set(races) & set(c_races))
+                    if s == []:
+                        await ctx.send("Не найдено ни одного совпадения с созданными расами!")
+                        return False
+                    else:
+                        return s
+
+        async def element_f(message, ctx, server):
+            try:
+                text = "`w` - <:water:888029916287885332>(water) Огонь >х0.75> Вода >х1.25> Земля\n`a` - <:air:888029789749919787>(air) Земля >х0.75> Воздух >х1.25> Огонь\n`f` - <:fire:888029761828425789>(fire) \n`e` - <:earth:888029840945598534>(earth) "
+                emb = discord.Embed(title = "Элементы:",
+                description = text, color=server['embed_color'])
+                msg1 = await ctx.send(embed = emb)
+                msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
+            except asyncio.TimeoutError:
+                await ctx.send("Время вышло.")
+                return False
+            else:
+                try:
+                    await msg.delete()
+                except Exception:
+                    pass
+
+                if message.content in ['fire', 'water', 'air', 'earth', 'none']:
+
+                    if msg.content in ['w', 'water']:
+                        el = "w"
+                    elif msg.content in ['a', 'air']:
+                        el = "a"
+                    elif msg.content in ['f', 'fire']:
+                        el = "f"
+                    elif msg.content in ['e', 'earth',]:
+                        el = "e"
+                    elif msg.content in ['none']:
+                        el = None
+
+                    return el
+
+                else:
+                    await ctx.send("Требовалось указать 1 из элементов! (w, a, f, e)")
+                    return False
+
 
         server = servers.find_one({"server": ctx.guild.id})
 
@@ -189,6 +249,9 @@ class rpg(commands.Cog):
             return emb
 
         message = await ctx.send(embed = embed())
+
+        r = await race_u_f(message, ctx, server)
+        print(r)
 
         try:
             await message.edit(embed = embed(f'Укажите тип предмета: '))
@@ -528,7 +591,7 @@ class rpg(commands.Cog):
             else:
                 item.update({'description': description})
 
-            await message.edit(embed = embed(type, name, act, image, quality, description, f'Укажите описание предмета или `none`: (макс 2000 символов)'))
+            await message.edit(embed = embed(type, name, act, style, image, quality, description, f'Укажите описание предмета или `none`: (макс 2000 символов)'))
             action_m = await action_m_f(message, ctx)
             if action_m == False:
                 return
@@ -831,17 +894,17 @@ class rpg(commands.Cog):
                 emb = discord.Embed(title = "Создание предмета", description = "", color=server['embed_color'])
                 emb.add_field(name = "Тип предмета", value = f"{type}")
                 emb.add_field(name = "Имя предмета", value = f"{name}")
-                if act != 'Не указано':
+                if act != 'Не указано' and act != 'Укажите id предметов для крафта: (максимум 500 предметов)':
                     emb.add_field(name = "Используемые предметы", value = f"{','.join(str(x) for x in act)}")
                 else:
                     emb.add_field(name = "Используемые предметы", value = f"{act}")
 
-                if ndi != 'Не указано':
+                if ndi != 'Не указано' and ndi != 'Укажите не удаляемые предметы' and ndi != None:
                     emb.add_field(name = "Не удаляемые предметы", value = f"{','.join(str(x) for x in ndi)}")
                 else:
                     emb.add_field(name = "Не удаляемые предметы", value = f"{ndi}")
 
-                if create != 'Не указано':
+                if create != 'Не указано' and create != 'Укажите id  предметов которые будут созданы: (максимум 500 предметов)':
                     emb.add_field(name = "Создаваемые предметы", value = f"{','.join(str(x) for x in create)}")
                 else:
                     emb.add_field(name = "Создаваемые предметы", value = f"{create}")
@@ -868,7 +931,7 @@ class rpg(commands.Cog):
                 emb = discord.Embed(title = "",
                 description = "Укажите id предметов для крафта, формат: 12 12 1 2 2\nЕсли вы хотите увеличить колличество предмета то просто укажите его повторно, пример: 11 11 (будет удалено 2 предмета с id 11)", color=server['embed_color'])
                 msg1 = await ctx.send(embed = emb)
-                await message.edit(embed = embed(type, name, f"Укажите id предметов для крафта: (максимум {b} предметов)"))
+                await message.edit(embed = embed(type, name, f"Укажите id предметов для крафта: (максимум 500 предметов)"))
                 msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
             except asyncio.TimeoutError:
                 await ctx.send("Время вышло.")
@@ -905,7 +968,7 @@ class rpg(commands.Cog):
                 emb = discord.Embed(title = "Укажите предметы (id) которые не будут удаляться: (Пример: 1 2 8)",
                 description = "`none` - при крафте все предметы удаляться из инвенторя\n", color=server['embed_color'])
                 msg1 = await ctx.send(embed = emb)
-                await message.edit(embed = embed(type, name, act, f"Укажите метод рецепта "))
+                await message.edit(embed = embed(type, name, act, f"Укажите не удаляемые предметы"))
                 msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
             except asyncio.TimeoutError:
                 await ctx.send("Время вышло.")
@@ -934,13 +997,14 @@ class rpg(commands.Cog):
 
                     item.update({ 'ndi': ndi})
 
+
             try:
                 b = 500
 
                 emb = discord.Embed(title = "",
                 description = "Укажите id создаваемых предметов, формат: 12 12 1 2 2\nЕсли вы хотите увеличить колличество предмета то просто укажите его повторно, пример: 11 11 (будет создано 2 предмета с id 11)", color=server['embed_color'])
                 msg1 = await ctx.send(embed = emb)
-                await message.edit(embed = embed(type, name, act, ndi, f"Укажите id  предметов которые будут созданы: (максимум {b} предметов)"))
+                await message.edit(embed = embed(type, name, act, ndi, f"Укажите id  предметов которые будут созданы: (максимум 500 предметов)"))
                 msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
             except asyncio.TimeoutError:
                 await ctx.send("Время вышло.")
@@ -976,7 +1040,7 @@ class rpg(commands.Cog):
                 item.update({'create': cr})
 
             await message.edit(embed = embed(type, name, act, ndi, create, "Укажите изображение предмета:"))
-            image = await image(message, ctx)
+            image = await image_f(message, ctx)
             if image == False:
                 return
             else:
@@ -1013,10 +1077,12 @@ class rpg(commands.Cog):
                 emb = discord.Embed(title = "Создание предмета", description = "", color=server['embed_color'])
                 emb.add_field(name = "Тип предмета", value = f"{type}")
                 emb.add_field(name = "Имя предмета", value = f"{name}")
+
                 if act == 'Не указано' or act == f"Укажите [id](https://support.discord.com/hc/ru/articles/206346498-%D0%93%D0%B4%D0%B5-%D0%BC%D0%BD%D0%B5-%D0%BD%D0%B0%D0%B9%D1%82%D0%B8-ID-%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D0%B5%D0%BB%D1%8F-%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80%D0%B0-%D1%81%D0%BE%D0%BE%D0%B1%D1%89%D0%B5%D0%BD%D0%B8%D1%8F-) роли `{name}`":
                     emb.add_field(name = "Id роли", value = f"{act}")
                 else:
                     emb.add_field(name = "Id роли", value = f"<@&{act}>")
+
                 emb.add_field(name = "Стиль предмета", value = f"{style}")
                 if image != 'Не указано' and image != 'none' and image != "Укажите изображение предмета:" and image != None:
                     emb.set_thumbnail(url = image)
@@ -1028,7 +1094,7 @@ class rpg(commands.Cog):
 
 
             await message.edit(embed = embed(type, f'Укажите название предмета: (не более 150 символов)'))
-            name = await name(message, ctx)
+            name = await name_f(message, ctx)
             if name == False:
                 return
             else:
