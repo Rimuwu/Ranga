@@ -116,6 +116,12 @@ class profile(commands.Cog):
 
             return im.resize(s, Image.ANTIALIAS)
 
+        def bl_f(im):
+            mask = Image.new('L',(800, 400))
+            ImageDraw.Draw(mask).polygon(xy=[(0, 0),(340, 0),(500,400),(0,400)], fill = 250)
+            mask = mask.filter(ImageFilter.BoxBlur(1.5))
+            im.paste(im.filter( ImageFilter.GaussianBlur(radius=2) ), mask=mask)
+            return im
 
         t = dict(sorted(server['users'].items(),key=lambda x: x[1]['money'], reverse=True))
         topmn = list(t.keys()).index(str(member.id)) +1
@@ -146,20 +152,10 @@ class profile(commands.Cog):
         bar = Image.new('RGB',(800, 400))
 
         #панель
-        ImageDraw.Draw(mask).polygon(xy=[(0, 0),(402, 0),(285,400),(0,400)], fill = al[0])
-        ImageDraw.Draw(bar).polygon(xy=[(0, 0),(402, 0),(285,400),(0,400)], fill = (pl[0][0],pl[0][1],pl[0][2]))
+        ImageDraw.Draw(mask).polygon(xy=[(0, 0),(340, 0),(500,400),(0,400)], fill = al[0])
+        ImageDraw.Draw(bar).polygon(xy=[(0, 0),(340, 0),(500,400),(0,400)], fill = (pl[0][0],pl[0][1],pl[0][2]))
         bar = bar.filter(ImageFilter.BoxBlur(0.5))
         mask = mask.filter(ImageFilter.BoxBlur(1.5))
-        alpha = Image.composite(bar, alpha, mask)
-
-        #панель 2
-        mask = Image.new('L',(800, 400))
-        bar = Image.new('RGB',(800, 400))
-        ImageDraw.Draw(mask).polygon(xy=[(319, 285),(800, 285),(800,400),(285,400)], fill = al[1] )
-        ImageDraw.Draw(bar).polygon(xy=[(319, 285),(800, 285),(800,400),(285,400)], fill = (pl[1][0],pl[1][1],pl[1][2]))
-        bar = bar.filter(ImageFilter.BoxBlur(0.5))
-        mask = mask.filter(ImageFilter.BoxBlur(1.5))
-
         alpha = Image.composite(bar, alpha, mask)
 
         text_image = Image.open(f"elements/text.png")
@@ -172,17 +168,17 @@ class profile(commands.Cog):
         width, height = (800, 400)
 
         progress_width = 420 /100 * percent
-        progress_height = 20  # Пусть будет 10% от высоты
-        x0 = 330
-        y0 = height * (80 / 100)  # 80% от высоты
+        progress_height = 20
+        x0 = 30
+        y0 = height * (82 / 100)
 
         x1 = x0 + progress_width
         y1 = y0 + progress_height
         bar = Image.new('RGB',(800, 400))
         mask = Image.new('L',(800, 400))
-        ImageDraw.Draw(mask).polygon(xy=[(x0,y0+10),(x0-9,y1+10),(750,y1+10),(750,y0+10)], fill = 255)
-        mask = mask.filter(ImageFilter.BoxBlur(2))
-        ImageDraw.Draw(bar).polygon(xy=[(x0,y0+10),(x0-9,y1+10),(750,y1+10),(750,y0+10)], fill = (255, 255, 255), outline = (0, 0, 0))
+        ImageDraw.Draw(mask).polygon(xy=[(x0,y0+10),(x0-9,y1+10),(440,y1+10),(440,y0+10)], fill = 255)
+        # mask = mask.filter(ImageFilter.BoxBlur(2))
+        ImageDraw.Draw(bar).polygon(xy=[(x0,y0+10),(x0-9,y1+10),(440,y1+10),(440,y0+10)], fill = (255, 255, 255), outline = (0, 0, 0))
         alpha = Image.composite(bar, alpha, mask)
 
         if user['xp'] > 0:
@@ -219,53 +215,28 @@ class profile(commands.Cog):
         fg_img = im
         alpha = trans_paste(fg_img, bg_img, 1.0, (25, 25, 175, 175))
 
-        fr = user['frame']
-        if fr != None:
-            fr = frames.find_one({"id": fr})
-
-            fr_l = fr['link']
-
-            if fr['style'] == 1:
-
-                em = requests.get(fr_l, stream = True)
-                em = Image.open(io.BytesIO(em.content))
-                em = em.convert("RGBA")
-                em = em.resize((210, 210), Image.ANTIALIAS)
-
-                bg_img = alpha
-                fg_img = em
-                alpha = trans_paste(fg_img, bg_img, 1.0, (0, 0, 210, 210))
-
-            if fr['style'] == 2:
-
-                em = requests.get(fr_l, stream = True)
-                em = Image.open(io.BytesIO(em.content))
-                em = em.convert("RGBA")
-                em = em.resize((160, 160), Image.ANTIALIAS)
-
-                bg_img = alpha
-                fg_img = em
-                alpha = trans_paste(fg_img, bg_img, 1.0, (20, 20, 180, 180))
-
         idraw = ImageDraw.Draw(alpha)
-        if user['guild'] != None:
-            club = server['rpg']['guild'][f'{user["guild"]}']
-            idraw.text((315,360), f"{name}#{tag} [{club['tag']}]", font = headline) #первое значение это отступ с лева, второе сверху
-        else:
-            idraw.text((315,360), f"{name}#{tag}", font = headline)
 
-        idraw.text((60,348), f"{user['money']} #{topmn}", font = para)
-        idraw.text((260,50), f"{len(user['rep'][0])}", font = para)
-        idraw.text((260,90), str(len(user['rep'][1])), font = para)
-        idraw.text((505,282), f"{user['xp']}  |  {expn}" , font = para)
-        idraw.text((60,298), f"{user['lvl']} #{toplvl}" , font = para)
         if user['voice_time'] >= 86400:
             text = funs.time_end(user['voice_time'])[:-4]
         if user['voice_time'] >= 604800:
             text = funs.time_end(user['voice_time'])[:-8]
         else:
             text = funs.time_end(user['voice_time'])
-        idraw.text((60,252), f"{text} #{topvoice}" , font = para)
+
+        idraw.text((60,195), f"{text} #{topvoice}" , font = para)
+
+        if user['guild'] != None:
+            club = server['rpg']['guild'][f'{user["guild"]}']
+            idraw.text((15,360), f"{name}#{tag} [{club['tag']}]", font = headline) #первое значение это отступ с лева, второе сверху
+        else:
+            idraw.text((15,360), f"{name}#{tag}", font = headline)
+
+        idraw.text((60,242), f"{user['money']} #{topmn}", font = para)
+        idraw.text((260,50), f"{len(user['rep'][0])}", font = para)
+        idraw.text((260,90), str(len(user['rep'][1])), font = para)
+        idraw.text((230,288), f"{user['xp']} / {expn}" , font = para)
+        idraw.text((60,288), f"{user['lvl']} #{toplvl}" , font = para)
 
 
         embed = discord.Embed(color=0xf03e65)
@@ -400,7 +371,7 @@ class profile(commands.Cog):
 
 
         if bc['format'] == "png":
-
+            img = bl_f(img)
             bg_img = img
             fg_img = alpha
             img = trans_paste(fg_img, bg_img, 1.0)

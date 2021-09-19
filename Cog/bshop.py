@@ -333,6 +333,13 @@ class bs(commands.Cog):
 
             return im.resize(s, Image.ANTIALIAS)
 
+        def bl_f(im):
+            mask = Image.new('L',(800, 400))
+            ImageDraw.Draw(mask).polygon(xy=[(0, 0),(340, 0),(500,400),(0,400)], fill = 250)
+            mask = mask.filter(ImageFilter.BoxBlur(1.5))
+            im.paste(im.filter( ImageFilter.GaussianBlur(radius=2) ), mask=mask)
+            return im
+
         t = '?'
 
         alpha = Image.open('elements/alpha.png')
@@ -359,20 +366,10 @@ class bs(commands.Cog):
         bar = Image.new('RGB',(800, 400))
 
         #панель
-        ImageDraw.Draw(mask).polygon(xy=[(0, 0),(402, 0),(285,400),(0,400)], fill = 153)
-        ImageDraw.Draw(bar).polygon(xy=[(0, 0),(402, 0),(285,400),(0,400)], fill = (0,0,0))
+        ImageDraw.Draw(mask).polygon(xy=[(0, 0),(340, 0),(500,400),(0,400)], fill = 153)
+        ImageDraw.Draw(bar).polygon(xy=[(0, 0),(340, 0),(500,400),(0,400)], fill = (0,0,0))
         bar = bar.filter(ImageFilter.BoxBlur(0.5))
         mask = mask.filter(ImageFilter.BoxBlur(1.5))
-        alpha = Image.composite(bar, alpha, mask)
-
-        #панель 2
-        mask = Image.new('L',(800, 400))
-        bar = Image.new('RGB',(800, 400))
-        ImageDraw.Draw(mask).polygon(xy=[(319, 285),(800, 285),(800,400),(285,400)], fill = 153 )
-        ImageDraw.Draw(bar).polygon(xy=[(319, 285),(800, 285),(800,400),(285,400)], fill = (0,0,0))
-        bar = bar.filter(ImageFilter.BoxBlur(0.5))
-        mask = mask.filter(ImageFilter.BoxBlur(1.5))
-
         alpha = Image.composite(bar, alpha, mask)
 
         text_image = Image.open(f"elements/text.png")
@@ -385,17 +382,16 @@ class bs(commands.Cog):
         width, height = (800, 400)
 
         progress_width = 420 /100 * percent
-        progress_height = 20  # Пусть будет 10% от высоты
-        x0 = 330
-        y0 = height * (80 / 100)  # 80% от высоты
+        progress_height = 20
+        x0 = 30
+        y0 = height * (82 / 100)
 
         x1 = x0 + progress_width
         y1 = y0 + progress_height
         bar = Image.new('RGB',(800, 400))
         mask = Image.new('L',(800, 400))
-        ImageDraw.Draw(mask).polygon(xy=[(x0,y0+10),(x0-9,y1+10),(750,y1+10),(750,y0+10)], fill = 255)
-        mask = mask.filter(ImageFilter.BoxBlur(2))
-        ImageDraw.Draw(bar).polygon(xy=[(x0,y0+10),(x0-9,y1+10),(750,y1+10),(750,y0+10)], fill = (255, 255, 255), outline = (0, 0, 0))
+        ImageDraw.Draw(mask).polygon(xy=[(x0,y0+10),(x0-9,y1+10),(440,y1+10),(440,y0+10)], fill = 255)
+        ImageDraw.Draw(bar).polygon(xy=[(x0,y0+10),(x0-9,y1+10),(440,y1+10),(440,y0+10)], fill = (255, 255, 255), outline = (0, 0, 0))
         alpha = Image.composite(bar, alpha, mask)
 
         if user['xp'] > 0:
@@ -432,21 +428,27 @@ class bs(commands.Cog):
         fg_img = im
         alpha = trans_paste(fg_img, bg_img, 1.0, (25, 25, 175, 175))
 
-
         idraw = ImageDraw.Draw(alpha)
 
-        idraw.text((315,360), f"{name}#{tag}", font = headline)
+        if user['voice_time'] >= 86400:
+            text = funs.time_end(user['voice_time'])[:-4]
+        if user['voice_time'] >= 604800:
+            text = funs.time_end(user['voice_time'])[:-8]
+        else:
+            text = funs.time_end(user['voice_time'])
 
-        idraw.text((60,348), f"{user['money']} #{t}", font = para)
+        idraw.text((60,195), f"{text} #{t}" , font = para)
+        idraw.text((15,360), f"{name}#{tag}", font = headline)
+
+        idraw.text((60,242), f"{user['money']} #{t}", font = para)
         idraw.text((260,50), f"{len(user['rep'][0])}", font = para)
         idraw.text((260,90), str(len(user['rep'][1])), font = para)
-        idraw.text((505,282), f"{user['xp']}  |  {expn}" , font = para)
-        idraw.text((60,298), f"{user['lvl']} #{t}" , font = para)      #55,265
-        idraw.text((60,252), f"{funs.time_end(user['voice_time'])} #{t}" , font = para)
+        idraw.text((230,288), f"{user['xp']} / {expn}" , font = para)
+        idraw.text((60,288), f"{user['lvl']} #{t}" , font = para)
 
 
         if type == "png":
-
+            img = bl_f(img)
             bg_img = img
             fg_img = alpha
             img = trans_paste(fg_img, bg_img, 1.0)
@@ -515,9 +517,11 @@ class bs(commands.Cog):
 
                 bs = s['bs']
                 try:
-                    bs_id = int(max(bs.keys())) + 2
+                    bs_id = int(max(bs.keys())) + 3
                 except:
                     bs_id = 1
+
+                print(bs_id)
 
                 embed = discord.Embed(title = f'ID {bs_id}', description = f'Автор: {ctx.author.id}\nУкзанный формат: {type}\nURL: {link}')
                 embed.set_image(url=link)
