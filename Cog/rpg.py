@@ -202,7 +202,7 @@ class rpg(commands.Cog):
 
         async def element_f(message, ctx, server):
             try:
-                text = "`w` - <:water:888029916287885332>(water) Огонь >х0.75> Вода >х1.25> Земля\n`a` - <:air:888029789749919787>(air) Земля >х0.75> Воздух >х1.25> Огонь\n`f` - <:fire:888029761828425789>(fire) \n`e` - <:earth:888029840945598534>(earth) "
+                text = "`w` - <:water:888029916287885332>(water) Огонь >`х0.75`> Вода >`х1.25`> Земля\n`a` -  <:air:888029789749919787>(air) Земля >`х0.75`> Воздух >`х1.25`> Огонь\n`f` - <:fire:888029761828425789>(fire) Воздух >`х0.75`> Огонь >`х1.25`> Вода\n`e` - <:earth:888029840945598534>(earth) Вода >`х0.75`> Земля >`х1.25`> Воздух\n\n<:fire:888029761828425789> >`х1.25`> <:water:888029916287885332> >`х1.25`> <:earth:888029840945598534> >`х1.25`> <:air:888029789749919787> >`х1.25`> <:fire:888029761828425789>\n\nУкажите `none` если у предмета нет стихии."
                 emb = discord.Embed(title = "Элементы:",
                 description = text, color=server['embed_color'])
                 msg1 = await ctx.send(embed = emb)
@@ -212,11 +212,12 @@ class rpg(commands.Cog):
                 return False
             else:
                 try:
+                    await msg1.delete()
                     await msg.delete()
                 except Exception:
                     pass
 
-                if message.content in ['fire', 'water', 'air', 'earth', 'none']:
+                if msg.content in ['fire', 'water', 'air', 'earth', 'none', 'w', 'a', 'f', 'e']:
 
                     if msg.content in ['w', 'water']:
                         el = "w"
@@ -235,6 +236,35 @@ class rpg(commands.Cog):
                     await ctx.send("Требовалось указать 1 из элементов! (w, a, f, e)")
                     return False
 
+        async def emoji_f(message, ctx, server):
+            try:
+                msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
+            except asyncio.TimeoutError:
+                await ctx.send("Время вышло.")
+                return False
+            else:
+                try:
+                    await msg.delete()
+                except Exception:
+                    pass
+
+                test_msg = await ctx.send("Тестовое сообщение\n Не удаляйте его, оно быдут удалено автоматически при наличии прав у бота")
+                list = []
+
+                try:
+                    await test_msg.add_reaction(msg.content)
+                except Exception:
+                    await ctx.send("Требовалось указать :emoji:")
+                    return False
+
+                try:
+                    await test_msg.delete()
+                except Exception:
+                    pass
+
+                return msg.content
+
+
 
         server = servers.find_one({"server": ctx.guild.id})
 
@@ -249,9 +279,6 @@ class rpg(commands.Cog):
             return emb
 
         message = await ctx.send(embed = embed())
-
-        r = await race_u_f(message, ctx, server)
-        print(r)
 
         try:
             await message.edit(embed = embed(f'Укажите тип предмета: '))
@@ -332,6 +359,13 @@ class rpg(commands.Cog):
                 item.update({'description': description})
 
             await message.edit(embed = embed(type, name, act, image, quality, description, f'Укажите описание предмета или `none`: (макс 2000 символов)'))
+            action_m = await action_m_f(message, ctx)
+            if action_m == False:
+                return
+            else:
+                item.update({'action_m': action_m})
+
+            await message.edit(embed = embed(type, name, act, image, quality, description, action_m, f'Укажите описание предмета или `none`: (макс 2000 символов)'))
             action_m = await action_m_f(message, ctx)
             if action_m == False:
                 return
@@ -1426,19 +1460,62 @@ class rpg(commands.Cog):
             msg = await ctx.send(embed= emb)
 
         if len(s_i) > 1:
+            inv = {}
+
+            items = []
+            for i in server['items'].keys():
+                items.append(server['items'][i])
+
+            for i in user['inv']:
+                u = i.copy()
+                del i['iid']
+
+                if i in items:
+                    if i['name'] in list(inv.keys()):
+                        inv.update({ i['name']: { 'it':i, 'count': inv[i['name']]['count']+1 } })
+                    else:
+                        inv.update({ i['name']: { 'it':i, 'count': 1 } })
+
+                if i not in items:
+                    if f'{i["name"]} (#{u["iid"]})' in list(inv.keys()):
+                        inv.update({ f'{i["name"]} (#{u["iid"]})': { 'it':i, 'count': inv[i['name']]['count']+1 } })
+                    else:
+                        inv.update({ f'{i["name"]} (#{u["iid"]})': { 'it':i, 'count': 1 } })
+
+            class Dropdown(discord.ui.Select):
+                def __init__(self, inv, ctx, msg, emb):
+
+                    options = []
+                    for k in inv:
+                        options.append(discord.SelectOption(label=f'{k}'))
+
+                    super().__init__(placeholder='Выберите используемый предмет...', min_values=1, max_values=1, options=options)
+
+                async def callback(self, interaction: discord.Interaction):
+                    if ctx.author.id == interaction.user.id:
+                        await interaction.response.send_message(f'{self.values[0]}', ephemeral = True)
+                        self.view.stop()
+
+                    else:
+                        await interaction.response.send_message(f'Откройте свой инвентарь!', ephemeral = True)
+
+
+            class DropdownView(discord.ui.View):
+                def __init__(self, inv, ctx, msg, emb):
+                    super().__init__()
+                    self.add_item(Dropdown(inv, ctx, msg, emb))
+
+            pprint.pprint(inv)
             text = ''
-            items = {}
             n = 0
-            for i in s_i:
+            for k in inv:
+                i = inv[k]
                 n += 1
-                text += f'{n}# {i["name"]}\n'
-                items.update({ str(n): i })
+                text += f'{n}# {k} x{i["count"]}\n'
 
-            emb = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь', description = f'В инвентаре найдено несколько совпадений:\n{text}', color=server['embed_color']).set_footer(text = 'В чат введите число с нужным вам предметом')
-            msg = await ctx.send(embed= emb)
-
-
-
+            emb = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь', description = f'В инвентаре найдено несколько совпадений:\n{text}', color=server['embed_color'])
+            msg = await ctx.send(embed = emb)
+            await msg.edit(embed = emb, view=DropdownView(inv, ctx, msg, emb))
 
 
 

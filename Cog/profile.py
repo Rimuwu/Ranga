@@ -120,7 +120,7 @@ class profile(commands.Cog):
             mask = Image.new('L',(800, 400))
             ImageDraw.Draw(mask).polygon(xy=[(0, 0),(340, 0),(500,400),(0,400)], fill = 250)
             mask = mask.filter(ImageFilter.BoxBlur(1.5))
-            im.paste(im.filter( ImageFilter.GaussianBlur(radius=2) ), mask=mask)
+            im.paste(im.filter( ImageFilter.GaussianBlur(radius=8) ), mask=mask)
             return im
 
         t = dict(sorted(server['users'].items(),key=lambda x: x[1]['money'], reverse=True))
@@ -167,26 +167,25 @@ class profile(commands.Cog):
             percent = 100
         width, height = (800, 400)
 
-        progress_width = 420 /100 * percent
+        progress_width = 445 /100 * percent
         progress_height = 20
-        x0 = 30
+        x0 = 15
         y0 = height * (82 / 100)
 
         x1 = x0 + progress_width
         y1 = y0 + progress_height
         bar = Image.new('RGB',(800, 400))
         mask = Image.new('L',(800, 400))
-        ImageDraw.Draw(mask).polygon(xy=[(x0,y0+10),(x0-9,y1+10),(440,y1+10),(440,y0+10)], fill = 255)
-        # mask = mask.filter(ImageFilter.BoxBlur(2))
-        ImageDraw.Draw(bar).polygon(xy=[(x0,y0+10),(x0-9,y1+10),(440,y1+10),(440,y0+10)], fill = (255, 255, 255), outline = (0, 0, 0))
+        ImageDraw.Draw(mask).polygon(xy=[(x0,y0+10),(x0,y1+10),(469,y1+10),(460,y0+10)], fill = 255)
+        ImageDraw.Draw(bar).polygon(xy=[(x0,y0+10),(x0,y1+10),(469,y1+10),(460,y0+10)], fill = (255, 255, 255), outline = (0, 0, 0))
         alpha = Image.composite(bar, alpha, mask)
 
         if user['xp'] > 0:
             pbar = Image.new('RGB', (800, 400))
             mask = Image.new('L', (800, 400))
-            ImageDraw.Draw(mask).polygon(xy=[(x0,y0+10),(x0-9,y1+10),(x1,y1+10),(x1,y0+10)], fill = 255)
+            ImageDraw.Draw(mask).polygon(xy=[(x0,y0+10),(x0,y1+9),(x1+10,y1+10),(x1,y0+10)], fill = 255)
             mask = mask.filter(ImageFilter.BoxBlur(2))
-            ImageDraw.Draw(pbar).polygon(xy=[(x0, y0+10),(x0-9, y1+10),(x1, y1+10),(x1, y0+10)], fill=(progress_bar[0], progress_bar[1], progress_bar[2])) #основной прогресс бар
+            ImageDraw.Draw(pbar).polygon(xy=[(x0, y0+10),(x0, y1+9),(x1+10, y1+10),(x1, y0+10)], fill=(progress_bar[0], progress_bar[1], progress_bar[2])) #основной прогресс бар
             alpha = Image.composite(pbar, alpha, mask)
 
 
