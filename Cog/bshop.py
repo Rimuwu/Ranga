@@ -578,11 +578,14 @@ class bs(commands.Cog):
         mid = await channel.fetch_message(bs['message'])
         await mid.clear_reactions()
 
+        if bs["type"] == 'png': tp = 'Статичная картинка'
+        if bs["type"] == 'gif': tp = 'Анимированная картинка'
+
         if reason == None:
-            embed = discord.Embed(title = f'ID {id} Отклонён', description = f'Автор: {bs["author"]}\nУкзанный формат: {bs["type"]}\nURL: {bs["url"]}', color = 0xf03e65)
+            embed = discord.Embed(title = f'ID {id} Отклонён', description = f'Автор: {bs["author"]}\nУкзанный формат: {tp}\nURL: {bs["url"]}', color = 0xf03e65)
             embed.set_image(url=bs["url"])
         if reason != None:
-            embed = discord.Embed(title = f'ID {id} Отклонён', description = f'Автор: {bs["author"]}\nУкзанный формат: {bs["type"]}\nURL: {bs["url"]}\n\n\nПричина: {"".join(reason)}', color = 0xf03e65)
+            embed = discord.Embed(title = f'ID {id} Отклонён', description = f'Автор: {bs["author"]}\nУкзанный формат: {tp}\nURL: {bs["url"]}\n\n\nПричина: {"".join(reason)}', color = 0xf03e65)
             embed.set_image(url=bs["url"])
 
             g = self.bot.get_guild(bs['server'])
@@ -640,7 +643,10 @@ class bs(commands.Cog):
         mid = await channel.fetch_message(bs['message'])
         await mid.clear_reactions()
 
-        embed = discord.Embed(title = f'ID {id} Принят', description = f'Автор: {bs["author"]}\nФормат: {type}\nURL: {bs["url"]}\nПринял: {ctx.author.mention}\nID в магазине: {len(list(backs.find()))}', color = 0x34cb2c)
+        if type == 'png': tp = 'Статичная картинка'
+        if type == 'gif': tp = 'Анимированная картинка'
+
+        embed = discord.Embed(title = f'ID {id} Принят', description = f'Автор: {bs["author"]}\nФормат: {tp}\nURL: {bs["url"]}\nПринял: {ctx.author.mention}\nID в магазине: {len(list(backs.find()))}', color = 0x34cb2c)
         embed.set_image(url=bs["url"])
 
         await mid.edit(embed= embed)

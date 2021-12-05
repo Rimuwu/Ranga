@@ -32,6 +32,9 @@ class profile(commands.Cog):
     async def rep(self,ctx, member: discord.Member, arg=None):
 
         user = funs.user_check(member, member.guild)
+        if user == False:
+            await ctx.send(f"С ботом взаимодействовать нельзя!")
+            return
         server = servers.find_one({"server": ctx.guild.id})
 
         if member == ctx.author:
@@ -42,18 +45,26 @@ class profile(commands.Cog):
             await ctx.send(f"Укажите пользователя")
             return
 
+
         else:
             if arg == "+" or arg == None:
+                print(2)
                 if ctx.author.id in user['rep'][0]:
+                    print(3)
                     await ctx.send("Повторно нельзя повысить репутацию пользователю")
+                    print(4)
                     return
                 if ctx.author.id in user['rep'][1]:
+                    print(5)
                     user['rep'][1].remove(ctx.author.id)
 
-
+                print(6)
                 user['rep'][0].append(ctx.author.id)
+                print(7)
                 funs.user_update(member.id, member.guild, 'rep', user['rep'])
+                print(8)
                 embed = discord.Embed(title="+rep!", description=f"<@{member.id}> получает **+rep** от <@{ctx.author.id}>!",color=0x63d955)
+                print(9)
                 await ctx.send(embed=embed)
 
             elif arg == "-":
