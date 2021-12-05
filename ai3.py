@@ -159,8 +159,6 @@ class functions:
                     'Nitro': False,
                     'back': 0,
                     'back_inv': [0],
-                    'frame': None,
-                    'frame_inv': [],
                     'rep': [[],[]],
                    }
 

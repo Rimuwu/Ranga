@@ -189,7 +189,7 @@ class rpg(commands.Cog):
                     pass
 
                 if msg.content == 'all' or msg.content == 'none':
-                    return
+                    return None
                 else:
                     races = list(server['races'].keys())
                     c_races = msg.content.split()
