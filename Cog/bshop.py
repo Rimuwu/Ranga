@@ -517,11 +517,10 @@ class bs(commands.Cog):
 
                 bs = s['bs']
                 try:
-                    bs_id = int(max(bs.keys())) + 3
+                    bs_id = int(max(bs.keys())) + 4
                 except:
                     bs_id = 1
 
-                print(bs_id)
 
                 embed = discord.Embed(title = f'ID {bs_id}', description = f'Автор: {ctx.author.id}\nУкзанный формат: {type}\nURL: {link}')
                 embed.set_image(url=link)
@@ -637,7 +636,7 @@ class bs(commands.Cog):
         if type == None:
             type = bs['type']
 
-        channel = self.bot.get_channel(config.bs_channel)
+        channel = self.bot.get_channel(config.bs_op)
         mid = await channel.fetch_message(bs['message'])
         await mid.clear_reactions()
 
