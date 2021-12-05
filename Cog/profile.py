@@ -129,7 +129,7 @@ class profile(commands.Cog):
 
         def bl_f(im):
             mask = Image.new('L',(800, 400))
-            ImageDraw.Draw(mask).polygon(xy=[(0, 0),(340, 0),(500,400),(0,400)], fill = 250)
+            ImageDraw.Draw(mask).polygon(xy=[(0, 0),(340, 0),(500,400),(0,400)], fill = 200)
             mask = mask.filter(ImageFilter.BoxBlur(1.5))
             im.paste(im.filter( ImageFilter.GaussianBlur(radius=8) ), mask=mask)
             return im
