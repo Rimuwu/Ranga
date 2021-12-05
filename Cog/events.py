@@ -634,7 +634,7 @@ class MainCog(commands.Cog):
 
             b_t = int(time.time() - b_t)
 
-            channel = await self.bot.fetch_channel(884499936476024913)
+            channel = await self.bot.fetch_channel(config.check_channel)
             emb = discord.Embed(description=f"Проверка мьютов: {funs.time_end(m_t)}\nПроверка ролей дохода: {funs.time_end(i_t)}\nУстановка баннера: {funs.time_end(b_t)}", color=0xE52B50)
             await channel.send(embed = emb)
 
@@ -2360,7 +2360,7 @@ class MainCog(commands.Cog):
                 counter = 0
                 log = server['mod']['log_channel']['logging']
                 channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-                emb = discord.Embed(title = f'Роль обновлена', description = f'Роль {after.mention} была обновлена', color=0xE52B50 )
+                emb = discord.Embed(title = f'Роль обновлена', description = f'Роль {after.mention} была обновлена', color=0xd0b714 )
 
                 if 'role_color' in log or 'all' in log or 'guild' in log:
                     if before.color != after.color:
