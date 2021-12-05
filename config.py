@@ -7,6 +7,8 @@ cluster_token = os.environ.get('CLUSTER_TOKEN')
 donatepay_token = os.environ.get('DN_TOKEN')
 #id канала для принятия\отклонения фонов (bs_app)
 bs_channel = 917043751795445771
+#канал голосования за фоны
+bs_op = 917047102394228756
 #канал с логом ошибок
 error_channel = 917043101862858772
 #канал с логом запуска
