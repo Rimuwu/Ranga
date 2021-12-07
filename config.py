@@ -1,10 +1,10 @@
 import os
-#токен бота
-bot_token = os.environ.get('BOT_TOKEN')
-#токен кластера mongo
-cluster_token = os.environ.get('CLUSTER_TOKEN')
-#токен донат системы
-donatepay_token = os.environ.get('DN_TOKEN')
+# bot_token = os.environ.get('BOT_TOKEN')
+bot_token = "NzM1MTcyMTI4NjAwNjIxMDc3.XxcYZg.-Do9ymCfg0wWTrpaqkjF8Zwdubo"
+# cluster_token = os.environ.get('CLUSTER_TOKEN')
+cluster_token = "mongodb+srv://bot:IU9745987495KJHIUyerkloOIUO6969423lgo@cluster0.jy3nj.mongodb.net/<dbname>?retryWrites=true&w=majority"
+# donatepay_token = os.environ.get('DN_TOKEN')
+donatepay_token = 'fl18hEAfzRsVXH0TVSONbdvVFMC7YEdlxiy7ewwtLTDgpRBzyA2GgFyHCobr'
 #id канала для принятия\отклонения фонов (bs_app)
 bs_channel = 917043751795445771
 #канал голосования за фоны
