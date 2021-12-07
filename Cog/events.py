@@ -38,6 +38,11 @@ stat_list = [
                'Мошенница - Акудама SSS ранга, Награда: 100.000.000$',
                'Чем сильнее я становлюсь, тем сильнее мои враги...',
                'IT | Демон | 1.?.9',
+               'Взлом: 11%',
+               'Взлом: 67%',
+               'Взлом: 105%',
+               'Взлом: 3%',
+               'Взлом: 29%',
             ]
 
 async def voice_check(guild):
@@ -127,30 +132,43 @@ class MainCog(commands.Cog):
     async def on_ready(self):
         global start_time
 
-        channel = self.bot.get_channel(config.start_channel)
-        ping = self.bot.latency
-        ping_emoji = "🟩🔳🔳🔳🔳"
+        try:
+            channel = self.bot.get_channel(config.start_channel)
+            ping = self.bot.latency
+            ping_emoji = "🟩🔳🔳🔳🔳"
 
-        ping_list = [
-            {"ping": 0.100000000000000, "emoji": "🟧🟩🔳🔳🔳"},
-            {"ping": 0.150000000000000, "emoji": "🟥🟧🟩🔳🔳"},
-            {"ping": 0.200000000000000, "emoji": "🟥🟥🟧🟩🔳"},
-            {"ping": 0.250000000000000, "emoji": "🟥🟥🟥🟧🟩"},
-            {"ping": 0.300000000000000, "emoji": "🟥🟥🟥🟥🟧"},
-            {"ping": 0.350000000000000, "emoji": "🟥🟥🟥🟥🟥"}]
+            ping_list = [
+                {"ping": 0.100000000000000, "emoji": "🟧🟩🔳🔳🔳"},
+                {"ping": 0.150000000000000, "emoji": "🟥🟧🟩🔳🔳"},
+                {"ping": 0.200000000000000, "emoji": "🟥🟥🟧🟩🔳"},
+                {"ping": 0.250000000000000, "emoji": "🟥🟥🟥🟧🟩"},
+                {"ping": 0.300000000000000, "emoji": "🟥🟥🟥🟥🟧"},
+                {"ping": 0.350000000000000, "emoji": "🟥🟥🟥🟥🟥"}]
 
-        for ping_one in ping_list:
-            if ping > ping_one["ping"]:
-                ping_emoji = ping_one["emoji"]
+            for ping_one in ping_list:
+                if ping > ping_one["ping"]:
+                    ping_emoji = ping_one["emoji"]
 
-        time2 = time.time()
+            time2 = time.time()
 
-        await channel.send(f"Бот {self.bot.user} онлайн - Команд: {len(self.bot.commands)}\n{ping_emoji} `{ping * 1000:.0f}ms`\nВремя на запуск: {funs.time_end(time2 - start_time)}")
-        print(f"Бот {self.bot.user} онлайн - Команд: {len(self.bot.commands)}\n{ping_emoji} {ping * 1000:.0f}ms\nВремя на запуск: {funs.time_end(time2 - start_time)}")
+            await channel.send(f"Бот {self.bot.user} онлайн - Команд: {len(self.bot.commands)}\n{ping_emoji} `{ping * 1000:.0f}ms`\nВремя на запуск: {funs.time_end(time2 - start_time)}")
+            print(f"Бот {self.bot.user} онлайн - Команд: {len(self.bot.commands)}\n{ping_emoji} {ping * 1000:.0f}ms\nВремя на запуск: {funs.time_end(time2 - start_time)}")
+        except:
+            print('ERROR in on_ready!')
+            pass
 
 
         self.change_stats.start()
         self.manage_check.start()
+        self.chan_nam_change.start()
+
+    @tasks.loop(seconds = 2)
+    async def chan_nam_change(self):
+        h = time.strftime('%H')
+        if h == '0' or h == '00' or h == '6' or h == '12' or h == '18':
+            channel = self.bot.get_channel(config.chat_channel)
+            rnd_emoji = ['🍕', '🥞', '🍖', '🍡', '🎂', '🎍', '🎋', '🍬', '🍭', '🍹', '🍸', '🍱', '🍻', '🍩']
+            await channel.edit(name = f'{random.choice(rnd_emoji)}┃чат')
 
     @tasks.loop(seconds = 15)
     async def change_stats(self):
