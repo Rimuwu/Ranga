@@ -162,7 +162,7 @@ class MainCog(commands.Cog):
         self.manage_check.start()
         self.chan_nam_change.start()
 
-    @tasks.loop(seconds = 2)
+    @tasks.loop(seconds = 30)
     async def chan_nam_change(self):
         h = time.strftime('%H')
         if h == '0' or h == '00' or h == '6' or h == '12' or h == '18':

@@ -43,6 +43,8 @@ class settings(commands.Cog):
         server = servers.find_one({"server": ctx.guild.id})
         a = server['upsend_sett']
 
+        server['premium'] = True
+
         if server['premium'] != True:
             mk = 20
             if len(a['upitems'].keys()) >= 50:
@@ -438,11 +440,14 @@ class settings(commands.Cog):
             await ctx.send("У вас недостаточно прав для использования этой команды!")
             return
 
+
         member = ctx.author
         server = servers.find_one({"server": member.guild.id})
         name = member.name
         tag = member.discriminator
         reaction = 'a'
+
+        server['premium'] = True
 
         def make_ellipse_mask(size, x0, y0, x1, y1, blur_radius):
             img = Image.new("L", size, color=0)
@@ -960,6 +965,8 @@ class settings(commands.Cog):
         name = member.name
         tag = member.discriminator
         reaction = 'a'
+
+        server['premium'] = True
 
         def make_ellipse_mask(size, x0, y0, x1, y1, blur_radius):
             img = Image.new("L", size, color=0)
@@ -2349,6 +2356,8 @@ class settings(commands.Cog):
 
         server = servers.find_one({'server':ctx.guild.id})
 
+        server['premium'] = True
+
         try:
             await test_msg.delete()
         except Exception:
@@ -2375,6 +2384,8 @@ class settings(commands.Cog):
             return
 
         server = servers.find_one({'server':ctx.guild.id})
+
+        server['premium'] = True
 
         try:
             pr = server['premium']
@@ -3160,6 +3171,8 @@ class settings(commands.Cog):
 
         server = servers.find_one({"server": ctx.guild.id})
         a = server['voice_reward']
+
+        server['premium'] = True
 
         if server['premium'] != True:
             mk = 15
