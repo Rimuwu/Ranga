@@ -700,7 +700,7 @@ class settings(commands.Cog):
                 return
 
         try:
-            await message.edit(embed = embed(channel, link, f_el, f_we, f_na, w_text, emb, "Укажите тип информации (0 или 1)\n0 - центральное расположение\n1 - расположение относительно лево"))
+            await message.edit(embed = embed(channel, link, f_el, f_we, f_na, w_text, emb, "Укажите тип информации (0 или 1)\n0 - центральное расположение\n1 - расположение относительно слева"))
             msg = await self.bot.wait_for('message', timeout=120.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
         except asyncio.TimeoutError:
             await ctx.send("Время вышло.")
@@ -1213,7 +1213,7 @@ class settings(commands.Cog):
                 return
 
         try:
-            await message.edit(embed = embed(channel, link, f_el, f_we, f_na, w_text, emb, "Укажите тип информации (0 или 1)\n0 - центральное расположение\n1 - расположение относительно лево"))
+            await message.edit(embed = embed(channel, link, f_el, f_we, f_na, w_text, emb, "Укажите тип информации (0 или 1)\n0 - центральное расположение\n1 - расположение относительно слева"))
             msg = await self.bot.wait_for('message', timeout=120.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
         except asyncio.TimeoutError:
             await ctx.send("Время вышло.")

@@ -672,30 +672,29 @@ class MainCog(commands.Cog):
             if channel != None:
                 if server['send']['avatar_join_url'] != "avatar_url_none":
 
-                    ust = server['send']
+                    ust = server['welcome']
 
                     try:
                         ust['join_type']
                     except:
-                        ust.update({'join_type': "png"})
+                        ust.update({'join_type': False})
 
                     url = server['send']['avatar_join_url']
 
-                    if ust['join_type'] == "png":
+                    if ust['join_type'] == False: #png
 
                         response = requests.get(url, stream = True)
                         response = Image.open(io.BytesIO(response.content))
                         response = response.convert("RGBA")
                         alpha = response.resize((960, 470), Image.ANTIALIAS) # улучшение качества
 
-                    if ust['join_type'] == "gif":
+                    if ust['join_type'] == True: #gif
 
                         response = requests.get(url, stream=True)
                         response.raw.decode_content = True
                         img = Image.open(response.raw)
 
                         alpha = Image.open('elements/alpha.png')
-                        alpha = alpha.resize((960, 470), Image.ANTIALIAS) # улучшение качества
 
 
                     idraw = ImageDraw.Draw(alpha)
@@ -811,7 +810,7 @@ class MainCog(commands.Cog):
                         text = server['welcome']['wel_text']
                         text = funs.text_replase(text, member)
 
-                    if ust['join_type'] == "png":
+                    if ust['join_type'] == False:
 
 
                         image = alpha
@@ -822,7 +821,7 @@ class MainCog(commands.Cog):
                         file = discord.File(fp = image_pix, filename="welcome_card.png")
                         ul = 'png'
 
-                    if ust['join_type'] == "gif":
+                    if ust['join_type'] == True:
                         fs = []
                         for frame in ImageSequence.Iterator(img):
                             frame = frame.convert("RGBA")
@@ -834,12 +833,12 @@ class MainCog(commands.Cog):
                             img = trans_paste(fg_img, bg_img, 1.0)
 
                             b = io.BytesIO()
-                            frame.save(b, format="GIF",optimize=True, quality=75)
+                            frame.save(b, format="GIF")
                             frame = Image.open(b)
                             fs.append(frame)
 
 
-                        fs[0].save('welcome_card.gif', save_all=True, append_images=fs[1:], loop = 0, optimize=True, quality=75)
+                        fs[0].save('welcome_card.gif', save_all=True, append_images=fs[1:], loop = 0)
 
                         file = discord.File(fp = "welcome_card.gif", filename="welcome_card.gif")
                         ul = 'gif'
@@ -927,12 +926,7 @@ class MainCog(commands.Cog):
 
                 channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
 
-                one_day_ago = datetime.now() - timedelta(days=1)
-                if member.created_at > one_day_ago: #меньше одного дня
-                    emb = discord.Embed(description="Пользователь присоединился к серверу", color=0xE52B50)
-                    emb.add_field(name="Оповещение",value=f"Аккаунт создан меньше одного дня назад!", inline=False)
-                else: #больше одного дня
-                    emb = discord.Embed(description="Пользователь присоединился к серверу", color=0x76E212)
+                emb = discord.Embed(description="Пользователь присоединился к серверу", color=0x76E212)
 
                 if member.nick == None:
                     nick = f"Имя: {member.name}#{member.discriminator}\nУпоминание: {member.mention}"
@@ -956,22 +950,22 @@ class MainCog(commands.Cog):
             if channel != None:
                 if server['send']['avatar_leave_url'] != "avatar_url_none":
 
-                    ust = server['send']
+                    ust = server['goodbye']
                     try:
                         ust['leave_type']
                     except:
-                        ust.update({'leave_type': "png"})
+                        ust.update({'leave_type': False})
 
                     url = server['send']['avatar_leave_url']
 
-                    if ust['leave_type'] == "png":
+                    if ust['leave_type'] == False:
 
                         response = requests.get(url, stream = True)
                         response = Image.open(io.BytesIO(response.content))
                         response = response.convert("RGBA")
                         alpha = response.resize((960, 470), Image.ANTIALIAS) # улучшение качества
 
-                    if ust['leave_type'] == "gif":
+                    if ust['leave_type'] == True:
 
                         response = requests.get(url, stream=True)
                         response.raw.decode_content = True
@@ -1094,7 +1088,7 @@ class MainCog(commands.Cog):
                         text = server['goodbye']['lea_text']
                         text = funs.text_replase(text, member)
 
-                    if ust['leave_type'] == "png":
+                    if ust['leave_type'] == False:
 
                         image = alpha
                         output = BytesIO()
@@ -1104,7 +1098,7 @@ class MainCog(commands.Cog):
                         file = discord.File(fp = image_pix, filename="goodbye_card.png")
                         ul = 'png'
 
-                    if ust['leave_type'] == "gif":
+                    if ust['leave_type'] == True:
                         fs = []
                         for frame in ImageSequence.Iterator(img):
                             frame = frame.convert("RGBA")
