@@ -48,23 +48,23 @@ class profile(commands.Cog):
 
         else:
             if arg == "+" or arg == None:
-                print(2)
+
                 if ctx.author.id in user['rep'][0]:
-                    print(3)
+
                     await ctx.send("Повторно нельзя повысить репутацию пользователю")
-                    print(4)
+
                     return
                 if ctx.author.id in user['rep'][1]:
-                    print(5)
+
                     user['rep'][1].remove(ctx.author.id)
 
-                print(6)
+
                 user['rep'][0].append(ctx.author.id)
-                print(7)
+
                 funs.user_update(member.id, member.guild, 'rep', user['rep'])
-                print(8)
+
                 embed = discord.Embed(title="+rep!", description=f"<@{member.id}> получает **+rep** от <@{ctx.author.id}>!",color=0x63d955)
-                print(9)
+
                 await ctx.send(embed=embed)
 
             elif arg == "-":
@@ -305,31 +305,31 @@ class profile(commands.Cog):
 
                 if item['type'] == 'weapon':
 
-                    text += f"{qul} | {i}: {inv[i]['count']}\n"
+                    text += f"{qul} | {item['emoji']} | {i}: {inv[i]['count']}\n"
                     num += inv[i]['count']
 
                 elif item['type'] == 'point':
 
-                    text2 += f"{qul} | {i}: {inv[i]['count']}\n"
+                    text2 += f"{qul} | {item['emoji']} | {i}: {inv[i]['count']}\n"
                     num2 += inv[i]['count']
 
                 elif item['type'] == 'eat':
 
-                    text3 += f"{qul} | {i}: {inv[i]['count']}\n"
+                    text3 += f"{qul} | {item['emoji']} | {i}: {inv[i]['count']}\n"
                     num3 += inv[i]['count']
 
                 elif item['type'] == 'pet':
 
-                    text4 += f"{qul} | {i}: {inv[i]['count']}\n"
+                    text4 += f"{qul} | {item['emoji']} | {i}: {inv[i]['count']}\n"
                     num4 += inv[i]['count']
 
                 elif item['type'] == 'role':
 
-                    text6 += f"{qul} | {i}: {inv[i]['count']}\n"
+                    text6 += f"{qul} | {item['emoji']} | {i}: {inv[i]['count']}\n"
                     num6 += inv[i]['count']
 
                 else:
-                    text5 += f"{qul} | {i}: {inv[i]['count']}\n"
+                    text5 += f"{qul} | {item['emoji']} | {i}: {inv[i]['count']}\n"
                     num5 += inv[i]['count']
 
 
