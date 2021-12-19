@@ -399,7 +399,7 @@ class rpg(commands.Cog):
 
         elif type == 'point':
 
-            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', style = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано'):
+            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', style = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано', race_u = 'Не указано', emoji_v = 'Не указано'):
                 nonlocal server
 
                 emb = discord.Embed(title = "Создание предмета", description = "", color=server['embed_color'])
@@ -412,6 +412,14 @@ class rpg(commands.Cog):
                 emb.add_field(name = "Качество предмета", value = f"{quality}")
                 emb.add_field(name = "Описание предмета", value = f"{description}")
                 emb.add_field(name = "Сообщение при активации", value = f"{action_m}")
+
+                if race_u != 'Не указано' and race_u != 'Укажите названия рас, которые могут использовать этот предмет или `all`:' and race_u != 'all' and race_u != None:
+                    emb.add_field(name = "Расы с возможностью использовать", value = f"{','.join(str(x) for x in race_u)}")
+                else:
+                    emb.add_field(name = "Расы с возможностью использовать", value = f"{race_u}")
+
+                emb.add_field(name = "Эмоджи", value = f"{emoji_v}")
+
                 emb.set_footer(text = 'Отправляйте сообщения в чат без использованеи команд, на одно указание у вас 60 сек.')
                 return emb
 
@@ -483,20 +491,49 @@ class rpg(commands.Cog):
             else:
                 item.update({'action_m': action_m})
 
+            await message.edit(embed = embed(type, name, act, style, image, quality, description, action_m, f'Укажите названия рас, которые могут использовать этот предмет или `all`:'))
+            race_u = await race_u_f(message, ctx, server)
+            if race_u == False:
+                return
+            else:
+                item.update({'race_u': race_u})
+
+            await message.edit(embed = embed(type, name, act, style, image, quality, description, action_m, race_u, f'Укажите эмоджи предмета:'))
+            emoji_v = await emoji_f(message, ctx)
+            if emoji_v == False:
+                return
+            else:
+                item.update({'emoji': emoji_v})
+
+            await message.edit(embed = embed( type, name, act, style, image, quality, description, action_m, race_u, emoji_v))
+
         elif type == 'case':
 
-            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано'):
+            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано', race_u = 'Не указано', emoji_v = 'Не указано'):
                 nonlocal server
 
                 emb = discord.Embed(title = "Создание предмета", description = "", color=server['embed_color'])
                 emb.add_field(name = "Тип предмета", value = f"{type}")
                 emb.add_field(name = "Имя предмета", value = f"{name}")
-                emb.add_field(name = "Выпадаемые предметы", value = f"{act}")
+
+                if act != 'Не указано' and act != f"Укажите id предметов выпадаемые из `{name}`\nПример: 16 52 13" and act != None:
+                    emb.add_field(name = "Выпадаемые предметы", value = f"{','.join(str(x) for x in act)}")
+                else:
+                    emb.add_field(name = "Выпадаемые предметы", value = f"{act}")
+
                 if image != 'Не указано' and image != 'none' and image != "Укажите изображение предмета:" and image != None:
                     emb.set_thumbnail(url = image)
                 emb.add_field(name = "Качество предмета", value = f"{quality}")
                 emb.add_field(name = "Описание предмета", value = f"{description}")
                 emb.add_field(name = "Сообщение при активации", value = f"{action_m}")
+
+                if race_u != 'Не указано' and race_u != 'Укажите названия рас, которые могут использовать этот предмет или `all`:' and race_u != 'all' and race_u != None:
+                    emb.add_field(name = "Расы с возможностью использовать", value = f"{','.join(str(x) for x in race_u)}")
+                else:
+                    emb.add_field(name = "Расы с возможностью использовать", value = f"{race_u}")
+
+                emb.add_field(name = "Эмоджи", value = f"{emoji_v}")
+
                 emb.set_footer(text = 'Отправляйте сообщения в чат без использованеи команд, на одно указание у вас 60 сек.')
                 return emb
 
@@ -565,11 +602,25 @@ class rpg(commands.Cog):
             else:
                 item.update({'action_m': action_m})
 
-            await message.edit(embed = embed( type, name, act, image, quality, description, action_m))
+            await message.edit(embed = embed(type, name, act, image, quality, description, action_m, f'Укажите названия рас, которые могут использовать этот предмет или `all`:'))
+            race_u = await race_u_f(message, ctx, server)
+            if race_u == False:
+                return
+            else:
+                item.update({'race_u': race_u})
+
+            await message.edit(embed = embed(type, name, act, image, quality, description, action_m, race_u, f'Укажите эмоджи предмета:'))
+            emoji_v = await emoji_f(message, ctx)
+            if emoji_v == False:
+                return
+            else:
+                item.update({'emoji': emoji_v})
+
+            await message.edit(embed = embed( type, name, act, image, quality, description, action_m, race_u, emoji_v))
 
         elif type == 'armor':
 
-            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', style = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано'):
+            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', style = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано', race_u = 'Не указано', element = 'Не указано', emoji_v = 'Не указано'):
                 nonlocal server
 
                 emb = discord.Embed(title = "Создание предмета", description = "", color=server['embed_color'])
@@ -582,6 +633,14 @@ class rpg(commands.Cog):
                 emb.add_field(name = "Качество предмета", value = f"{quality}")
                 emb.add_field(name = "Описание предмета", value = f"{description}")
                 emb.add_field(name = "Сообщение при активации", value = f"{action_m}")
+
+                if race_u != 'Не указано' and race_u != 'Укажите названия рас, которые могут использовать этот предмет или `all`:' and race_u != 'all' and race_u != None:
+                    emb.add_field(name = "Расы с возможностью использовать", value = f"{','.join(str(x) for x in race_u)}")
+                else:
+                    emb.add_field(name = "Расы с возможностью использовать", value = f"{race_u}")
+
+                emb.add_field(name = "Элемент", value = f"{element}")
+                emb.add_field(name = "Эмоджи", value = f"{emoji_v}")
                 emb.set_footer(text = 'Отправляйте сообщения в чат без использованеи команд, на одно указание у вас 60 сек.')
                 return emb
 
@@ -593,7 +652,7 @@ class rpg(commands.Cog):
             else:
                 item.update({ 'name': name})
 
-            await message.edit(embed = embed(type, name, f"Укажите питательность `{name}`"))
+            await message.edit(embed = embed(type, name, f"Укажите защиту `{name}`"))
             act = await act_f(message, ctx)
             if act == False:
                 return
@@ -654,12 +713,33 @@ class rpg(commands.Cog):
             else:
                 item.update({'action_m': action_m})
 
-            await message.edit(embed = embed( type, name, act, style, image, quality, description, action_m))
+            await message.edit(embed = embed(type, name, act, style, image, quality, description, action_m, f'Укажите названия рас, которые могут использовать этот предмет или `all`:'))
+            race_u = await race_u_f(message, ctx, server)
+            if race_u == False:
+                return
+            else:
+                item.update({'race_u': race_u})
+
+            await message.edit(embed = embed(type, name, act, style, image, quality, description, action_m, race_u, f'Укажите элеменет или `none`:'))
+            element = await element_f(message, ctx)
+            if element == False:
+                return
+            else:
+                item.update({'element': element})
+
+            await message.edit(embed = embed(type, name, act, style, image, quality, description, action_m, race_u, element, f'Укажите эмоджи предмета:'))
+            emoji_v = await emoji_f(message, ctx)
+            if emoji_v == False:
+                return
+            else:
+                item.update({'emoji': emoji_v})
+
+            await message.edit(embed = embed( type, name, act, style, image, quality, description, action_m, race_u, element, emoji_v))
 
 
         elif type == 'weapon':
 
-            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', style = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано'):
+            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', style = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано', race_u = 'Не указано', element = 'Не указано', emoji_v = 'Не указано'):
                 nonlocal server
 
                 emb = discord.Embed(title = "Создание предмета", description = "", color=server['embed_color'])
@@ -672,6 +752,15 @@ class rpg(commands.Cog):
                 emb.add_field(name = "Качество предмета", value = f"{quality}")
                 emb.add_field(name = "Описание предмета", value = f"{description}")
                 emb.add_field(name = "Сообщение при активации", value = f"{action_m}")
+
+                if race_u != 'Не указано' and race_u != 'Укажите названия рас, которые могут использовать этот предмет или `all`:' and race_u != 'all' and race_u != None:
+                    emb.add_field(name = "Расы с возможностью использовать", value = f"{','.join(str(x) for x in race_u)}")
+                else:
+                    emb.add_field(name = "Расы с возможностью использовать", value = f"{race_u}")
+
+                emb.add_field(name = "Элемент", value = f"{element}")
+                emb.add_field(name = "Эмоджи", value = f"{emoji_v}")
+
                 emb.set_footer(text = 'Отправляйте сообщения в чат без использованеи команд, на одно указание у вас 60 сек.')
                 return emb
 
@@ -744,11 +833,32 @@ class rpg(commands.Cog):
             else:
                 item.update({'action_m': action_m})
 
-            await message.edit(embed = embed( type, name, act, style, image, quality, description, action_m))
+            await message.edit(embed = embed(type, name, act, style, image, quality, description, action_m, f'Укажите названия рас, которые могут использовать этот предмет или `all`:'))
+            race_u = await race_u_f(message, ctx, server)
+            if race_u == False:
+                return
+            else:
+                item.update({'race_u': race_u})
+
+            await message.edit(embed = embed(type, name, act, style, image, quality, description, action_m, race_u, f'Укажите элеменет или `none`:'))
+            element = await element_f(message, ctx)
+            if element == False:
+                return
+            else:
+                item.update({'element': element})
+
+            await message.edit(embed = embed(type, name, act, style, image, quality, description, action_m, race_u, element, f'Укажите эмоджи предмета:'))
+            emoji_v = await emoji_f(message, ctx)
+            if emoji_v == False:
+                return
+            else:
+                item.update({'emoji': emoji_v})
+
+            await message.edit(embed = embed( type, name, act, style, image, quality, description, action_m, race_u, element, emoji_v))
 
         elif type == 'pet':
 
-            def embed(type = 'Не указано', name = 'Не указано', style = 'Не указано', act = 'Не указано', image = 'Не указано', chance = 'Не указано', damage = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано'):
+            def embed(type = 'Не указано', name = 'Не указано', style = 'Не указано', act = 'Не указано', image = 'Не указано', chance = 'Не указано', damage = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано', race_u = 'Не указано', element = 'Не указано', emoji_v = 'Не указано'):
 
                 emb = discord.Embed(title = "Создание предмета", description = "", color=server['embed_color'])
                 emb.add_field(name = "Тип", value = f"{type}")
@@ -761,9 +871,18 @@ class rpg(commands.Cog):
                 emb.add_field(name = "Шанс атаки", value = f"{chance}")
                 emb.add_field(name = "Урон", value = f"{damage}")
 
-                emb.add_field(name = "Качество питомца", value = f"{quality}")
+                emb.add_field(name = "Редкость питомца", value = f"{quality}")
                 emb.add_field(name = "Описание предмета", value = f"{description}")
                 emb.add_field(name = "Сообщение при активации", value = f"{action_m}")
+
+                if race_u != 'Не указано' and race_u != 'Укажите названия рас, которые могут использовать этот предмет или `all`:' and race_u != 'all' and race_u != None:
+                    emb.add_field(name = "Расы с возможностью использовать", value = f"{','.join(str(x) for x in race_u)}")
+                else:
+                    emb.add_field(name = "Расы с возможностью использовать", value = f"{race_u}")
+
+                emb.add_field(name = "Элемент", value = f"{element}")
+                emb.add_field(name = "Эмоджи", value = f"{emoji_v}")
+
                 emb.set_footer(text = 'Отправляйте сообщения в чат без использованеи команд, на одно указание у вас 60 сек.')
                 return emb
 
@@ -894,11 +1013,32 @@ class rpg(commands.Cog):
             else:
                 item.update({'action_m': action_m})
 
-            await message.edit(embed = embed( type, name, style, act, image, chance, damage, quality, description, action_m))
+            await message.edit(embed = embed(type, name, style, act, image, chance, damage, quality, description, action_m, f'Укажите названия рас, которые могут использовать этот предмет или `all`:'))
+            race_u = await race_u_f(message, ctx, server)
+            if race_u == False:
+                return
+            else:
+                item.update({'race_u': race_u})
+
+            await message.edit(embed = embed(type, name, style, act, image, chance, damage, quality, description, action_m, race_u, f'Укажите элеменет или `none`:'))
+            element = await element_f(message, ctx)
+            if element == False:
+                return
+            else:
+                item.update({'element': element})
+
+            await message.edit(embed = embed(type, name, style, act, image, chance, damage, quality, description, action_m, race_u, element, f'Укажите эмоджи предмета:'))
+            emoji_v = await emoji_f(message, ctx)
+            if emoji_v == False:
+                return
+            else:
+                item.update({'emoji': emoji_v})
+
+            await message.edit(embed = embed( type, name, style, act, image, chance, damage, quality, description, action_m, race_u, element, emoji_v))
 
         elif type == 'material':
 
-            def embed(type = 'Не указано', name = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано'):
+            def embed(type = 'Не указано', name = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано', race_u = 'Не указано', emoji_v = 'Не указано'):
                 nonlocal server
 
                 emb = discord.Embed(title = "Создание предмета", description = "", color=server['embed_color'])
@@ -908,6 +1048,14 @@ class rpg(commands.Cog):
                     emb.set_thumbnail(url = image)
                 emb.add_field(name = "Качество предмета", value = f"{quality}")
                 emb.add_field(name = "Описание предмета", value = f"{description}")
+
+                if race_u != 'Не указано' and race_u != 'Укажите названия рас, которые могут использовать этот предмет или `all`:' and race_u != 'all' and race_u != None:
+                    emb.add_field(name = "Расы с возможностью использовать", value = f"{','.join(str(x) for x in race_u)}")
+                else:
+                    emb.add_field(name = "Расы с возможностью использовать", value = f"{race_u}")
+
+                emb.add_field(name = "Эмоджи", value = f"{emoji_v}")
+
                 emb.set_footer(text = 'Отправляйте сообщения в чат без использованеи команд, на одно указание у вас 60 сек.')
                 return emb
 
@@ -917,7 +1065,6 @@ class rpg(commands.Cog):
                 return
             else:
                 item.update({ 'name': name})
-
 
             await message.edit(embed = embed(type, name, "Укажите изображение предмета:"))
             image = await image_f(message, ctx)
@@ -940,11 +1087,25 @@ class rpg(commands.Cog):
             else:
                 item.update({'description': description})
 
-            await message.edit(embed = embed( type, name, image, quality, description))
+            await message.edit(embed = embed(type, name, image, quality, description, f'Укажите названия рас, которые могут использовать этот предмет или `all`:'))
+            race_u = await race_u_f(message, ctx, server)
+            if race_u == False:
+                return
+            else:
+                item.update({'race_u': race_u})
+
+            await message.edit(embed = embed(type, name, image, quality, description, race_u, f'Укажите эмоджи предмета:'))
+            emoji_v = await emoji_f(message, ctx)
+            if emoji_v == False:
+                return
+            else:
+                item.update({'emoji': emoji_v})
+
+            await message.edit(embed = embed( type, name, image, quality, description, race_u, emoji_v))
 
         elif type == 'recipe':
 
-            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', ndi = 'Не указано', create = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано'):
+            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', ndi = 'Не указано', create = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано', race_u = 'Не указано', emoji_v = 'Не указано'):
                 nonlocal server
 
                 emb = discord.Embed(title = "Создание предмета", description = "", color=server['embed_color'])
@@ -970,6 +1131,14 @@ class rpg(commands.Cog):
                 emb.add_field(name = "Качество предмета", value = f"{quality}")
                 emb.add_field(name = "Описание предмета", value = f"{description}")
                 emb.add_field(name = "Сообщение при активации", value = f"{action_m}")
+
+                if race_u != 'Не указано' and race_u != 'Укажите названия рас, которые могут использовать этот предмет или `all`:' and race_u != 'all' and race_u != None:
+                    emb.add_field(name = "Расы с возможностью использовать", value = f"{','.join(str(x) for x in race_u)}")
+                else:
+                    emb.add_field(name = "Расы с возможностью использовать", value = f"{race_u}")
+
+                emb.add_field(name = "Эмоджи", value = f"{emoji_v}")
+
                 emb.set_footer(text = 'Отправляйте сообщения в чат без использованеи команд, на одно указание у вас 60 сек.')
                 return emb
 
@@ -1123,11 +1292,25 @@ class rpg(commands.Cog):
             else:
                 item.update({'action_m': action_m})
 
-            await message.edit(embed = embed( type, name, act, ndi, create, image, quality, description, action_m))
+            await message.edit(embed = embed(type, name, act, ndi, create, image, quality, description, action_m, f'Укажите названия рас, которые могут использовать этот предмет или `all`:'))
+            race_u = await race_u_f(message, ctx, server)
+            if race_u == False:
+                return
+            else:
+                item.update({'race_u': race_u})
+
+            await message.edit(embed = embed(type, name, act, ndi, create, image, quality, description, action_m, race_u, f'Укажите эмоджи предмета:'))
+            emoji_v = await emoji_f(message, ctx)
+            if emoji_v == False:
+                return
+            else:
+                item.update({'emoji': emoji_v})
+
+            await message.edit(embed = embed( type, name, act, ndi, create, image, quality, description, action_m, race_u, emoji_v))
 
         elif type == 'role':
 
-            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', style = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано'):
+            def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', style = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано', race_u = 'Не указано', emoji_v = 'Не указано'):
                 nonlocal server
 
                 emb = discord.Embed(title = "Создание предмета", description = "", color=server['embed_color'])
@@ -1145,6 +1328,12 @@ class rpg(commands.Cog):
                 emb.add_field(name = "Качество предмета", value = f"{quality}")
                 emb.add_field(name = "Описание предмета", value = f"{description}")
                 emb.add_field(name = "Сообщение при активации", value = f"{action_m}")
+                if race_u != 'Не указано' and race_u != 'Укажите названия рас, которые могут использовать этот предмет или `all`:' and race_u != 'all' and race_u != None:
+                    emb.add_field(name = "Расы с возможностью использовать", value = f"{','.join(str(x) for x in race_u)}")
+                else:
+                    emb.add_field(name = "Расы с возможностью использовать", value = f"{race_u}")
+
+                emb.add_field(name = "Эмоджи", value = f"{emoji_v}")
                 emb.set_footer(text = 'Отправляйте сообщения в чат без использованеи команд, на одно указание у вас 60 сек.')
                 return emb
 
@@ -1238,7 +1427,22 @@ class rpg(commands.Cog):
             else:
                 item.update({'action_m': action_m})
 
-            await message.edit(embed = embed( type, name, act, style, image, quality, description, action_m))
+            await message.edit(embed = embed(type, name, act, style, image, quality, description, action_m, f'Укажите названия рас, которые могут использовать этот предмет или `all`:'))
+            race_u = await race_u_f(message, ctx, server)
+            if race_u == False:
+                return
+            else:
+                item.update({'race_u': race_u})
+
+
+            await message.edit(embed = embed(type, name, act, style, image, quality, description, action_m, race_u, f'Укажите эмоджи предмета:'))
+            emoji_v = await emoji_f(message, ctx)
+            if emoji_v == False:
+                return
+            else:
+                item.update({'emoji': emoji_v})
+
+            await message.edit(embed = embed( type, name, act, style, image, quality, description, action_m, race_u, emoji_v))
 
         try:
             l = server['items']
@@ -1644,11 +1848,11 @@ class rpg(commands.Cog):
         await ctx.send(embed = emb)
 
     @commands.command(usage = '(id) [member]', description = 'Выдать предмет.')
-    async def item_add(self, ctx, id:int, member:discord.Member = None):
+    async def item_add(self, ctx, id:int, rp:int, member:discord.Member = None):
         if member == None:
             member = ctx.author
 
-        if funs.roles_check(member, ctx.guild.id) == False:
+        if funs.roles_check(ctx.author, ctx.guild.id) == False:
             await ctx.send("У вас недостаточно прав для использования этой команды!")
             return
 
@@ -1664,10 +1868,13 @@ class rpg(commands.Cog):
             return
 
         item = server['items'][str(id)]
-        user['inv'].append(funs.creat_item(ctx.guild.id, id))
+        while rp != 0:
+            user['inv'].append(funs.creat_item(ctx.guild.id, id))
+            rp -= 1
+
         funs.user_update(member.id, ctx.guild, 'inv', user['inv'])
 
-        await ctx.send('Предмет добавлен!')
+        await ctx.send('Предмет(ы) добавлен(ы)!')
 
 
 
