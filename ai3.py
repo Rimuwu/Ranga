@@ -241,6 +241,9 @@ class functions:
         if type(user_id) == discord.Member:
             user_id = user_id.id
 
+        if type(guild) == int:
+            guild.id = guild
+
         if met == 'update':
 
             try:

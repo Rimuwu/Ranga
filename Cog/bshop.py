@@ -672,18 +672,19 @@ class bs(commands.Cog):
                 except:
                     pass
 
-                user = funs.user_check(m, ctx.guild)
+                user = funs.user_check(bs['author'], bs['server'])
+                print(user, '1')
                 inv = user['back_inv']
                 inv.append(id)
-                funs.user_update(m.id, m.guild, 'back_inv', inv)
-
+                funs.user_update(bs['author'], bs['server'], 'back_inv', inv)
+                print(user, '2')
 
 
         s['bs'].update( {str(id): {'status': True} })
         settings.update_one({"sid": 1},{'$set': {'bs': s['bs']}})
 
 
-        b = { 'bid': len(list(backs.find())),
+        b = { 'bid': len(list(backs.find())) + 1,
               'url': bs["url"],
               'price': price,
               'creator_id': bs['author'],
