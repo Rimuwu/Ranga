@@ -279,12 +279,17 @@ class bs(commands.Cog):
             await msg.add_reaction(x)
         await reackt()
 
-    @commands.command(usage = '(url) [type]', description = 'Подача заявки на новый фон.', help = 'Грустные')
+    @commands.command(usage = '(url) [type]', description = 'Подача заявки на новый фон.')
     async def bs_app(self, ctx, link, type = 'png'):
 
         try:
             emb = discord.Embed(description = "-", color=0xf03e65)
             emb.set_image(url = link)
+            mms = await ctx.send(embed = emb)
+            try:
+                await mms.delete()
+            except:
+                pass
         except:
             await ctx.send("Требовалось указать ссылку!")
             return
@@ -510,16 +515,22 @@ class bs(commands.Cog):
             nonlocal link
             nonlocal msg
             nonlocal sze
+            if type == 'png': type = 'Статичная картинка'
+            if type == 'gif': type = 'Анимированная картинка'
+
             if str(reaction.emoji) == '✅':
 
                 await msg.remove_reaction('✅', member)
                 channel = await self.bot.fetch_channel(config.bs_op)
 
-                bs = s['bs']
                 try:
-                    bs_id = int(max(bs.keys())) + 4
+                    bs_num = s['bs_num']
                 except:
-                    bs_id = 1
+                    bs_num = 1
+                    settings.update_one({"sid": 1},{'$set': {'bs_num': 1}})
+
+                bs = s['bs']
+                bs_id = bs_num + 1
 
 
                 embed = discord.Embed(title = f'ID {bs_id}', description = f'Автор: {ctx.author.id}\nУкзанный формат: {type}\nURL: {link}')
@@ -532,6 +543,7 @@ class bs(commands.Cog):
 
                 s['bs'].update( {str(bs_id): {'author': ctx.author.id, 'url': link, 'type': type, 'message': m.id, 'server':ctx.guild.id, "status": None} })
                 settings.update_one({"sid": 1},{'$set': {'bs': s['bs']}})
+                settings.update_one({"sid": 1},{'$set': {'bs_num': bs_id}})
 
                 await ctx.send("Фон отправлен на рассмотрение!")
                 return
@@ -656,9 +668,15 @@ class bs(commands.Cog):
             m = g.get_member(bs['author'])
             if m != None:
                 try:
-                    await m.send(f'Ваш фон под id {id} был принят!')
+                    await m.send(f'Ваш фон под id {id} был принят!\nТак же он был добавлен вам в коллекцию. Вы можете проверить и установить его, у себя в инвентаре (back_inv)!')
                 except:
                     pass
+
+                user = funs.user_check(ctx.author, ctx.guild)
+                inv = user['back_inv']
+                inv.append(id)
+                funs.user_update(ctx.author.id, member.guild, 'back_inv', inv)
+
 
 
         s['bs'].update( {str(id): {'status': True} })
