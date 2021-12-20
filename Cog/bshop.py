@@ -672,10 +672,10 @@ class bs(commands.Cog):
                 except:
                     pass
 
-                user = funs.user_check(ctx.author, ctx.guild)
+                user = funs.user_check(m, ctx.guild)
                 inv = user['back_inv']
                 inv.append(id)
-                funs.user_update(ctx.author.id, member.guild, 'back_inv', inv)
+                funs.user_update(m.id, m.guild, 'back_inv', inv)
 
 
 

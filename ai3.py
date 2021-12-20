@@ -165,6 +165,9 @@ class functions:
         if type(user) == int:
             user.id = user
 
+        if type(guild) == int:
+            guild.id = guild
+
         server = servers.find_one({"server": guild.id})
         if met == None:
 
