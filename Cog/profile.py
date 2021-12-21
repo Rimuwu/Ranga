@@ -101,6 +101,11 @@ class profile(commands.Cog):
         name = member.name
         tag = member.discriminator
 
+        if bc['format'] == 'Статичная картинка':
+            bc['format'] = 'png'
+        elif bc['format'] == 'Анимированная картинка':
+            bc['format'] = 'gif'
+
         headline = ImageFont.truetype("fonts/NotoSans-Bold.ttf", size = 25)
         para = ImageFont.truetype("fonts/NotoSans-Bold.ttf", size = 30)
 
@@ -145,7 +150,7 @@ class profile(commands.Cog):
 
         alpha = Image.open('elements/alpha.png')
 
-        if bc['format'] == "png":
+        if bc['format'] == "png" :
 
             response = requests.get(url, stream = True)
             response = Image.open(io.BytesIO(response.content))
