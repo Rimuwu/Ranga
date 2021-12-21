@@ -533,7 +533,7 @@ class bs(commands.Cog):
                 bs_id = bs_num + 1
 
 
-                embed = discord.Embed(title = f'ID {bs_id}', description = f'Автор: {ctx.author.id}\nУкзанный формат: {type}\nURL: {link}')
+                embed = discord.Embed(title = f'ID {bs_id}', description = f'Автор: <@{ctx.author.id}>>\nУкзанный формат: {type}\nURL: {link}')
                 embed.set_image(url=link)
                 await msg.clear_reactions()
                 m = await channel.send(embed=embed)
