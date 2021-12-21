@@ -62,13 +62,11 @@ class bs(commands.Cog):
 
             b = backs.find_one({"bid": number})
 
-            if str(number) in user['back_inv']:
+            if str(number) in user['back_inv'] or number in user['back_inv']:
                 status_b = ok
             else:
                 status_b = no
 
-            if user['Nitro'] == True:
-                status_b = ok
 
             if b['display'] == 0 and number not in user['back_inv'] or b['display'] == 0 and str(number) not in user['back_inv']:
                 status_b = f'{no} Не доступен {no}'
