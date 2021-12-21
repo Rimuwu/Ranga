@@ -76,7 +76,7 @@ class bs(commands.Cog):
             emb = discord.Embed(title = "Покупка фонов", description =
             f"Стоимость: {d[str(number)]['price']}\n Автор: <@{d[str(number)]['creator_id']}>\n Статус: {status_b}", color = int(d[str(number)]["emb_color"]))
             emb.set_image(url =f'{d[str(number)]["url"]}')
-            emb.set_footer(text = f'ID {number} | {len(bs)-1}')
+            emb.set_footer(text = f'ID {number} | {len(bs)}')
             return emb
 
         msg = await ctx.send(embed = embed(number))
@@ -97,14 +97,14 @@ class bs(commands.Cog):
                     await msg.edit(embed = embed(number))
                     await reackt()
                 else:
-                    number = len(bs)-1
+                    number = len(bs)
                     await msg.edit(embed = embed(number))
                     await reackt()
 
             elif str(reaction.emoji) == '▶':
                 await msg.remove_reaction('▶', member)
                 number += 1
-                if number == len(bs):
+                if number == len(bs)+1:
                     number = 0
                     await msg.edit(embed = embed(number))
                     await reackt()
