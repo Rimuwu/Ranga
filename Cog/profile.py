@@ -95,6 +95,7 @@ class profile(commands.Cog):
         url = bc['url']
         progress_bar = bc["progress_bar"]
         pl = bc['panel_color']
+        al = bc['alpha_panel']
         expn = 5 * user['lvl']*user['lvl'] + 50 * user['lvl'] + 100
 
         name = member.name

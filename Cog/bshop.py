@@ -687,6 +687,7 @@ class bs(commands.Cog):
               'color': 15744613,
               'format': type,
               'progress_bar': [238, 74, 84],
+              'alpha_panel': [0],
               'panel_color': [ [0,0,0], [0,0,0] ],
 
         }
