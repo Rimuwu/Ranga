@@ -672,7 +672,7 @@ class bs(commands.Cog):
 
         user = funs.user_check(m, g)
         inv = user['back_inv']
-        inv.append(id)
+        inv.append(len(list(backs.find())))
         funs.user_update(m, g, 'back_inv', inv)
 
         s['bs'].update( {str(id): {'status': True} })
