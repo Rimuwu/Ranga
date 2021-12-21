@@ -162,9 +162,6 @@ class functions:
                     'rep': [[],[]],
                    }
 
-        if type(user) == int:
-            user.id = user
-
         if type(guild) == int:
             guild.id = guild
 
@@ -234,12 +231,14 @@ class functions:
         return a[str(member.id)]
 
     @staticmethod
-    def user_update(user_id, guild: discord.Guild, key:str, ch, met = 'update', key2 = 'users'):
+    def user_update(user, guild: discord.Guild, key:str, ch, met = 'update', key2 = 'users'):
         server = servers.find_one({"server": guild.id})
         a = server[key2].copy()
 
-        if type(user_id) == discord.Member:
-            user_id = user_id.id
+        if type(user) == discord.Member:
+            user_id = user.id
+        else:
+            user_id = user
 
         if type(guild) == int:
             guild.id = guild

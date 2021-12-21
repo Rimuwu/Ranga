@@ -586,12 +586,13 @@ class bs(commands.Cog):
             await ctx.send("Фон уже был принят\отклонён!")
             return
 
-        channel = self.bot.get_channel(config.bs_channel)
+        g = self.bot.get_guild(bs['server'])
+
+        type = bs['type']
+
+        channel = g.get_channel(config.bs_op)
         mid = await channel.fetch_message(bs['message'])
         await mid.clear_reactions()
-
-        if bs["type"] == 'png': type = 'Статичная картинка'
-        if bs["type"] == 'gif': type = 'Анимированная картинка'
 
         if reason == None:
             embed = discord.Embed(title = f'ID {id} Отклонён', description = f'Автор: {bs["author"]}\nУкзанный формат: {type}\nURL: {bs["url"]}', color = 0xf03e65)
@@ -600,7 +601,6 @@ class bs(commands.Cog):
             embed = discord.Embed(title = f'ID {id} Отклонён', description = f'Автор: {bs["author"]}\nУкзанный формат: {type}\nURL: {bs["url"]}\n\n\nПричина: {"".join(reason)}', color = 0xf03e65)
             embed.set_image(url=bs["url"])
 
-            g = self.bot.get_guild(bs['server'])
             if g != None:
                 m = g.get_member(bs['author'])
                 if m != None:
@@ -631,6 +631,9 @@ class bs(commands.Cog):
             await ctx.send("Запроса с таким id не найден!")
             return
 
+        g = self.bot.get_guild(bs['server'])
+        m = g.get_member(bs['author'])
+
         if bs['status'] != None:
             await ctx.send("Фон уже был принят\отклонён!")
             return
@@ -651,34 +654,26 @@ class bs(commands.Cog):
         if type == None:
             type = bs['type']
 
-        channel = self.bot.get_channel(config.bs_op)
+        channel = g.get_channel(config.bs_op)
         mid = await channel.fetch_message(bs['message'])
         await mid.clear_reactions()
-
-        if type == 'png': type = 'Статичная картинка'
-        if type == 'gif': type = 'Анимированная картинка'
 
         embed = discord.Embed(title = f'ID {id} Принят', description = f'Автор: {bs["author"]}\nФормат: {type}\nURL: {bs["url"]}\nПринял: {ctx.author.mention}\nID в магазине: {len(list(backs.find()))}', color = 0x34cb2c)
         embed.set_image(url=bs["url"])
 
         await mid.edit(embed= embed)
 
-        g = self.bot.get_guild(bs['server'])
         if g != None:
-            m = g.get_member(bs['author'])
             if m != None:
                 try:
                     await m.send(f'Ваш фон под id {id} был принят!\nТак же он был добавлен вам в коллекцию. Вы можете проверить и установить его, у себя в инвентаре (back_inv)!')
                 except:
                     pass
 
-                user = funs.user_check(bs['author'], bs['server'])
-                print(user, '1')
-                inv = user['back_inv']
-                inv.append(id)
-                funs.user_update(bs['author'], bs['server'], 'back_inv', inv)
-                print(user, '2')
-
+        user = funs.user_check(m, g)
+        inv = user['back_inv']
+        inv.append(id)
+        funs.user_update(m, g, 'back_inv', inv)
 
         s['bs'].update( {str(id): {'status': True} })
         settings.update_one({"sid": 1},{'$set': {'bs': s['bs']}})
@@ -692,7 +687,6 @@ class bs(commands.Cog):
               'color': 15744613,
               'format': type,
               'progress_bar': [238, 74, 84],
-              'alpha_panel': [153, 153],
               'panel_color': [ [0,0,0], [0,0,0] ],
 
         }

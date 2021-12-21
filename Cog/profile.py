@@ -94,7 +94,6 @@ class profile(commands.Cog):
         bc = backs.find_one({"bid": back})
         url = bc['url']
         progress_bar = bc["progress_bar"]
-        al = bc['alpha_panel']
         pl = bc['panel_color']
         expn = 5 * user['lvl']*user['lvl'] + 50 * user['lvl'] + 100
 
