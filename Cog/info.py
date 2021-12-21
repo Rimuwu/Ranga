@@ -64,19 +64,19 @@ class info(commands.Cog):
             url= b.avatar.url))
 
 
-    @commands.command(aliases=['N', 'n', 'Nitro', 'нитро', "Нитро"], usage = '-', description = 'Информация о премиум подписке.')
-    async def nitro(self,ctx):
-        global settings
-
-        kk = self.bot.get_emoji(778533802342875136)
-        un = self.bot.get_emoji(778545536138608652)
-
-        emb = discord.Embed(title = f'{un}Информация о Котик Nitro', color=0xfe00b8)
-        emb.add_field(name="Плюшки:", value=f"Опыт: х2\ndaily: x2\n Комиссия: Off\n Покупка всех фонов: Бесплатно\nВалюта: 10к{kk}")
-        emb.add_field(name="Статус:", value=f"Цена: 250 руб. (rus)\nДлительность: 3 месяца")
-        emb.add_field(name="Связь:", value=f"Покупка: {ctx.prefix}it_nitro_buy", inline = False)
-        emb.set_thumbnail(url= 'https://ia.wampi.ru/2020/11/18/icons8-dog-paw-print-96.png')
-        await ctx.send(embed = emb)
+    # @commands.command(aliases=['N', 'n', 'Nitro', 'нитро', "Нитро"], usage = '-', description = 'Информация о премиум подписке.')
+    # async def nitro(self,ctx):
+    #     global settings
+    #
+    #     kk = self.bot.get_emoji(778533802342875136)
+    #     un = self.bot.get_emoji(778545536138608652)
+    #
+    #     emb = discord.Embed(title = f'{un}Информация о Котик Nitro', color=0xfe00b8)
+    #     emb.add_field(name="Плюшки:", value=f"Опыт: х2\ndaily: x2\n Комиссия: Off\n Покупка всех фонов: Бесплатно\nВалюта: 10к{kk}")
+    #     emb.add_field(name="Статус:", value=f"Цена: 250 руб. (rus)\nДлительность: 3 месяца")
+    #     emb.add_field(name="Связь:", value=f"Покупка: {ctx.prefix}it_nitro_buy", inline = False)
+    #     emb.set_thumbnail(url= 'https://ia.wampi.ru/2020/11/18/icons8-dog-paw-print-96.png')
+    #     await ctx.send(embed = emb)
 
 
     @commands.command(aliases = ["юзеринфо", "юзер", "user"], usage = '(@member)', description = 'Информация о пользователе.')
@@ -204,32 +204,32 @@ class info(commands.Cog):
         color=server['embed_color'])
         await ctx.send(embed = emb)
 
-    @commands.command(usage = '-', description = 'Покупка премиум подписки.')
-    async def it_nitro_buy(self, ctx):
-        server = servers.find_one({"server": ctx.guild.id})
-        us = funs.user_check(ctx.author, ctx.author.guild)
-
-        emb = discord.Embed(
-            title="Информация о покупке IT Nitro",
-            description = f'Для покпки подписки:\n1. Вызовите эту команду\n2. Перейдите на сайт [Клик](https://new.donatepay.ru/@811772)\nВ поле "Ваше имя" введите свой id `( {ctx.author.id} )`\n3. В поле "Сумма пожертвования" введите минимум 250 и укажите валюту "RUB"\n4. Ожидайте в течении 10 минут.\n\nЕсли It Nitro не было получено в течении 10 минут свяжитесь с разработчиком `💧Римуру-самаˢˡⁱᵐᵉ ᵃʷ#6228`',
-            color = server['embed_color'])
-
-        await ctx.send(embed = emb)
-
-        await asyncio.sleep(600)
-        r = requests.get('https://donatepay.ru/api/v1/transactions', params={'access_token': config.donatepay_token, 'status': 'success'})
-
-        for i in r.json()['data']:
-            if i['created_at'][0:10] == str(time.strftime('%Y-%m-%d')):
-                if i['comment'] == str(ctx.author.id):
-                    if int(i['sum']) >= 250:
-                        await ctx.send('Вам было выданно IT Nitro!')
-
-                        funs.user_update(ctx.author.id, ctx.author.guild, 'Nitro', True)
-                        funs.user_update(ctx.author.id, ctx.author.guild, 'money', us + 10000)
-                        break
-                    else:
-                        await ctx.send('Сумма меньше 250-ти рублей!')
+    # @commands.command(usage = '-', description = 'Покупка премиум подписки.')
+    # async def it_nitro_buy(self, ctx):
+    #     server = servers.find_one({"server": ctx.guild.id})
+    #     us = funs.user_check(ctx.author, ctx.author.guild)
+    #
+    #     emb = discord.Embed(
+    #         title="Информация о покупке IT Nitro",
+    #         description = f'Для покпки подписки:\n1. Вызовите эту команду\n2. Перейдите на сайт [Клик](https://new.donatepay.ru/@811772)\nВ поле "Ваше имя" введите свой id `( {ctx.author.id} )`\n3. В поле "Сумма пожертвования" введите минимум 250 и укажите валюту "RUB"\n4. Ожидайте в течении 10 минут.\n\nЕсли It Nitro не было получено в течении 10 минут свяжитесь с разработчиком `💧Римуру-самаˢˡⁱᵐᵉ ᵃʷ#6228`',
+    #         color = server['embed_color'])
+    #
+    #     await ctx.send(embed = emb)
+    #
+    #     await asyncio.sleep(600)
+    #     r = requests.get('https://donatepay.ru/api/v1/transactions', params={'access_token': config.donatepay_token, 'status': 'success'})
+    #
+    #     for i in r.json()['data']:
+    #         if i['created_at'][0:10] == str(time.strftime('%Y-%m-%d')):
+    #             if i['comment'] == str(ctx.author.id):
+    #                 if int(i['sum']) >= 250:
+    #                     await ctx.send('Вам было выданно IT Nitro!')
+    #
+    #                     funs.user_update(ctx.author.id, ctx.author.guild, 'Nitro', True)
+    #                     funs.user_update(ctx.author.id, ctx.author.guild, 'money', us + 10000)
+    #                     break
+    #                 else:
+    #                     await ctx.send('Сумма меньше 250-ти рублей!')
 
 def setup(bot):
     bot.add_cog(info(bot))
