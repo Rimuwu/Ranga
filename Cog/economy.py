@@ -1479,54 +1479,58 @@ class economy(commands.Cog):
             funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - (amout * repet))
             funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] + u_money)
 
-    @commands.command(usage = '(number) (money) (@member)', description = 'Игра в шанс.', help = 'Игры', aliases = ['шанс'])
+    @commands.command(usage = '(number) (money) (@member)', description = 'Игра в шанс.', help = 'Игры', aliases = ['шанс', 'duel'])
     async def chance(self, ctx, number:int = None, money:int = None, member:discord.Member = None ):
+
+        if member == None:
+            await ctx.send("Требовалось указать пользователя!")
+            return
 
         kk = self.bot.get_emoji(778533802342875136)
         user = funs.user_check(ctx.author, ctx.guild)
-        mem = funs.user_check(member.id, ctx.guild)
+        mem = funs.user_check(member, ctx.guild)
         server = servers.find_one({"server": ctx.guild.id})
         if number == None or money == None or member == None:
             emb = discord.Embed(description = f'Правильный ввод команды: \n`{ctx.prefix}duel (число от 1 до 100) (ставка от 10 до 100к) (@пользователь)`', color=server['embed_color'])
-            emb.set_author(icon_url = '{}'.format(ctx.author.avatar_url), name = '{}'.format(ctx.author))
+            emb.set_author(icon_url = '{}'.format(ctx.author.avatar.url), name = '{}'.format(ctx.author))
             await ctx.send(embed = emb)
             return
 
-        if number > 100 or number < 1:
+        if number > 100 or number < 1 or number == None:
             emb = discord.Embed(description = f'Укажите число от 1 до 100', color=server['embed_color'])
-            emb.set_author(icon_url = '{}'.format(ctx.author.avatar_url), name = '{}'.format(ctx.author))
+            emb.set_author(icon_url = '{}'.format(ctx.author.avatar.url), name = '{}'.format(ctx.author))
             await ctx.send(embed = emb)
             return
 
-        if money < server['economy']['games']['chance']['mini'] or money > server['economy']['games']['chance']['max']:
+        if money < server['economy']['games']['chance']['mini'] or money > server['economy']['games']['chance']['max'] or money == None:
             emb = discord.Embed(description = f"Укажите колличество монет от {server['economy']['games']['chance']['mini']} до {server['economy']['games']['chance']['max']}", color=server['embed_color'])
-            emb.set_author(icon_url = '{}'.format(ctx.author.avatar_url), name = '{}'.format(ctx.author))
+            emb.set_author(icon_url = '{}'.format(ctx.author.avatar.url), name = '{}'.format(ctx.author))
             await ctx.send(embed = emb)
             return
 
         if money > user['money']:
             emb = discord.Embed(description = f'У вас нет столько монеток', color=server['embed_color'])
-            emb.set_author(icon_url = '{}'.format(ctx.author.avatar_url), name = '{}'.format(ctx.author))
+            emb.set_author(icon_url = '{}'.format(ctx.author.avatar.url), name = '{}'.format(ctx.author))
             await ctx.send(embed = emb)
             return
 
         if money > mem['money']:
             emb = discord.Embed(description = f'У {member.mention} нет столько монеток', color=server['embed_color'])
-            emb.set_author(icon_url = '{}'.format(ctx.author.avatar_url), name = '{}'.format(ctx.author))
+            emb.set_author(icon_url = '{}'.format(ctx.author.avatar.url), name = '{}'.format(ctx.author))
             await ctx.send(embed = emb)
             return
 
         if ctx.author == member:
             emb = discord.Embed(description = f'Игра в шанс с самим собой не возможен', color=server['embed_color'])
-            emb.set_author(icon_url = '{}'.format(ctx.author.avatar_url), name = '{}'.format(ctx.author))
+            emb.set_author(icon_url = '{}'.format(ctx.author.avatar.url), name = '{}'.format(ctx.author))
             await ctx.send(embed = emb)
             return
 
 
         solutions = ['✔', '❌']
         reaction = 'a'
-        emb2 = discord.Embed(description = f'<@{member.id}> вы готовы принять шанс от <@{ctx.author.id}>?`', color=server['embed_color'])
-        emb2.set_author(icon_url = '{}'.format(ctx.author.avatar_url), name = '{}'.format(ctx.author))
+        emb2 = discord.Embed(description = f'<@{member.id}> вы готовы принять шанс от <@{ctx.author.id}>?', color=server['embed_color'])
+        emb2.set_author(icon_url = '{}'.format(ctx.author.avatar.url), name = '{}'.format(ctx.author))
 
         async def text():
             nonlocal mess
@@ -1535,7 +1539,7 @@ class economy(commands.Cog):
             nonlocal server
             await mess.clear_reactions()
             emb3 = discord.Embed(description = f'<@{member.id}> введите число от `1 до 100`', color=server['embed_color'])
-            emb3.set_author(icon_url = '{}'.format(member.avatar_url), name = '{}'.format(member)).set_footer(text='В чат без использования команд')
+            emb3.set_author(icon_url = '{}'.format(member.avatar.url), name = '{}'.format(member)).set_footer(text='В чат без использования команд')
             await mess.edit(embed = emb3)
             try:
                 msg = await self.bot.wait_for('message', timeout=30.0, check=lambda message: message.author == member)

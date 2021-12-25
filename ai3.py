@@ -135,7 +135,7 @@ class functions:
             return text
 
     @staticmethod
-    def user_check(user, guild: discord.Guild, met:str = None, key:str = 'users'):
+    def user_check(user:discord.Member, guild: discord.Guild, met:str = None, key:str = 'users'):
 
         def upd(server):
             return {
