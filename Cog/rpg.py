@@ -1215,7 +1215,7 @@ class rpg(commands.Cog):
                     l = set(act) & set(ms_c_i)
 
                     if dict(set(l) & set(msg.content.split())) == {}:
-                        ndi = (int(x) for x in msg.content.split())
+                        ndi = list(int(x) for x in msg.content.split())
                     else:
                         await ctx.send("Требовалось указать предметы (число) из крафта которые не будут удаляться!")
                         return
@@ -1452,7 +1452,6 @@ class rpg(commands.Cog):
                 emb = discord.Embed(title = "Создание предмета", description = "", color=server['embed_color'])
                 emb.add_field(name = "Тип предмета", value = f"{type}")
                 emb.add_field(name = "Имя предмета", value = f"{name}")
-                emb.add_field(name = "Питательность предмета", value = f"{act}")
                 if image != 'Не указано' and image != 'none' and image != "Укажите изображение предмета:" and image != None:
                     emb.set_thumbnail(url = image)
 
