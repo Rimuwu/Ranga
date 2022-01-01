@@ -772,7 +772,7 @@ class rpg(commands.Cog):
             else:
                 item.update({ 'name': name})
 
-            await message.edit(embed = embed(type, name, f"Укажите питательность `{name}`"))
+            await message.edit(embed = embed(type, name, f"Укажите урон `{name}`"))
             act = await act_f(message, ctx)
             if act == False:
                 return
@@ -804,6 +804,100 @@ class rpg(commands.Cog):
                     return
 
                 style = msg.content
+
+            if style == 'bow':
+                try:
+                    mmsg = await ctx.send("Укажите используемый для стрельбы предмет (id):")
+                    msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
+                except asyncio.TimeoutError:
+                    await ctx.send("Время вышло.")
+                    return
+                else:
+                    try:
+                        await msg.delete()
+                    except Exception:
+                        pass
+
+                    try:
+                        iddd = int(msg.content)
+                    except:
+                        await ctx.send("Требовалось указать число!")
+                        return
+
+                    try:
+                        server['items'][str(iddd)]
+                    except:
+                        await ctx.send("Требовалось id существующего предмета!!")
+                        return
+
+                    item['bow_item'] = iddd
+
+                    try:
+                        await mmsg.edit(content = f'Укажите используемый для стрельбы предмет (id): {iddd}')
+                    except:
+                        pass
+
+            if style == 'staff':
+                try:
+                    mmsg = await ctx.send("Укажите количество используемой маны:")
+                    msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
+                except asyncio.TimeoutError:
+                    await ctx.send("Время вышло.")
+                    return
+                else:
+                    try:
+                        await msg.delete()
+                    except Exception:
+                        pass
+
+                    try:
+                        ni = int(msg.content)
+                    except:
+                        await ctx.send("Требовалось указать число!")
+                        return
+
+                    if ni < 0:
+                        await ctx.send("Укажите число больше или равное нулю!")
+                        return
+
+                    item['mana_use'] = ni
+
+                    try:
+                        await mmsg.edit(content = f'Укажите количество используемой маны: {ni}')
+                    except:
+                        pass
+
+            if style == 'sword':
+                try:
+                    mmsg = await ctx.send("Укажите прочность (0 - бесконечная прочность):")
+                    msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
+                except asyncio.TimeoutError:
+                    await ctx.send("Время вышло.")
+                    return
+                else:
+                    try:
+                        await msg.delete()
+                    except Exception:
+                        pass
+
+                    try:
+                        ni = int(msg.content)
+                    except:
+                        await ctx.send("Требовалось указать число!")
+                        return
+
+                    if ni < 0:
+                        await ctx.send("Укажите число больше или равное нулю!")
+                        return
+
+
+                    item['stabl'] = ni
+
+                    try:
+                        await mmsg.edit(content = f'Укажите прочность (0 - бесконечная прочность): {ni}')
+                    except:
+                        pass
+
 
             await message.edit(embed = embed(type, name, act, style, "Укажите изображение предмета:"))
             image = await image_f(message, ctx)
@@ -1112,17 +1206,17 @@ class rpg(commands.Cog):
                 emb.add_field(name = "Тип предмета", value = f"{type}")
                 emb.add_field(name = "Имя предмета", value = f"{name}")
                 if act != 'Не указано' and act != 'Укажите id предметов для крафта: (максимум 500 предметов)':
-                    emb.add_field(name = "Используемые предметы", value = f"{','.join(str(x) for x in act)}")
+                    emb.add_field(name = "Используемые предметы", value = f"{', '.join(str(x) for x in act)}")
                 else:
                     emb.add_field(name = "Используемые предметы", value = f"{act}")
 
                 if ndi != 'Не указано' and ndi != 'Укажите не удаляемые предметы' and ndi != None:
-                    emb.add_field(name = "Не удаляемые предметы", value = f"{','.join(str(x) for x in ndi)}")
+                    emb.add_field(name = "Не удаляемые предметы", value = f"{', '.join(str(x) for x in ndi)}")
                 else:
                     emb.add_field(name = "Не удаляемые предметы", value = f"{ndi}")
 
                 if create != 'Не указано' and create != 'Укажите id  предметов которые будут созданы: (максимум 500 предметов)':
-                    emb.add_field(name = "Создаваемые предметы", value = f"{','.join(str(x) for x in create)}")
+                    emb.add_field(name = "Создаваемые предметы", value = f"{', '.join(str(x) for x in create)}")
                 else:
                     emb.add_field(name = "Создаваемые предметы", value = f"{create}")
 
@@ -1133,7 +1227,7 @@ class rpg(commands.Cog):
                 emb.add_field(name = "Сообщение при активации", value = f"{action_m}")
 
                 if race_u != 'Не указано' and race_u != 'Укажите названия рас, которые могут использовать этот предмет или `all`:' and race_u != 'all' and race_u != None:
-                    emb.add_field(name = "Расы с возможностью использовать", value = f"{','.join(str(x) for x in race_u)}")
+                    emb.add_field(name = "Расы с возможностью использовать", value = f"{', '.join(str(x) for x in race_u)}")
                 else:
                     emb.add_field(name = "Расы с возможностью использовать", value = f"{race_u}")
 
@@ -1722,7 +1816,9 @@ class rpg(commands.Cog):
         s_i = []
 
         for i in user['inv']:
-            if fuzz.token_sort_ratio(i_name, i['name']) > 90 or fuzz.ratio(i_name,i['name']) > 90 or i_name == i['name']:
+            print(i['name'])
+            print(fuzz.token_sort_ratio(i_name, i['name']), fuzz.ratio(i_name,i['name']), i_name == i['name'])
+            if fuzz.token_sort_ratio(i_name, i['name']) > 80 or fuzz.ratio(i_name,i['name']) > 80 or i_name == i['name']:
                 s_i.append(i)
 
         if len(s_i) == 1:
@@ -1764,9 +1860,9 @@ class rpg(commands.Cog):
                     else:
                         inv.update({ f'{i["name"]} (#{u["iid"]})': { 'it':i, 'count': 1 } })
 
+
             class Dropdown(discord.ui.Select):
                 def __init__(self, inv, ctx, msg, emb):
-
                     options = []
                     for k in inv:
                         options.append(discord.SelectOption(label=f'{k}'))
@@ -1787,7 +1883,6 @@ class rpg(commands.Cog):
                     super().__init__()
                     self.add_item(Dropdown(inv, ctx, msg, emb))
 
-            pprint.pprint(inv)
             text = ''
             n = 0
             for k in inv:
@@ -1801,107 +1896,111 @@ class rpg(commands.Cog):
 
 
 
-    @commands.command(usage = '(id)', description = 'Информация о предмете.')
-    async def item_info(self, ctx, id:int):
+    @commands.command(usage = '(item_name)', description = 'Информация о предмете.')
+    async def item_info(self, ctx, *, i_name:str):
 
+        user = funs.user_check(ctx.author, ctx.guild)
         server = servers.find_one({"server": ctx.guild.id})
 
-        act_title = '-'
+        async def inf(item, msg):
+            nonlocal ctx
+            nonlocal server
+            i = funs.item_info(item, ctx.guild.id)
 
-        try:
-            server['items'][str(id)]
-        except Exception:
-            await ctx.send(f"Указанный вами предмет не найден!\nПредметы: {', '.join(str(x) for x in list(server['items'].keys()) )} ")
-            return
+            emb = discord.Embed(description = f"**{i['emoji']} | {i['name']}**", color=server['embed_color'])
+            emb.add_field( name = f'Данные', value= f"Тип: {i['type']}\n{i['act_title']}\nРедкость: {i['quality']}\nЭлемент: {i['element']}\n{i['race_u']}", inline = True  )
 
-        item = server['items'][str(id)]
+            emb.add_field( name = f'Описание', value= f"{i['description']}", inline = True  )
 
-        act = server['items'][str(id)]['act']
+            if i['image'] != None:
+                emb.set_thumbnail(url = i['image'])
 
-        style = item['style']
+            await msg.edit(embed = emb, view = None)
 
-        quality = item['quality']
+        s_i = []
 
-        type = server['items'][str(id)]['type']
-        ttype = type.replace('eat', f'🍖 | Еда')
-        ttype = type.replace('point', f'<:mana:780352235246452756> | Зелье')
-        ttype = type.replace('case', f'<:chest:827218232783405097> | Сундук сокровищ')
-        ttype = type.replace('armor', f'<:armor:827220888130682880> | Броня')
-        ttype = type.replace('pet', f'<:pet:780381475207905290> | Питомец')
-        ttype = type.replace('material', f'<:leather:783036521099034626> | Материал')
-        ttype = type.replace('recipe', f'<:recipe:827221967886745600> | Рецепт')
-        ttype = type.replace('role', f'<:icons8pokeball96:779718625459437608> | Роль')
-        if type == 'weapon':
-            if item['style'] == 'sword':
-                type = type.replace('weapon', f'<:katana:827215937677426738> | Оружие ближнего боя')
-            if item['style'] == 'staff':
-                type = type.replace('weapon', f'<:staff:827215895548919869> | Оружие магического типа')
-            if item['style'] == 'bow':
-                type = type.replace('weapon', f'<:longrangeweapon:827217317544984607> | Оружие дальнего боя')
+        for i in user['inv']:
+            if fuzz.token_sort_ratio(i_name, i['name']) > 80 or fuzz.ratio(i_name,i['name']) > 80 or i_name == i['name']:
+                s_i.append(i)
 
-        if type == 'eat':
-            act_title = 'Питательность'
+        if len(s_i) == 1:
+            emb = discord.Embed(description = f'Вы хотите узнать информацию о **{s_i[0]["name"]}** ?', title = '<:inventory_b:886909340550823936> | Инвентарь', color=server['embed_color'])
+            msg = await ctx.send(embed = emb)
+            r = await funs.reactions_check( ["✅", "❌"], ctx.author, msg, True)
+            if r != 'Timeout':
+                if str(r.emoji) == "✅":
+                    await inf(s_i[0], msg)
+                else:
+                    return
+            else:
+                await ctx.send('Время вышло')
 
-        if type == 'point':
-            if style == 'heal':
-                act_title = 'Восстановление здоровья'
-            if style == 'mana':
-                act_title = 'Восстановление маны'
+        if len(s_i) == 0:
+            emb = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь', description = f'В вашем инвентаре не было найдено такого предмета!\nПопробуйте указать более точное название или осмотрите свой инвентарь более подробно!', color=server['embed_color'])
+            msg = await ctx.send(embed= emb)
 
-        if type == 'case':
-            act_title = 'Сундук удачи'
+        if len(s_i) > 1:
+            inv = {}
 
-        if type == 'armor':
-            if style == 'add':
-                act_title = 'Добавление брони'
-            if style == 'set':
-                act_title = 'Установка брони'
+            items = []
+            for i in server['items'].keys():
+                items.append(server['items'][i])
 
-        if type == 'weapon':
-            act_title = 'Урон'
+            for i in s_i:
+                u = i.copy()
+                del i['iid']
 
-        if type == 'pet':
-            if style == 'hp+':
-                act_title = 'Бонус к здоровью'
-            if style == 'mana+':
-                act_title = 'Бонус к мане'
-            if style == 'damage+':
-                act_title = 'Бонус к урону'
-            if style == 'armor+':
-                act_title = 'Бонус к защите'
-            if style == 'heal+':
-                act_title = 'Бонус восстановления здоровья'
-            if style == 'mn+':
-                act_title = 'Бонус восстановления маны'
+                if i in items:
+                    if i['name'] in list(inv.keys()):
+                        inv.update({ i['name']: { 'it':i, 'count': inv[i['name']]['count']+1 } })
+                    else:
+                        inv.update({ i['name']: { 'it':i, 'count': 1 } })
 
-        if type == 'recipe':
-            act_title = 'Рецепт'
-            ct = act
-            act  = f"Материалы: {ct['items']}\nСоздаёт: {server['items'][str(ct['create']['name'])]}"
-
-        if type == 'role':
-            act = f'<@&{act}>'
-            if style == 'add':
-                act_title = 'Добавление роли'
-            if style == 'remove':
-                act_title = 'Удаление роли'
-
-        if quality == 'n':
-            quality = ''
+                if i not in items:
+                    if f'{i["name"]} (#{u["iid"]})' in list(inv.keys()):
+                        inv.update({ f'{i["name"]} (#{u["iid"]})': { 'it':i, 'count': inv[i['name']]['count']+1 } })
+                    else:
+                        inv.update({ f'{i["name"]} (#{u["iid"]})': { 'it':i, 'count': 1 } })
 
 
-        emb = discord.Embed(title = item['name'], color=server['embed_color'])
-        emb.add_field(name='Тип', value= ttype)
+            class Dropdown(discord.ui.Select):
+                def __init__(self, inv, ctx, msg, emb):
+                    options = []
+                    for k in inv:
+                        options.append(discord.SelectOption(label=f'{k}'))
 
-        if type != 'material':
-            emb.add_field(name=act_title, value= act)
+                    super().__init__(placeholder='Выберите используемый предмет...', min_values=1, max_values=1, options=options)
+
+                async def callback(self, interaction: discord.Interaction):
+                    if ctx.author.id == interaction.user.id:
+
+                        # await interaction.response.send_message(f'{self.values[0]}', ephemeral = True)
+                        # await msg.delete()
+
+                        await inf(inv[self.values[0]]['it'], msg)
+                        self.view.stop()
+
+                    else:
+                        await interaction.response.send_message(f'Откройте свой инвентарь!', ephemeral = True)
 
 
+            class DropdownView(discord.ui.View):
+                def __init__(self, inv, ctx, msg, emb):
+                    super().__init__()
+                    self.add_item(Dropdown(inv, ctx, msg, emb))
 
-        if item['description'] != None:
-            emb.add_field(name='Описание:', value= item['description'])
+            text = ''
+            n = 0
+            for k in inv:
+                i = inv[k]
+                n += 1
+                text += f'{n}# {k} x{i["count"]}\n'
 
-        await ctx.send(embed = emb)
+            emb = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь', description = f'В инвентаре найдено несколько совпадений:\n{text}', color=server['embed_color'])
+            msg = await ctx.send(embed = emb)
+            await msg.edit(embed = emb, view=DropdownView(inv, ctx, msg, emb))
+
+
 
     @commands.command(usage = '(id) [member]', description = 'Выдать предмет.')
     async def item_add(self, ctx, id:int, rp:int, member:discord.Member = None):

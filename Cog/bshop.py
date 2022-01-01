@@ -593,10 +593,10 @@ class bs(commands.Cog):
         await mid.clear_reactions()
 
         if reason == None:
-            embed = discord.Embed(title = f'ID {id} Отклонён', description = f'Автор: {bs["author"]}\nУкзанный формат: {type}\nURL: {bs["url"]}', color = 0xf03e65)
+            embed = discord.Embed(title = f'ID {id} Отклонён', description = f'Автор: <@{bs["author"]}>\nУкзанный формат: {type}\nURL: {bs["url"]}', color = 0xf03e65)
             embed.set_image(url=bs["url"])
         if reason != None:
-            embed = discord.Embed(title = f'ID {id} Отклонён', description = f'Автор: {bs["author"]}\nУкзанный формат: {type}\nURL: {bs["url"]}\n\n\nПричина: {"".join(reason)}', color = 0xf03e65)
+            embed = discord.Embed(title = f'ID {id} Отклонён', description = f'Автор: <@{bs["author"]}>\nУкзанный формат: {type}\nURL: {bs["url"]}\n\n\nПричина: {"".join(reason)}', color = 0xf03e65)
             embed.set_image(url=bs["url"])
 
             if g != None:
@@ -656,7 +656,7 @@ class bs(commands.Cog):
         mid = await channel.fetch_message(bs['message'])
         await mid.clear_reactions()
 
-        embed = discord.Embed(title = f'ID {id} Принят', description = f'Автор: {bs["author"]}\nФормат: {type}\nURL: {bs["url"]}\nПринял: {ctx.author.mention}\nID в магазине: {len(list(backs.find()))}', color = 0x34cb2c)
+        embed = discord.Embed(title = f'ID {id} Принят', description = f'Автор: <@{bs["author"]}>\nФормат: {type}\nURL: {bs["url"]}\nПринял: {ctx.author.mention}\nID в магазине: {len(list(backs.find()))}', color = 0x34cb2c)
         embed.set_image(url=bs["url"])
 
         await mid.edit(embed= embed)
