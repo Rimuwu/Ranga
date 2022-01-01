@@ -692,6 +692,161 @@ class functions:
         servers.update_one({"server": guild_id}, {"$set": {"rpg": rpg}})
         return item
 
+    @staticmethod
+    def item_info(item, guild_id:int):
+        server = servers.find_one({'server': guild_id})
+
+        ni = {}
+        ni['name'] = item['name']
+        ni['image'] = item['image']
+
+        try:
+            ni['emoji'] = item['emoji']
+        except:
+            ni['emoji'] = "🏮"
+
+        if item['description'] != None:
+            ni['description'] = item['description']
+        else:
+            ni['description'] = '*Засекречено* | (отсутствует)'
+
+
+        try:
+            f = item['quality']
+        except:
+            item['quality'] = '<:void:924632079143157800>'
+
+        if item['quality'] == 'n':
+            ni['quality'] = '<:normal_q:781531816993620001>'
+        elif item['quality'] == 'u':
+            ni['quality'] = '<:unusual_q:781531868780691476>'
+        elif item['quality'] == 'r':
+            ni['quality'] = '<:rare_q:781531919140651048>'
+        elif item['quality'] == 'o':
+            ni['quality'] = '<:orate_q:781531996866084874>'
+        elif item['quality'] == 'l':
+            ni['quality'] = '<:legendary_q:781532085130100737>'
+
+
+        try:
+            tt = ", ".join(item['race_u'])
+            ni['race_u'] = f"Расы которые могут использовать: {tt}"
+        except:
+            ni['race_u'] = 'Все расы могут использовать данный предмет.'
+
+
+        try:
+            el = item['element']
+        except:
+            el = None
+
+        if el == 'w':
+            ni['element'] = '<:water:888029916287885332>'
+        elif el == 'a':
+            ni['element'] = '<:air:888029789749919787>'
+        elif el == 'f':
+            ni['element'] = '<:fire:888029761828425789>'
+        elif el == 'e':
+            ni['element'] = '<:earth:888029840945598534>'
+        else:
+            ni['element'] = 'Отсутствует'
+
+
+
+        if item['type'] == 'eat':
+            ni['type'] = '🍖 | Еда'
+            ni['act_title'] = f'Питательность: {item["act"]}'
+
+        elif item['type'] == 'point':
+            ni['type'] = '<:mana:780352235246452756> | Зелье'
+            if item['style'] == 'heal':
+                ni['act_title'] = f"Восстановление {item['act']} здоровья"
+            elif item['style'] == 'mana':
+                ni['act_title'] = f"Восстановление {item['act']} маны"
+
+        elif item['type'] == 'case':
+            ni['type'] = '<:chest:827218232783405097> | Сундук сокровищ'
+            ni['act_title'] = f'Выпадаемые предметы: {", ".join(server["items"][str(x)]["name"] for x in item["act"])}'
+
+        elif item['type'] == 'armor':
+            ni['type'] = '<:armor:827220888130682880> | Броня'
+            if item['style'] == 'add':
+                ni['act_title'] = f"Добавляет {item['act']} брони"
+            elif item['style'] == 'set':
+                ni['act_title'] = f"Устанавливает {item['act']} брони"
+
+        elif item['type'] == 'weapon':
+            if item['style'] == 'sword':
+                ni['type'] =  f'<:katana:827215937677426738> | Оружие ближнего боя'
+
+                if item['stabl'] == 0:
+                    st = 'Неразрушаемый'
+                else:
+                    st = item['stabl']
+                ni['act_title'] = f"Атакует с максимальным уроном {item['act']}\nПрочность: {st}"
+
+            if item['style'] == 'staff':
+                ni['type'] =  f'<:staff:827215895548919869> | Оружие магического типа'
+                ni['act_title'] = f"Атакует с максимальным уроном {item['act']}\nИспользует {item['mana_use']} маны"
+
+            if item['style'] == 'bow':
+                ni['type'] = f'<:longrangeweapon:827217317544984607> | Оружие дальнего боя'
+                ni['act_title'] = f"Атакует с максимальным уроном {item['act']}\nИспользует {server['items'][str(item['bow_item'])]['name']} для стрельбы"
+
+        elif item['type'] == 'pet':
+            ni['type'] = '<:pet:780381475207905290> | Питомец'
+            if item['style'] == 'hp+':
+                ni['act_title'] = f"Увеличивает здоровье на {item['act']}"
+            elif item['style'] == f'mana+':
+                ni['act_title'] = f"Увеличивает ману на {item['act']}"
+            elif item['style'] == f'damage+':
+                ni['act_title'] = f"Увеличивает урон на {item['act']}"
+            elif item['style'] == f'armor+':
+                ni['act_title'] = f"Увеличивает защиту на {item['act']}"
+            elif item['style'] == f'mana-':
+                ni['act_title'] = f"Уменьшает расход маны на {item['act']}"
+
+        elif item['type'] == 'material':
+            ni['type'] = '<:leather:783036521099034626> | Материал'
+            ni['act_title'] = 'Материал может быть использован в крафтах'
+
+        elif item['type'] == 'recipe':
+            ni['type'] = '<:recipe:827221967886745600> | Рецепт'
+            c_i = []
+            ni_i = []
+            ct_i = []
+            for i in item['act']:
+                c_i.append(server['items'][str(i)]['name'])
+
+            for n in item['ndi']:
+                ni_i.append(server['items'][str(n)]['name'])
+
+            for c in item['ndi']:
+                ct_i.append(server['items'][str(n)]['name'])
+
+
+            ni['act_title'] = f"Выпадаемые предметы: {', '.join(c_i)}\n"
+            if ni_i != []:
+                ni['act_title'] += f'Предметы которые не будут удалены: {", ".join(ni_i)}\n'
+
+            ni['act_title'] += f'Создаваемыве предметы: {", ".join(ct_i)}'
+
+
+        elif item['type'] == 'role':
+            ni['type'] = '<:icons8pokeball96:779718625459437608> | Роль'
+            if item['style'] == f'add':
+                ni['act_title'] = f"Добавляет вам <@{item['act']}>"
+            elif item['style'] == f'remore':
+                ni['act_title'] = f"Удаляет у вас <@{item['act']}>"
+
+        elif item['type'] == 'prop':
+            ni['type'] = '📦 | Проп'
+            ni['act'] = 'Является неиграбельным предметом'
+
+
+
+        return ni
+
 
 # коги ======================================= #
 
