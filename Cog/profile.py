@@ -292,7 +292,7 @@ class profile(commands.Cog):
                     yield lst[i:i + n]
 
             pages = []
-            nl = list(chunks(list(inv.keys()), 10))
+            nl = list(chunks(list(inv.keys()), 50))
             pn = 0
 
             for iiv in nl:
