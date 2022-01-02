@@ -287,69 +287,107 @@ class profile(commands.Cog):
 
         if inv != {}:
 
-            emb_i = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь',color=0xf03e65)
+            def chunks(lst, n):
+                for i in range(0, len(lst), n):
+                    yield lst[i:i + n]
+
+            pages = []
+            nl = list(chunks(list(inv.keys()), 10))
+            pn = 0
+
+            for iiv in nl:
+
+                pn + 1
+                emb_i = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь',color=0xf03e65)
+
+                text, text2, text3, text4, text5, text6, text7, text8 = '', '', '', '', '', '', '', ''
+                num, num2, num3, num4, num5, num6, num7, num8 = 0, 0, 0, 0, 0, 0, 0, 0
+
+                for i in iiv:
+                    item = inv[i]['it']
+                    if item['quality'] == 'n':
+                        qul = '<:normal_q:781531816993620001>'
+                    elif item['quality'] == 'u':
+                        qul = '<:unusual_q:781531868780691476>'
+                    elif item['quality'] == 'r':
+                        qul = '<:rare_q:781531919140651048>'
+                    elif item['quality'] == 'o':
+                        qul = '<:orate_q:781531996866084874>'
+                    elif item['quality'] == 'l':
+                        qul = '<:legendary_q:781532085130100737>'
+                    else:
+                        qul = '???'
+
+                    if item['emoji'] == None: item['emoji'] = "🏮"
+
+                    if item['type'] == 'weapon':
+
+                        text += f"{qul} | {item['emoji']} | {i}: {inv[i]['count']}\n"
+                        num += inv[i]['count']
+
+                    elif item['type'] == 'point':
+
+                        text2 += f"{qul} | {item['emoji']} | {i}: {inv[i]['count']}\n"
+                        num2 += inv[i]['count']
+
+                    elif item['type'] == 'eat':
+
+                        text3 += f"{qul} | {item['emoji']} | {i}: {inv[i]['count']}\n"
+                        num3 += inv[i]['count']
+
+                    elif item['type'] == 'recipe':
+
+                        text4 += f"{qul} | {item['emoji']} | {i}: {inv[i]['count']}\n"
+                        num4 += inv[i]['count']
+
+                    elif item['type'] == 'role':
+
+                        text6 += f"{qul} | {item['emoji']} | {i}: {inv[i]['count']}\n"
+                        num6 += inv[i]['count']
+
+                    elif item['type'] == 'material':
+
+                        text7 += f"{qul} | {item['emoji']} | {i}: {inv[i]['count']}\n"
+                        num7 += inv[i]['count']
+
+                    elif item['type'] == 'armor':
+
+                        text8 += f"{qul} | {item['emoji']} | {i}: {inv[i]['count']}\n"
+                        num8 += inv[i]['count']
+
+                    else:
+                        text5 += f"{qul} | {item['emoji']} | {i}: {inv[i]['count']}\n"
+                        num5 += inv[i]['count']
+
+                text += f'({len(text)})'
+                text2 += f'({len(text2)})'
+                text3 += f'({len(text3)})'
+                text4 += f'({len(text4)})'
+                text5 += f'({len(text5)})'
+                text6 += f'({len(text6)})'
+                text7 += f'({len(text7)})'
+                text8 += f'({len(text8)})'
 
 
-            text, text2, text3, text4, text5, text6 = '', '', '', '', '', ''
-            num, num2, num3, num4, num5, num6 = 0, 0, 0, 0, 0, 0
+                if num > 0:
+                    emb_i.add_field(name= f"Предметы | Оружия: {num}", value= text)
+                if num2 > 0:
+                    emb_i.add_field(name= f"Предметы | Зелья: {num2}", value= text2)
+                if num3 > 0:
+                    emb_i.add_field(name= f"Предметы | Еда: {num3}", value= text3, inline = False)
+                if num4 > 0:
+                    emb_i.add_field(name= f"Предметы | Рецепты: {num4}", value= text4)
+                if num6 > 0:
+                    emb_i.add_field(name= f"Предметы | Роли: {num6}", value= text6)
+                if num7 > 0:
+                    emb_i.add_field(name= f"Предметы | Материалы: {num7}", value= text7, inline = False)
+                if num8 > 0:
+                    emb_i.add_field(name= f"Предметы | Броня: {num8}", value= text8)
 
-            for i in inv.keys():
-                item = inv[i]['it']
-                if item['quality'] == 'n':
-                    qul = '<:normal_q:781531816993620001>'
-                elif item['quality'] == 'u':
-                    qul = '<:unusual_q:781531868780691476>'
-                elif item['quality'] == 'r':
-                    qul = '<:rare_q:781531919140651048>'
-                elif item['quality'] == 'o':
-                    qul = '<:orate_q:781531996866084874>'
-                elif item['quality'] == 'l':
-                    qul = '<:legendary_q:781532085130100737>'
-                else:
-                    qul = '???'
+                if num5 > 0:
+                    emb_i.add_field(name= f"Предметы | Разное: {num5}", value= text5)
 
-                if item['type'] == 'weapon':
-
-                    text += f"{qul} | {item['emoji']} | {i}: {inv[i]['count']}\n"
-                    num += inv[i]['count']
-
-                elif item['type'] == 'point':
-
-                    text2 += f"{qul} | {item['emoji']} | {i}: {inv[i]['count']}\n"
-                    num2 += inv[i]['count']
-
-                elif item['type'] == 'eat':
-
-                    text3 += f"{qul} | {item['emoji']} | {i}: {inv[i]['count']}\n"
-                    num3 += inv[i]['count']
-
-                elif item['type'] == 'pet':
-
-                    text4 += f"{qul} | {item['emoji']} | {i}: {inv[i]['count']}\n"
-                    num4 += inv[i]['count']
-
-                elif item['type'] == 'role':
-
-                    text6 += f"{qul} | {item['emoji']} | {i}: {inv[i]['count']}\n"
-                    num6 += inv[i]['count']
-
-                else:
-                    text5 += f"{qul} | {item['emoji']} | {i}: {inv[i]['count']}\n"
-                    num5 += inv[i]['count']
-
-
-            if num > 0:
-                emb_i.add_field(name= f"Предметы | Оружия: {num}", value= text)
-            if num2 > 0:
-                emb_i.add_field(name= f"Предметы | Зелья: {num2}", value= text2)
-            if num3 > 0:
-                emb_i.add_field(name= f"Предметы | Еда: {num3}", value= text3)
-            if num4 > 0:
-                emb_i.add_field(name= f"Предметы | Питомцы: {num4}", value= text4)
-            if num6 > 0:
-                emb_i.add_field(name= f"Предметы | Роли: {num5}", value= text6)
-            if num5 > 0:
-                emb_i.add_field(name= f"Предметы | Остальное: {num5}", value= text5)
+                pages.append(emb_i)
 
 
         emb_s = discord.Embed(title = ':bust_in_silhouette:  | Профиль',
@@ -397,7 +435,9 @@ class profile(commands.Cog):
             image_pix=BytesIO(output.getvalue())
 
             file = discord.File(fp = image_pix, filename="user_card.png")
-            emb_i.set_image(url="attachment://user_card.png")
+            for e in pages:
+                e.set_image(url="attachment://user_card.png")
+
             emb_s.set_image(url="attachment://user_card.png")
 
         else:
@@ -421,7 +461,8 @@ class profile(commands.Cog):
             fs[0].save('user_card.gif', save_all=True, append_images=fs[1:], loop = 0, optimize=True, quality=75)
 
             file = discord.File(fp = "user_card.gif", filename="user_card.gif")
-            emb_i.set_image(url="attachment://user_card.gif")
+            for e in pages:
+                e.set_image(url="attachment://user_card.gif")
             emb_s.set_image(url="attachment://user_card.gif")
 
 
@@ -433,23 +474,62 @@ class profile(commands.Cog):
             pass
 
         page_s = 'stat'
+        p_n = 0
 
         def check(reaction, user):
             nonlocal msg
-            return user == ctx.author and str(reaction.emoji) == '<:ch_page:886895064331202590>' and str(reaction.message) == str(msg)
+            return user == ctx.author and str(reaction.emoji) in ['<:ch_page:886895064331202590>', '◀', '▶'] and str(reaction.message) == str(msg)
 
         async def rr():
             nonlocal reaction
             nonlocal page_s
+            nonlocal p_n
+            nonlocal pages
 
             if str(reaction.emoji) == '<:ch_page:886895064331202590>':
                 await msg.remove_reaction('<:ch_page:886895064331202590>', ctx.author)
                 if page_s == 'inv':
                     page_s = 'stat'
+                    await msg.clear_reactions()
+                    await msg.add_reaction('<:ch_page:886895064331202590>')
                     await msg.edit(embed = emb_s)
                 else:
                     page_s = 'inv'
-                    await msg.edit(embed = emb_i)
+                    await msg.edit(embed = pages[p_n].set_footer(text = f'{p_n+1} | {len(nl)}'))
+                    if len(pages) > 1:
+                        await msg.add_reaction('◀')
+                        await msg.add_reaction('▶')
+
+            if str(reaction.emoji) == '◀' or str(reaction.emoji) == '▶':
+                if page_s == 'inv':
+                    if len(pages) > 1:
+
+                        if str(reaction.emoji) == '◀':
+                            p_n -= 1
+                            await msg.remove_reaction('◀', ctx.author)
+                            if p_n == -1:
+                                p_n = len(pages) - 1
+
+                            await msg.edit(embed = pages[p_n].set_footer(text = f'{p_n+1} | {len(nl)}'))
+
+                        if str(reaction.emoji) == '▶':
+                            p_n += 1
+                            await msg.remove_reaction('▶', ctx.author)
+                            if p_n == len(pages):
+                                p_n = 0
+
+                            await msg.edit(embed = pages[p_n].set_footer(text = f'{p_n+1} | {len(nl)}'))
+                else:
+                    try:
+                        await msg.remove_reaction('▶', ctx.author)
+                    except:
+                        pass
+
+                    try:
+                        await msg.remove_reaction('◀', ctx.author)
+                    except:
+                        pass
+
 
 
         async def reackt():
