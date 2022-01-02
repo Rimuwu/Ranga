@@ -284,6 +284,7 @@ class profile(commands.Cog):
 
         if inv == {}:
             emb_i = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь', description = 'Тут пусто 🔎',color=0xf03e65)
+            pages = [emb_i]
 
         if inv != {}:
 
@@ -297,8 +298,8 @@ class profile(commands.Cog):
 
             for iiv in nl:
 
-                pn + 1
-                emb_i = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь',color=0xf03e65)
+                pn += 1
+                emb_i = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь',color=0xf03e65).set_footer(text = f'{pn} | {len(nl)}')
 
                 text, text2, text3, text4, text5, text6, text7, text8 = '', '', '', '', '', '', '', ''
                 num, num2, num3, num4, num5, num6, num7, num8 = 0, 0, 0, 0, 0, 0, 0, 0
@@ -358,16 +359,6 @@ class profile(commands.Cog):
                     else:
                         text5 += f"{qul} | {item['emoji']} | {i}: {inv[i]['count']}\n"
                         num5 += inv[i]['count']
-
-                text += f'({len(text)})'
-                text2 += f'({len(text2)})'
-                text3 += f'({len(text3)})'
-                text4 += f'({len(text4)})'
-                text5 += f'({len(text5)})'
-                text6 += f'({len(text6)})'
-                text7 += f'({len(text7)})'
-                text8 += f'({len(text8)})'
-
 
                 if num > 0:
                     emb_i.add_field(name= f"Предметы | Оружия: {num}", value= text)
@@ -485,17 +476,29 @@ class profile(commands.Cog):
             nonlocal page_s
             nonlocal p_n
             nonlocal pages
+            nonlocal nl
 
             if str(reaction.emoji) == '<:ch_page:886895064331202590>':
                 await msg.remove_reaction('<:ch_page:886895064331202590>', ctx.author)
                 if page_s == 'inv':
                     page_s = 'stat'
-                    await msg.clear_reactions()
+
+                    for em in ['◀', '▶']:
+                        try:
+                            await msg.remove_reaction(em, ctx.author)
+                        except:
+                            pass
+                        try:
+                            await msg.remove_reaction(em, ctx.guild.me)
+                        except:
+                            pass
+
+
                     await msg.add_reaction('<:ch_page:886895064331202590>')
                     await msg.edit(embed = emb_s)
                 else:
                     page_s = 'inv'
-                    await msg.edit(embed = pages[p_n].set_footer(text = f'{p_n+1} | {len(nl)}'))
+                    await msg.edit(embed = pages[p_n])
                     if len(pages) > 1:
                         await msg.add_reaction('◀')
                         await msg.add_reaction('▶')
@@ -510,7 +513,7 @@ class profile(commands.Cog):
                             if p_n == -1:
                                 p_n = len(pages) - 1
 
-                            await msg.edit(embed = pages[p_n].set_footer(text = f'{p_n+1} | {len(nl)}'))
+                            await msg.edit(embed = pages[p_n])
 
                         if str(reaction.emoji) == '▶':
                             p_n += 1
@@ -518,7 +521,7 @@ class profile(commands.Cog):
                             if p_n == len(pages):
                                 p_n = 0
 
-                            await msg.edit(embed = pages[p_n].set_footer(text = f'{p_n+1} | {len(nl)}'))
+                            await msg.edit(embed = pages[p_n])
                 else:
                     try:
                         await msg.remove_reaction('▶', ctx.author)
