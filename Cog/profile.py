@@ -259,34 +259,33 @@ class profile(commands.Cog):
 
         reaction = 'a'
 
-        inv = {}
-
-        items = []
-        for i in server['items'].keys():
-            items.append(server['items'][i])
-
-        for i in user['inv']:
-            u = i.copy()
-            del i['iid']
-
-            if i in items:
-                if i['name'] in list(inv.keys()):
-                    inv.update({ i['name']: { 'it':i, 'count': inv[i['name']]['count']+1 } })
-                else:
-                    inv.update({ i['name']: { 'it':i, 'count': 1 } })
-
-            if i not in items:
-                if f'{i["name"]} (#{u["iid"]})' in list(inv.keys()):
-                    inv.update({ f'{i["name"]} (#{u["iid"]})': { 'it':i, 'count': inv[i['name']]['count']+1 } })
-                else:
-                    inv.update({ f'{i["name"]} (#{u["iid"]})': { 'it':i, 'count': 1 } })
-
-
-        if inv == {}:
+        if user['inv'] == {}:
             emb_i = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь', description = 'Тут пусто 🔎',color=0xf03e65)
             pages = [emb_i]
 
-        if inv != {}:
+        elif user['inv'] != {}:
+
+            inv = {}
+
+            items = []
+            for i in server['items'].keys():
+                items.append(server['items'][i])
+
+            for i in user['inv']:
+                u = i.copy()
+                del i['iid']
+
+                if i in items:
+                    if i['name'] in list(inv.keys()):
+                        inv.update({ i['name']: { 'it':i, 'count': inv[i['name']]['count']+1 } })
+                    else:
+                        inv.update({ i['name']: { 'it':i, 'count': 1 } })
+
+                if i not in items:
+                    if f'{i["name"]} (#{u["iid"]})' in list(inv.keys()):
+                        inv.update({ f'{i["name"]} (#{u["iid"]})': { 'it':i, 'count': inv[i['name']]['count']+1 } })
+                    else:
+                        inv.update({ f'{i["name"]} (#{u["iid"]})': { 'it':i, 'count': 1 } })
 
             def chunks(lst, n):
                 for i in range(0, len(lst), n):

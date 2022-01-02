@@ -705,6 +705,9 @@ class functions:
         except:
             ni['emoji'] = "🏮"
 
+        if ni['emoji'] == None:
+            ni['emoji'] = "🏮"
+
         if item['description'] != None:
             ni['description'] = item['description']
         else:
@@ -825,7 +828,7 @@ class functions:
                 ct_i.append(server['items'][str(n)]['name'])
 
 
-            ni['act_title'] = f"Выпадаемые предметы: {', '.join(c_i)}\n"
+            ni['act_title'] = f"Требуемые предметы: {', '.join(c_i)}\n"
             if ni_i != []:
                 ni['act_title'] += f'Предметы которые не будут удалены: {", ".join(ni_i)}\n'
 
@@ -1693,6 +1696,8 @@ async def punishment_mod(message, server, p, reason, shield):
 @bot.event
 async def on_message(message):
 
+    st = time.time()
+
     s = settings.find_one({"sid": 1})
 
     if message.author.bot == True: return
@@ -1803,7 +1808,7 @@ async def on_message(message):
                 if ctx.command.name not in server['mod']['off_commands']:
                     if functions.cooldown_check(message.author, message.guild, ctx.command.name, 'check') == False:
                         await bot.process_commands(message) # Выполнение команды
-                        print(ctx.command.name, 'no_errors')
+                        print(ctx.command.name, 'no_errors', functions.time_end(time.time() - st))
 
                         if ctx.command.name in server['mod']['cooldowns'].keys():
                             functions.cooldown_check(message.author, message.guild, ctx.command.name, 'add')
@@ -1835,7 +1840,7 @@ async def on_message(message):
 
             except Exception:
                 await bot.process_commands(message)
-                print(ctx.command.name, 'error')
+                print(ctx.command.name, 'error', functions.time_end(time.time() - st))
 
     except Exception:
         pass
