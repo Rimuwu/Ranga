@@ -2002,9 +2002,6 @@ class rpg(commands.Cog):
                 async def callback(self, interaction: discord.Interaction):
                     if ctx.author.id == interaction.user.id:
 
-                        await interaction.response.send_message(f'{self.values[0]}', ephemeral = True)
-                        await msg.delete()
-
                         await inf(inv[self.values[0]]['it'], msg)
                         self.view.stop()
 
