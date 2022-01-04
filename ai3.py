@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import nextcord as discord
+from nextcord import Interaction, SlashOption, ChannelType
+from nextcord.abc import GuildChannel
 from nextcord.ext import tasks, commands
-# from discord_slash import SlashCommand, SlashContext
+
 import requests
 from PIL import Image, ImageFont, ImageDraw, ImageOps, ImageSequence, ImageFilter
 import io
@@ -46,7 +48,6 @@ def get_prefix(client, message):
 intents = discord.Intents.all()
 
 bot = commands.Bot(command_prefix = get_prefix, intents = intents)
-# slash = SlashCommand(bot, sync_commands=True)
 
 
 # функции ======================================= #
@@ -694,6 +695,22 @@ class functions:
 
     @staticmethod
     def item_info(item, guild_id:int):
+
+        def list_counter(list):
+            ld = {}
+            for i in list:
+                if i not in ld.keys():
+                    ld[i] = 1
+                elif i in ld.keys():
+                    ld[i] += 1
+            list = []
+            for el in ld.keys():
+                list.append(f'{el} x{ld[el]}')
+
+            return list
+
+
+
         server = servers.find_one({'server': guild_id})
 
         ni = {}
@@ -769,7 +786,7 @@ class functions:
 
         elif item['type'] == 'case':
             ni['type'] = '<:chest:827218232783405097> | Сундук сокровищ'
-            ni['act_title'] = f'Выпадаемые предметы: {", ".join(server["items"][str(x)]["name"] for x in item["act"])}'
+            ni['act_title'] = f'Выпадаемые предметы:\n`{", ".join(list_counter(server["items"][str(x)]["name"] for x in item["act"]))}`'
 
         elif item['type'] == 'armor':
             ni['type'] = '<:armor:827220888130682880> | Броня'
@@ -828,11 +845,15 @@ class functions:
                 ct_i.append(server['items'][str(n)]['name'])
 
 
-            ni['act_title'] = f"Требуемые предметы: {', '.join(c_i)}\n"
+            ni['act_title'] = f"Требуемые предметы:\n`{', '.join(list_counter(c_i))}`\n"
             if ni_i != []:
-                ni['act_title'] += f'Предметы которые не будут удалены: {", ".join(ni_i)}\n'
+                ni['act_title'] += f'Предметы которые не будут удалены:\n`{", ".join(list_counter(ni_i))}`\n'
 
-            ni['act_title'] += f'Создаваемыве предметы: {", ".join(ct_i)}'
+            ni['act_title'] += f'Создаваемыве предметы:\n`{", ".join(list_counter(ct_i))}`\n'
+            if item['uses'] == 0:
+                ni['act_title'] += 'Количество использований: Бесконечно'
+            else:
+                ni['act_title'] += f'Количество использований: {item["uses"]}'
 
 
         elif item['type'] == 'role':
@@ -865,8 +886,16 @@ for filename in os.listdir("./Cog"):
 
 
 # slash ====================================== #
+# TESTING_GUILD_ID = 660507362758754311
+# guild_ids = [601124004224434357, 660507362758754311, 827219604701970482, 847102750928011274]
+#
+# @bot.slash_command(guild_ids = [TESTING_GUILD_ID])
+# async def example1(interaction: Interaction):
+#     await interaction.response.send_message(
+#         "Output from the first example slash command!"
+#     )
 
-# @slash.slash(name = 'lock',description="Закрыть приватный канал для всех или для определённого пользователя")
+# @bot.slash_command(name = 'lock',description="Закрыть приватный канал для всех или для определённого пользователя")
 # async def voice_lock(ctx, member:discord.Member = None):
 #
 #     server = servers.find_one({"server": ctx.guild.id})
