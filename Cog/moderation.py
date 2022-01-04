@@ -1,5 +1,7 @@
 import nextcord as discord
 from nextcord.ext import tasks, commands
+from nextcord.utils import utcnow
+from datetime import timedelta
 import sys
 import random
 from random import choice
@@ -105,52 +107,90 @@ class mod(commands.Cog):
             return
 
         server = servers.find_one({"server": ctx.guild.id})
+
         if member is None:
             await ctx.send("Вы не указали пользователя!")
         elif timem is None:
-            await ctx.send("Вы не указали время!\nФормат: 10m (s/m/h/d)")
+            await ctx.send("Вы не указали время!\nФормат: 10m (s/m/h/d/w)")
 
-        elif server['mod']['muterole'] is None:
-            await ctx.send(f"Роль мьюта не настроена на этом сервере!")
-
-        else:
-            if member.id == ctx.guild.owner.id:
-                return
-
+        elif server['mod']['muterole'] is not None:
             role = discord.utils.get(ctx.guild.roles, id = server['mod']['muterole']) #id роли
             await member.add_roles(role)
 
+        else:
+
+            if reason == None:
+                reason = 'Не указана'
+
+            try:
+                ttime = int(timem[:-1])
+            except:
+                await ctx.send(f"Укажите число!")
+                return
+
+            if member.id == ctx.guild.owner.id:
+                return
+
             if timem.endswith("s"):
                 a = server['mute_members'].copy()
-                a.update({str(member.id): time.time() + int(timem[:-1]) })
+                a.update({str(member.id): time.time() + ttime })
                 servers.update_one({"server": ctx.guild.id}, {"$set": {"mute_members": a}})
-                times = funs.time_end(int(timem[:-1]))
+                times = funs.time_end(ttime)
                 embs = discord.Embed(title = "Мьют", description = f"Пользователю {member.name}, был выдан мьют на {times}\nПричина: {reason}", color=server['embed_color'])
                 await ctx.send(embed = embs)
+                try:
+                    await member.edit(timeout=utcnow() + timedelta(seconds = ttime))
+                except:
+                    pass
 
             elif timem.endswith("m"):
                 a = server['mute_members'].copy()
-                a.update({str(member.id): time.time() + int(timem[:-1])*60 })
+                a.update({str(member.id): time.time() + ttime*60 })
                 servers.update_one({"server": ctx.guild.id}, {"$set": {"mute_members": a}})
-                times = funs.time_end(int(timem[:-1])*60)
+                times = funs.time_end(ttime*60)
                 embm = discord.Embed(title = "Мьют", description = f"Пользователю {member.name}, был выдан мьют на {times}\n\n**Причина: {reason}**", color=server['embed_color'])
                 await ctx.send(embed = embm)
+                try:
+                    await member.edit(timeout=utcnow() + timedelta(seconds = ttime*60))
+                except:
+                    pass
 
             elif timem.endswith("h"):
                 a = server['mute_members'].copy()
-                a.update({str(member.id): time.time() + int(timem[:-1])*3600 })
+                a.update({str(member.id): time.time() + ttime*3600 })
                 servers.update_one({"server": ctx.guild.id}, {"$set": {"mute_members": a}})
-                times = funs.time_end(int(timem[:-1])*3600)
+                times = funs.time_end(ttime*3600)
                 embh = discord.Embed(title = "Мьют", description = f"Пользователю {member.name}, был выдан мьют на {times}\n\n**Причина: {reason}**", color=server['embed_color'])
                 await ctx.send(embed = embh)
+                try:
+                    await member.edit(timeout=utcnow() + timedelta(seconds = ttime*3600))
+                except:
+                    pass
 
             elif timem.endswith("d"):
                 a = server['mute_members'].copy()
-                a.update({str(member.id): time.time() + int(timem[:-1])*86400 })
+                a.update({str(member.id): time.time() + ttime*86400 })
                 servers.update_one({"server": ctx.guild.id}, {"$set": {"mute_members": a}})
-                times = funs.time_end(int(timem[:-1])*86400)
+                times = funs.time_end(ttime*86400)
                 embd = discord.Embed(title = "Мьют", description = f"Пользователю {member.name}, был выдан мьют на {times}\n\n**Причина: {reason}**", color=server['embed_color'])
                 await ctx.send(embed = embd)
+                try:
+                    await member.edit(timeout=utcnow() + timedelta(seconds = ttime*86400))
+                except:
+                    pass
+
+            elif timem.endswith("w"):
+                a = server['mute_members'].copy()
+                a.update({str(member.id): time.time() + ttime*604800 })
+                servers.update_one({"server": ctx.guild.id}, {"$set": {"mute_members": a}})
+                times = funs.time_end(ttime*604800)
+                embd = discord.Embed(title = "Мьют", description = f"Пользователю {member.name}, был выдан мьют на {times}\n\n**Причина: {reason}**", color=server['embed_color'])
+                await ctx.send(embed = embd)
+                try:
+                    await member.edit(timeout=utcnow() + timedelta(seconds = ttime*604800))
+                except:
+                    pass
+
             else:
                 await ctx.send('Ошибка указания времени.')
                 return
@@ -240,6 +280,11 @@ class mod(commands.Cog):
 
         embd = discord.Embed(title = "Сброс", description = f"Мьют с пользователя {member.mention} был снят.", color=server['embed_color'])
         await ctx.send(embed = embd)
+
+        try:
+            await member.edit(timeout=utcnow() + timedelta(seconds = 0))
+        except:
+            pass
 
 
     @commands.command(usage = '-', description = 'Просмотреть всех замьюченых пользователей.', help = 'Мьюты', aliases = ['мьюты'])

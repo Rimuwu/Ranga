@@ -44,11 +44,10 @@ class info(commands.Cog):
 
 
         s1 = self.bot.get_guild(601124004224434357)
-        s2 = self.bot.get_guild(792687533792034827)
         b = ctx.guild.me
         await ctx.send(embed = discord.Embed(
             title="Ранга",
-            description=f"Я Ранга! По велению Римуру-доно, я прибыл чтобы наблюдать за этим местом!\n\nЯ кастомный бот для семьи серверов AW, к ним относятся: [{s1}](https://discord.gg/VyDc2e4HYE), [{s2}](https://discord.gg/9X5pkqmB3X)",
+            description=f"Я Ранга! По велению Римуру-доно, я прибыл чтобы наблюдать за этим местом!\n\nЯ кастомный бот для [{s1}](https://discord.gg/VyDc2e4HYE)",
             color=0x34cb2c).add_field(
             name="Префикс",
             value=f"{ctx.prefix}").add_field(
@@ -59,7 +58,7 @@ class info(commands.Cog):
             name="Статистика:",
             value=f"Пользователей: {len(self.bot.users)}\n"
             f"Команд: {len(self.bot.commands)}\n"
-                  ,inline=True).add_field(name="Библиотека", value="nextcord 2.0.0")
+                  ,inline=True).add_field(name="Библиотека", value="nextcord 2.0.0a5")
                   .add_field(name="Хостинг", value="heroku").set_thumbnail(
             url= b.avatar.url))
 

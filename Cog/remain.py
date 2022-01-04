@@ -73,31 +73,6 @@ class remain(commands.Cog):
 
         await mid.edit(content = mid.content, view= url_button(url, emoji, label))
 
-    @commands.command(hidden = True)
-    async def test(self, ctx):
-
-        class Dropdown(discord.ui.Select):
-            def __init__(self):
-
-                # Set the options that will be presented inside the dropdown
-                options = [
-                    discord.SelectOption(label='Red', description='Your favourite colour is red', emoji='🟥'),
-
-                ]
-
-                super().__init__(placeholder='Choose your favourite colour...', min_values=1, max_values=5, options=options)
-
-            async def callback(self, interaction: discord.Interaction):
-                await interaction.response.send_message(f'{self.values}', ephemeral = True)
-
-
-        class DropdownView(discord.ui.View):
-            def __init__(self):
-                super().__init__()
-                self.add_item(Dropdown())
-
-        await ctx.send('Pick your favourite colour:', view=DropdownView())
-
 
 
 def setup(bot):
