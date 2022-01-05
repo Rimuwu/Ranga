@@ -3361,7 +3361,9 @@ class settings(commands.Cog):
             cat = await ctx.guild.create_category('Tickets', overwrites = overwrites)
             category = cat.id
             if channel == None:
-                channel = await ctx.guild.create_text_channel(name=f"tickets", category=cat)
+                channel = await ctx.guild.create_text_channel(name=f"tickets", category=cat, overwrites = {
+                        ctx.guild.default_role: discord.PermissionOverwrite(view_channel=True, send_messages=False)
+                             })
 
         c = ctx.guild.get_channel(category)
         if c == None or type(c) != discord.CategoryChannel:
@@ -3369,7 +3371,7 @@ class settings(commands.Cog):
             return
 
         if message == None:
-            message = "Для создлания тикета, нажмите 💬"
+            message = "Если вы хотите обратится за помощью или задать вопрос, \nнажмите > 💬"
         else:
             if len(message) > 2000:
                 await ctx.send(f"Укажите сообщение меньше 2к симовлов!")
