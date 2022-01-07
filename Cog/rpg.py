@@ -1721,14 +1721,11 @@ class rpg(commands.Cog):
                 return
 
         try:
-            if server['premium'] == None:
-                b = 20
-            else:
-                b = 50
+            b = 50
 
             act = []
             emb = discord.Embed(title = "",
-            description = "Укажите id предметов для расы, формат: 12 12 1 2 2\nЕсли вы хотите увеличить колличество предмета то просто укажите его повторно, пример: 11 11 (будет добавлено 2 предмета с id 11)", color=server['embed_color'])
+            description = "Укажите id предметов для расы, формат: 12 12 1 2 2\nЕсли вы хотите увеличить колличество предмета то просто укажите его повторно, пример: 11 11 (будет добавлено 2 предмета с id 11)\nУкажите `none` если ничего.", color=server['embed_color'])
             msg1 = await ctx.send(embed = emb)
             await message.edit(embed = embed(name, hp, mana, f"Укажите id предметов для расы или `none`: (максимум {b} предметов)"))
             msg = await self.bot.wait_for('message', timeout=60.0, check=lambda message: message.author == ctx.author and message.channel.id == ctx.channel.id)
@@ -1778,6 +1775,7 @@ class rpg(commands.Cog):
                 await msg.delete()
             except Exception:
                 pass
+
             description = str(msg.content)
             if description == 'none':
                 race.update({ 'description': None})
@@ -1813,6 +1811,8 @@ class rpg(commands.Cog):
                 except Exception:
                     await ctx.send("Требовалось указать __ссылку__, повторите настройку ещё раз.")
                     return
+            else:
+                msg.content = None
 
             race.update({'image': msg.content})
             image = str(msg.content)
@@ -1823,15 +1823,81 @@ class rpg(commands.Cog):
                 pass
 
 
-        await message.edit(embed = embed(name, hp, mana, items, description, image))
+        await message.edit(content = 'Раса создана', embed = embed(name, hp, mana, items, description, image))
 
         server = servers.find_one({"server": ctx.guild.id})
         il = server['races']
         il.update({f'{name}': race})
         servers.update_one({'server':ctx.guild.id},{"$set":{'races': il}})
 
+    @commands.command(usage = '-', description = 'Информация о расах.')
+    async def race_info(self, ctx):
+
+        server = servers.find_one({"server": ctx.guild.id})
+
+        def list_counter(list):
+            ld = {}
+            for i in list:
+                if i not in ld.keys():
+                    ld[i] = 1
+                elif i in ld.keys():
+                    ld[i] += 1
+            list = []
+            for el in ld.keys():
+                list.append(f'{el} x{ld[el]}')
+
+            return list
+
+        async def inf(race, msg):
+            nonlocal ctx
+            nonlocal server
+            r = server['races'][race]
+
+            if r['items'] == None:
+                invv = 'Пусто'
+            else:
+                l = []
+                for i in r['items']: l.append(server['items'][str(i)]['name'])
+            invv = list_counter(l)
+
+            emb = discord.Embed( description = f'**🦄 | {race}**', color=server['embed_color'])
+            emb.add_field(name = 'Данные', value = f'<:heart:886874654072008705> Начальное здоровье: {r["hp"]}\n<:c_mana:886893705594818610> Начальная мана: {r["mana"]}\n<:p_backpack:886909262712930325> Начальные предметы: \n`{", ".join(invv)}`')
+            if r['description'] == None:
+                emb.add_field(name = 'Описание', value = f'Ничего не известно | (отсутствует)')
+            else:
+                emb.add_field(name = 'Описание', value = f'{r["description"]}')
+
+            if r['image'] != None:
+                emb.set_thumbnail(url = i['image'])
+
+            await msg.edit(embed = emb, view = None)
+
+        class Dropdown(discord.ui.Select):
+            def __init__(self, races, ctx, msg, emb):
+                options = []
+                for k in races.keys():
+                    options.append(discord.SelectOption(label=f'{k}'))
+
+                super().__init__(placeholder='Выберите расу...', min_values=1, max_values=1, options=options)
+
+            async def callback(self, interaction: discord.Interaction):
+                if ctx.author.id == interaction.user.id:
+
+                    await inf(self.values[0], msg)
+                    self.view.stop()
+
+                else:
+                    await interaction.response.send_message(f'Откройте свой инвентарь!', ephemeral = True)
 
 
+        class DropdownView(discord.ui.View):
+            def __init__(self, inv, ctx, msg, emb):
+                super().__init__()
+                self.add_item(Dropdown(inv, ctx, msg, emb))
+
+        emb = discord.Embed(title = '🦄 | Расы', description = f'Выберете о какой расе вы хотите узнать информацию', color=server['embed_color'])
+        msg = await ctx.send(embed = emb)
+        await msg.edit(embed = emb, view=DropdownView(server['races'], ctx, msg, emb))
 
     @commands.command(usage = '(item_name)', description = 'Использовать предмет из инвентаря.')
     async def use(self, ctx, *, i_name:str):
@@ -2258,13 +2324,12 @@ class rpg(commands.Cog):
                     await ctx.send("Требовалось указать 1 из элементов! (w, a, f, e)")
                     return False
 
-        def embed(type = 'Не указано', name = 'Не указано', act = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано', race_u = 'Не указано', element = 'Не указано', emoji_v = 'Не указано'):
+        def embed(name = 'Не указано', damage = 'Не указано', image = 'Не указано', quality = 'Не указано', description = 'Не указано', action_m = 'Не указано', race_u = 'Не указано', element = 'Не указано', emoji_v = 'Не указано'):
             nonlocal server
 
             emb = discord.Embed(title = "Создание предмета", description = "", color=server['embed_color'])
-            emb.add_field(name = "Тип предмета", value = f"{type}")
-            emb.add_field(name = "Имя предмета", value = f"{name}")
-            emb.add_field(name = "Питательность предмета", value = f"{act}")
+            emb.add_field(name = "Имя моба", value = f"{name}")
+            emb.add_field(name = "Максимальный урон", value = f"{act}")
             if image != 'Не указано' and image != 'none' and image != "Укажите изображение предмета:" and image != None:
                 emb.set_thumbnail(url = image)
             emb.add_field(name = "Качество предмета", value = f"{quality}")

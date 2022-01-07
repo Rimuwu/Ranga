@@ -406,28 +406,31 @@ class MainCog(commands.Cog):
 
                                 im = img
                                 try:
-                                    url = str(us.avatar.url)
-                                    response1 = requests.get(url, stream = True)
-                                    response1 = Image.open(io.BytesIO(response1.content))
+                                    try:
+                                        url = str(us.avatar.url)
+                                        response1 = requests.get(url, stream = True)
+                                        response1 = Image.open(io.BytesIO(response1.content))
 
-                                except Exception:
-                                    byteImgIO = io.BytesIO()
-                                    url = str(us.avatar.url)[:-9]
-                                    response = requests.get(url, stream = True)
-                                    response.raw.decode_content = True
-                                    response1 = Image.open(response.raw)
+                                    except Exception:
+                                        byteImgIO = io.BytesIO()
+                                        url = str(us.avatar.url)[:-9]
+                                        response = requests.get(url, stream = True)
+                                        response.raw.decode_content = True
+                                        response1 = Image.open(response.raw)
 
-                                response1 = response1.convert("RGBA")
-                                response1 = response1.resize((50, 50), Image.ANTIALIAS)
-                                size = (100, 100)
+                                    response1 = response1.convert("RGBA")
+                                    response1 = response1.resize((50, 50), Image.ANTIALIAS)
+                                    size = (100, 100)
 
-                                im = response1
-                                im = crop(im, size)
-                                im.putalpha(prepare_mask(size, 4))
+                                    im = response1
+                                    im = crop(im, size)
+                                    im.putalpha(prepare_mask(size, 4))
 
-                                bg_img = img
-                                fg_img = im
-                                img = trans_paste(fg_img, bg_img, 1.0, (300 + xgps, 350+ ygps, 400 + xgps, 450+ ygps))
+                                    bg_img = img
+                                    fg_img = im
+                                    img = trans_paste(fg_img, bg_img, 1.0, (300 + xgps, 350+ ygps, 400 + xgps, 450+ ygps))
+                                except:
+                                    pass
 
                                 try:
                                     img.save(f'banner {serv.id} id.png')
@@ -658,6 +661,34 @@ class MainCog(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member):
 
+        def trans_paste(fg_img,bg_img,alpha=10,box=(0,0)):
+            fg_img_trans = Image.new("RGBA",fg_img.size)
+            fg_img_trans = Image.blend(fg_img_trans,fg_img,alpha)
+            bg_img.paste(fg_img_trans,box,fg_img_trans)
+            return bg_img
+
+        def prepare_mask(size, antialias = 2):
+            mask = Image.new('L', (size[0] * antialias, size[1] * antialias), 0)
+            ImageDraw.Draw(mask).ellipse((0, 0) + mask.size, fill=255)
+            return mask.resize(size, Image.ANTIALIAS)
+
+        def crop(im, s):
+            w, h = im.size
+            k = w / s[0] - h / s[1]
+
+            if k > 0:
+                im = im.crop(((w - h) / 2, 0, (w + h) / 2, h))
+            elif k < 0:
+                im = im.crop((0, (h - w) / 2, w, (h + w) / 2))
+
+            return im.resize(s, Image.ANTIALIAS)
+
+        def make_ellipse_mask(size, x0, y0, x1, y1, blur_radius):
+            img = Image.new("L", size, color=0)
+            draw = ImageDraw.Draw(img)
+            draw.ellipse((x0, y0, x1, y1), fill=255)
+            return img.filter(ImageFilter.GaussianBlur(radius=blur_radius))
+
         server = servers.find_one({"server": member.guild.id})
 
         if server['send']['joinsend'] != 777777777777777777 or server['send']['joinsend'] != None:
@@ -743,64 +774,41 @@ class MainCog(commands.Cog):
                     else:
                         idraw.text((tp1, tp2), f"{name}#{tag}", font = headline,fill = f"{server['welcome']['nam_fill']}")
 
-                    url = str(member.avatar.url)
-
                     try:
-                        response1 = requests.get(url, stream = True)
-                        response1 = Image.open(io.BytesIO(response1.content))
 
-                    except Exception:
-                        byteImgIO = io.BytesIO()
-                        response = requests.get(url, stream = True)
-                        response.raw.decode_content = True
-                        response1 = Image.open(response.raw)
+                        url = str(member.avatar.url)
 
-                    response1 = response1.convert("RGB")
-                    response1 = response1.resize((200, 200), Image.ANTIALIAS)
+                        try:
+                            response1 = requests.get(url, stream = True)
+                            response1 = Image.open(io.BytesIO(response1.content))
 
-                    def trans_paste(fg_img,bg_img,alpha=10,box=(0,0)):
-                        fg_img_trans = Image.new("RGBA",fg_img.size)
-                        fg_img_trans = Image.blend(fg_img_trans,fg_img,alpha)
-                        bg_img.paste(fg_img_trans,box,fg_img_trans)
-                        return bg_img
+                        except Exception:
+                            byteImgIO = io.BytesIO()
+                            response = requests.get(url, stream = True)
+                            response.raw.decode_content = True
+                            response1 = Image.open(response.raw)
 
-                    def prepare_mask(size, antialias = 2):
-                        mask = Image.new('L', (size[0] * antialias, size[1] * antialias), 0)
-                        ImageDraw.Draw(mask).ellipse((0, 0) + mask.size, fill=255)
-                        return mask.resize(size, Image.ANTIALIAS)
+                        response1 = response1.convert("RGB")
+                        response1 = response1.resize((200, 200), Image.ANTIALIAS)
 
-                    def crop(im, s):
-                        w, h = im.size
-                        k = w / s[0] - h / s[1]
+                        im = response1
+                        im = crop(im, size)
+                        im.putalpha(prepare_mask(size, 4))
 
-                        if k > 0:
-                            im = im.crop(((w - h) / 2, 0, (w + h) / 2, h))
-                        elif k < 0:
-                            im = im.crop((0, (h - w) / 2, w, (h + w) / 2))
+                        overlay_image = alpha.filter(ImageFilter.GaussianBlur(radius=15))
+                        if server['welcome']['el_fill'] == None:
+                            mask_image = make_ellipse_mask((960, 470), ap1 - 10, ap2 - 10, ap1 + size[0] + 10, ap2 + size[1] + 10, 1)
+                            alpha = Image.composite(overlay_image, alpha, mask_image)
+                        else:
+                            idraw.ellipse((ap1 - 10, ap2 - 10, ap1 + size[0] + 10, ap2 + size[1] + 10), fill = f"{server['welcome']['el_fill']}")
 
-                        return im.resize(s, Image.ANTIALIAS)
+                        #аватарка
+                        bg_img = alpha
+                        fg_img = im
+                        im = trans_paste(fg_img, bg_img, 1.0, (ap1, ap2, ap1 + size[0], ap2 + size[0]))
 
-                    im = response1
-                    im = crop(im, size)
-                    im.putalpha(prepare_mask(size, 4))
-
-                    def make_ellipse_mask(size, x0, y0, x1, y1, blur_radius):
-                        img = Image.new("L", size, color=0)
-                        draw = ImageDraw.Draw(img)
-                        draw.ellipse((x0, y0, x1, y1), fill=255)
-                        return img.filter(ImageFilter.GaussianBlur(radius=blur_radius))
-
-                    overlay_image = alpha.filter(ImageFilter.GaussianBlur(radius=15))
-                    if server['welcome']['el_fill'] == None:
-                        mask_image = make_ellipse_mask((960, 470), ap1 - 10, ap2 - 10, ap1 + size[0] + 10, ap2 + size[1] + 10, 1)
-                        alpha = Image.composite(overlay_image, alpha, mask_image)
-                    else:
-                        idraw.ellipse((ap1 - 10, ap2 - 10, ap1 + size[0] + 10, ap2 + size[1] + 10), fill = f"{server['welcome']['el_fill']}")
-
-                    #аватарка
-                    bg_img = alpha
-                    fg_img = im
-                    im = trans_paste(fg_img, bg_img, 1.0, (ap1, ap2, ap1 + size[0], ap2 + size[0]))
+                    except:
+                        pass
 
                     if server['welcome']['wel_text'] == None:
                         text = f"Welcome {name}#{tag} to {member.guild.name}"
@@ -932,7 +940,12 @@ class MainCog(commands.Cog):
                     nick = f"Имя: {member.name}#{member.discriminator}\nНикнейм: {member.nick}\nУпоминание: {member.mention}"
 
                 emb.add_field(name="Информация",value=f"Аккаунт создан: {member.created_at.strftime('%X, %d %B, %Y')}\n{nick}", inline=False)
-                emb.set_thumbnail(url= member.avatar.url)
+
+                try:
+                    emb.set_thumbnail(url= member.avatar.url)
+                except:
+                    pass
+
                 emb.set_footer(text=f"ID: {member.id}")
                 await channel.send(embed=emb)
 
@@ -1021,64 +1034,68 @@ class MainCog(commands.Cog):
                     else:
                         idraw.text((tp1, tp2), f"{name}#{tag}", font = headline,fill = f"{server['goodbye']['nam_fill_l']}")
 
-                    url = str(member.avatar.url)
-
                     try:
-                        response1 = requests.get(url, stream = True)
-                        response1 = Image.open(io.BytesIO(response1.content))
+                        url = str(member.avatar.url)
 
-                    except Exception:
-                        byteImgIO = io.BytesIO()
-                        response = requests.get(url, stream = True)
-                        response.raw.decode_content = True
-                        response1 = Image.open(response.raw)
+                        try:
+                            response1 = requests.get(url, stream = True)
+                            response1 = Image.open(io.BytesIO(response1.content))
 
-                    response1 = response1.convert("RGB")
-                    response1 = response1.resize((200, 200), Image.ANTIALIAS)
+                        except Exception:
+                            byteImgIO = io.BytesIO()
+                            response = requests.get(url, stream = True)
+                            response.raw.decode_content = True
+                            response1 = Image.open(response.raw)
 
-                    def trans_paste(fg_img,bg_img,alpha=10,box=(0,0)):
-                        fg_img_trans = Image.new("RGBA",fg_img.size)
-                        fg_img_trans = Image.blend(fg_img_trans,fg_img,alpha)
-                        bg_img.paste(fg_img_trans,box,fg_img_trans)
-                        return bg_img
+                        response1 = response1.convert("RGB")
+                        response1 = response1.resize((200, 200), Image.ANTIALIAS)
 
-                    def prepare_mask(size, antialias = 2):
-                        mask = Image.new('L', (size[0] * antialias, size[1] * antialias), 0)
-                        ImageDraw.Draw(mask).ellipse((0, 0) + mask.size, fill=255)
-                        return mask.resize(size, Image.ANTIALIAS)
+                        def trans_paste(fg_img,bg_img,alpha=10,box=(0,0)):
+                            fg_img_trans = Image.new("RGBA",fg_img.size)
+                            fg_img_trans = Image.blend(fg_img_trans,fg_img,alpha)
+                            bg_img.paste(fg_img_trans,box,fg_img_trans)
+                            return bg_img
 
-                    def crop(im, s):
-                        w, h = im.size
-                        k = w / s[0] - h / s[1]
+                        def prepare_mask(size, antialias = 2):
+                            mask = Image.new('L', (size[0] * antialias, size[1] * antialias), 0)
+                            ImageDraw.Draw(mask).ellipse((0, 0) + mask.size, fill=255)
+                            return mask.resize(size, Image.ANTIALIAS)
 
-                        if k > 0:
-                            im = im.crop(((w - h) / 2, 0, (w + h) / 2, h))
-                        elif k < 0:
-                            im = im.crop((0, (h - w) / 2, w, (h + w) / 2))
+                        def crop(im, s):
+                            w, h = im.size
+                            k = w / s[0] - h / s[1]
 
-                        return im.resize(s, Image.ANTIALIAS)
+                            if k > 0:
+                                im = im.crop(((w - h) / 2, 0, (w + h) / 2, h))
+                            elif k < 0:
+                                im = im.crop((0, (h - w) / 2, w, (h + w) / 2))
 
-                    im = response1
-                    im = crop(im, size)
-                    im.putalpha(prepare_mask(size, 4))
+                            return im.resize(s, Image.ANTIALIAS)
 
-                    def make_ellipse_mask(size, x0, y0, x1, y1, blur_radius):
-                        img = Image.new("L", size, color=0)
-                        draw = ImageDraw.Draw(img)
-                        draw.ellipse((x0, y0, x1, y1), fill=255)
-                        return img.filter(ImageFilter.GaussianBlur(radius=blur_radius))
+                        im = response1
+                        im = crop(im, size)
+                        im.putalpha(prepare_mask(size, 4))
 
-                    overlay_image = alpha.filter(ImageFilter.GaussianBlur(radius=15))
-                    if server['goodbye']['el_fill_l'] == None:
-                        mask_image = make_ellipse_mask((960, 470), ap1 - 10, ap2 - 10, ap1 + size[0] + 10, ap2 + size[1] + 10, 1)
-                        alpha = Image.composite(overlay_image, alpha, mask_image)
-                    else:
-                        idraw.ellipse((ap1 - 10, ap2 - 10, ap1 + size[0] + 10, ap2 + size[1] + 10), fill = f"{server['goodbye']['el_fill_l']}")
+                        def make_ellipse_mask(size, x0, y0, x1, y1, blur_radius):
+                            img = Image.new("L", size, color=0)
+                            draw = ImageDraw.Draw(img)
+                            draw.ellipse((x0, y0, x1, y1), fill=255)
+                            return img.filter(ImageFilter.GaussianBlur(radius=blur_radius))
 
-                    #аватарка
-                    bg_img = alpha
-                    fg_img = im
-                    im = trans_paste(fg_img, bg_img, 1.0, (ap1, ap2, ap1 + size[0], ap2 + size[0]))
+                        overlay_image = alpha.filter(ImageFilter.GaussianBlur(radius=15))
+                        if server['goodbye']['el_fill_l'] == None:
+                            mask_image = make_ellipse_mask((960, 470), ap1 - 10, ap2 - 10, ap1 + size[0] + 10, ap2 + size[1] + 10, 1)
+                            alpha = Image.composite(overlay_image, alpha, mask_image)
+                        else:
+                            idraw.ellipse((ap1 - 10, ap2 - 10, ap1 + size[0] + 10, ap2 + size[1] + 10), fill = f"{server['goodbye']['el_fill_l']}")
+
+                        #аватарка
+                        bg_img = alpha
+                        fg_img = im
+                        im = trans_paste(fg_img, bg_img, 1.0, (ap1, ap2, ap1 + size[0], ap2 + size[0]))
+
+                    except:
+                        pass
 
                     if server['goodbye']['lea_text'] == None:
                         text = f"Goodbye {name}#{tag} to {member.guild.name}"
@@ -1168,7 +1185,10 @@ class MainCog(commands.Cog):
 
                 channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
                 emb = discord.Embed(description= f"Пользователь {member.name}#{member.discriminator} покинул сервер", color=0xFFDB8B)
-                emb.set_thumbnail(url= member.avatar.url)
+                try:
+                    emb.set_thumbnail(url= member.avatar.url)
+                except:
+                    pass
                 emb.set_footer(text=f"ID: {member.id}")
                 await channel.send(embed=emb)
 
@@ -1390,7 +1410,7 @@ class MainCog(commands.Cog):
 
                     if server['rr'][str(payload.message_id)]['limit_func'] == 'add':
                         await payload.member.add_roles(*roles, reason="Добавление роли за реакцию.")
-                    if server['rr'][str(payload.message_id)]['limit_func'] == 'remove':
+                    elif server['rr'][str(payload.message_id)]['limit_func'] == 'remove':
                         await payload.member.remove_roles(*roles, reason="Удаление роли за реакцию.")
 
             except Exception:
@@ -1400,7 +1420,7 @@ class MainCog(commands.Cog):
         guild = self.bot.get_guild(payload.guild_id)
         channel = guild.get_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
-        server = servers.find_one({"server":payload.guild_id})
+        server = servers.find_one({"server": payload.guild_id})
         emoji = payload.emoji
         member = payload.member
 
@@ -1447,11 +1467,16 @@ class MainCog(commands.Cog):
 
                                 if len(category.text_channels) < 50:
                                     emb = discord.Embed(title = f'Управление', description = f'Если вы хотите закрыть билет, нажмите ✅', color= server['embed_color'] )
-                                    overwrites = {
-                                                guild.default_role: discord.PermissionOverwrite(view_channel=False),
-                                                guild.me: discord.PermissionOverwrite(read_messages=True, manage_messages=True),
-                                                payload.member: discord.PermissionOverwrite(read_messages=True, send_messages=True),
-                                                }
+                                    try:
+                                        overwrites = {
+                                        guild.default_role: discord.PermissionOverwrite(view_channel=False),
+                                        guild.me: discord.PermissionOverwrite(read_messages=True, manage_messages=True),
+                                        payload.member: discord.PermissionOverwrite(read_messages=True, send_messages=True) }
+                                    except:
+                                        overwrites = {
+                                        guild.default_role: discord.PermissionOverwrite(view_channel=False),
+                                        guild.me: discord.PermissionOverwrite(read_messages=True, manage_messages=True)}
+
                                     channel = await guild.create_text_channel(name=f"ticket {server['tickets']['t_n']+1}", category = category,  overwrites=overwrites, reason = "ticket create")
                                     msg = await channel.send(f'{member.mention}',embed = emb)
                                     await msg.add_reaction("✅")
@@ -1541,7 +1566,10 @@ class MainCog(commands.Cog):
 
                                     emb = discord.Embed(title = f'Сообщение достойное пиццы!', description = f'{ message.content}', color=0xFF8B1F )
 
-                                    emb.set_author(name = message.author.name, icon_url = message.author.avatar.url)
+                                    try:
+                                        emb.set_author(name = message.author.name, icon_url = message.author.avatar.url)
+                                    except:
+                                        emb.set_author(name = message.author.name)
 
                                     if message.attachments != []:
                                         if message.attachments[0].content_type in ['image/jpeg', 'image/png', 'image/gif']:
@@ -1552,7 +1580,10 @@ class MainCog(commands.Cog):
                                 except :
                                     emb = discord.Embed(title = f'Сообщение достойное пиццы!', description = f'{ message.content}', color=0xFF8B1F )
 
-                                    emb.set_author(name = message.author.name, icon_url = message.author.avatar.url)
+                                    try:
+                                        emb.set_author(name = message.author.name, icon_url = message.author.avatar.url)
+                                    except:
+                                        pass
 
                                     if message.attachments != []:
                                         if message.attachments[0].content_type in ['image/jpeg', 'image/png', 'image/gif']:
@@ -1640,7 +1671,12 @@ class MainCog(commands.Cog):
 
             emb = discord.Embed(title = 'Бустит сервер!', description =f"{text}", color=server['embed_color'] )
             emb.set_author(icon_url = 'https://images-ext-1.discordapp.net/external/t8PQC99J_sKLcmwB6EVhtlmiIq8iG47SHE_gDJcQeOU/https/i.imgur.com/GdS5i6t.gif', name = booster)
-            emb.set_thumbnail(url= booster.avatar.url)
+
+            try:
+                emb.set_thumbnail(url= booster.avatar.url)
+            except:
+                pass
+
             if server["boost"]["url"] != None:
                 emb.set_image(url = server["boost"]["url"])
             if server["boost"]["footer"] != None:

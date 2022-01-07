@@ -45,22 +45,22 @@ class info(commands.Cog):
 
         s1 = self.bot.get_guild(601124004224434357)
         b = ctx.guild.me
-        await ctx.send(embed = discord.Embed(
+        embed = discord.Embed(
             title="Ранга",
             description=f"Я Ранга! По велению Римуру-доно, я прибыл чтобы наблюдать за этим местом!\n\nЯ кастомный бот для [{s1}](https://discord.gg/VyDc2e4HYE)",
-            color=0x34cb2c).add_field(
-            name="Префикс",
-            value=f"{ctx.prefix}").add_field(
-            name="Разработчик",
-            value=f"<@323512096350535680>").add_field(
-            name="Пинг:",
-            value=f"{ping_emoji} `{ping * 1000:.0f}ms`").add_field(
-            name="Статистика:",
-            value=f"Пользователей: {len(self.bot.users)}\n"
-            f"Команд: {len(self.bot.commands)}\n"
-                  ,inline=True).add_field(name="Библиотека", value="nextcord 2.0.0a5")
-                  .add_field(name="Хостинг", value="heroku").set_thumbnail(
-            url= b.avatar.url))
+            color=0x34cb2c)
+
+        embed.add_field(name="Префикс", value=f"{ctx.prefix}")
+        embed.add_field(name="Разработчик", value=f"<@323512096350535680>")
+        embed.add_field(name="Пинг:",value=f"{ping_emoji} `{ping * 1000:.0f}ms`")
+        embed.add_field(name="Статистика:",value=f"Пользователей: {len(self.bot.users)}\nКоманд: {len(self.bot.commands)}\n", inline=True)
+        embed.add_field(name="Библиотека", value="nextcord 2.0.0a5")
+        embed.add_field(name="Хостинг", value="heroku")
+        try:
+            embed.set_thumbnail(url= b.avatar.url)
+        except:
+            pass
+        await ctx.send(embed = embed)
 
 
     # @commands.command(aliases=['N', 'n', 'Nitro', 'нитро', "Нитро"], usage = '-', description = 'Информация о премиум подписке.')

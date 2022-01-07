@@ -127,7 +127,12 @@ class bs(commands.Cog):
                 if t == True:
                     if user['Nitro'] == True:
                         emb = discord.Embed(description = f'Фон успешно установлен на #{number}!',color=0xf03e65)
-                        emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+
+                        try:
+                            emb.set_author(name = f'{ctx.author}', icon_url = f'{ctx.author.avatar.url}')
+                        except:
+                            emb.set_author(name = f'{ctx.author}')
+
                         await ctx.send(embed = emb)
 
                         funs.user_update(ctx.author.id, member.guild, 'back', number)
@@ -138,14 +143,24 @@ class bs(commands.Cog):
                             funs.user_update(ctx.author.id, member.guild, 'back', number)
 
                             emb = discord.Embed(description = f'Фон успешно установлен на #{number}!',color=0xf03e65)
-                            emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+
+                            try:
+                                emb.set_author(name = f'{ctx.author}', icon_url = f'{ctx.author.avatar.url}')
+                            except:
+                                emb.set_author(name = f'{ctx.author}')
+
                             await ctx.send(embed = emb)
                         else:
                             bsk = backs.find_one({"bid": number})
                             if user['money'] >= bsk['price']:
 
                                 emb = discord.Embed(description = f'Фон успешно приобретён #{number}!',color=0xf03e65)
-                                emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+
+                                try:
+                                    emb.set_author(name = f'{ctx.author}', icon_url = f'{ctx.author.avatar.url}')
+                                except:
+                                    emb.set_author(name = f'{ctx.author}')
+
                                 await ctx.send(embed = emb)
 
                                 inv = user['back_inv']
@@ -255,7 +270,12 @@ class bs(commands.Cog):
                 if ctx.author.id == member.id:
                     user.update({"back": d[str(number)]["id"]})
                     emb = discord.Embed(description = f'Фон успешно установлен на #{d[str(number)]["id"]}!',color=0xf03e65)
-                    emb.set_author(name = '{}'.format(member), icon_url = '{}'.format(member.avatar.url))
+
+                    try:
+                        emb.set_author(name = f'{ctx.author}', icon_url = f'{ctx.author.avatar.url}')
+                    except:
+                        emb.set_author(name = f'{ctx.author}')
+
                     await ctx.send(embed = emb)
 
                 funs.user_update(member.id, member.guild, 'back', d[str(number)]["id"])
@@ -421,6 +441,7 @@ class bs(commands.Cog):
         response1 = response1.convert("RGBA")
         response1 = response1.resize((150, 150), Image.ANTIALIAS)
         size = (150, 150)
+
         await ctx.trigger_typing()
 
         im = response1
@@ -431,8 +452,8 @@ class bs(commands.Cog):
         fg_img = im
         alpha = trans_paste(fg_img, bg_img, 1.0, (25, 25, 175, 175))
 
-        idraw = ImageDraw.Draw(alpha)
 
+        idraw = ImageDraw.Draw(alpha)
         if user['voice_time'] >= 86400:
             text = funs.time_end(user['voice_time'])[:-4]
         if user['voice_time'] >= 604800:

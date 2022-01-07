@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 import nextcord as discord
-from nextcord import Interaction, SlashOption, ChannelType
-from nextcord.abc import GuildChannel
 from nextcord.ext import tasks, commands
 
 import requests
