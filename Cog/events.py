@@ -1424,6 +1424,9 @@ class MainCog(commands.Cog):
         emoji = payload.emoji
         member = payload.member
 
+        if member.bot == True:
+            return
+
         try:
             mm = server['rr'][str(message.id)]
             mr = True

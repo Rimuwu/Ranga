@@ -1797,6 +1797,8 @@ class settings(commands.Cog):
             await ctx.send("У вас недостаточно прав для использования этой команды!")
             return
 
+        await ctx.channel.purge(limit = 1)
+
         try:
             message = await ctx.channel.fetch_message(message_id)
         except Exception:
@@ -1804,14 +1806,16 @@ class settings(commands.Cog):
             return
 
         try:
-            if len(emoji) != 1:
-                l = len(emoji) - 19
-                em = int(emoji[l:-1])
-            else:
-                em = emoji
+            test_msg = await ctx.send("Тестовое сообщение\n Не удаляйте его, оно быдут удалено автоматически при наличии прав у бота")
+            await test_msg.add_reaction(emoji)
         except Exception:
-            await ctx.send('Эмоджи указан не верно!')
+            await ctx.send("Требовалось указать :emoji:")
             return
+
+        try:
+            await test_msg.delete()
+        except Exception:
+            pass
 
 
         ls = [] #проверка на роли
@@ -1846,6 +1850,7 @@ class settings(commands.Cog):
                     await help_message.delete()
                 except Exception:
                     pass
+
                 msg = msg.content.split()
                 if msg[0] not in ['add', 'remove']:
                     await ctx.send(f"Введите в чат без использования команд remove/add.")
@@ -1862,14 +1867,12 @@ class settings(commands.Cog):
 
                 try:
                     list = rrs[str(message_id)]['emojis']
-                    list.append([em, ls, msg[1], [] ])
+                    list.append([emoji, ls, msg[1], [] ])
                     rrs.update({str(message_id): {'emojis': list, 'func': function, 'limit_func': msg[0] }})
                 except Exception:
-                    rrs.update({str(message_id): {'emojis': [[em, ls, msg[1], [] ]], 'func': function, 'limit_func': msg[0] }})
+                    rrs.update({str(message_id): {'emojis': [[emoji, ls, msg[1], [] ]], 'func': function, 'limit_func': msg[0] }})
 
                 await message.add_reaction(emoji)
-                servers.update_one({'server':ctx.guild.id},{'$set': {'rr':rrs}})
-                await ctx.send("Роль за реакцию настроена!")
 
         else:
             await message.add_reaction(emoji)
@@ -1879,13 +1882,14 @@ class settings(commands.Cog):
 
             try:
                 list = rrs[str(message_id)]['emojis']
-                list.append([em, ls])
+                list.append([emoji, ls])
                 rrs.update({str(message_id): {'emojis': list, 'func': function }})
             except Exception:
-                rrs.update({str(message_id): {'emojis': [[em, ls]], 'func': function }})
+                rrs.update({str(message_id): {'emojis': [[emoji, ls]], 'func': function }})
 
-            await ctx.send("Роль за реакцию настроена!")
-            servers.update_one({'server':ctx.guild.id},{'$set': {'rr':rrs}})
+        servers.update_one({'server':ctx.guild.id},{'$set': {'rr':rrs}})
+
+
 
     @commands.command(usage = '(message_id)', description = 'Сбросить все реакции с сообщения.', help = 'Роли по реакциям')
     async def rr_clear(self, ctx, message_id:int):
@@ -1936,16 +1940,22 @@ class settings(commands.Cog):
             await ctx.send('Сообщение не найдено!')
             return
 
-        if len(emoji) != 1:
-            l = len(emoji) - 19
-            em = int(emoji[l:-1])
-        else:
-            em = emoji
+        try:
+            test_msg = await ctx.send("Тестовое сообщение\n Не удаляйте его, оно быдут удалено автоматически при наличии прав у бота")
+            await test_msg.add_reaction(emoji)
+        except Exception:
+            await ctx.send("Требовалось указать :emoji:")
+            return
+
+        try:
+            await test_msg.delete()
+        except Exception:
+            pass
 
         r = server['rr'].copy()
         ch = 0
         for i in server['rr'][str(message_id)]['emojis']:
-            if em in i:
+            if emoji in i:
                 r[str(message_id)]['emojis'].remove(i)
                 servers.update_one({'server':ctx.guild.id},{'$set': {'rr':r}})
                 ch += 1

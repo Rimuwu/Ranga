@@ -2040,16 +2040,9 @@ class rpg(commands.Cog):
 
 
         if len(inv) == 1:
-            emb = discord.Embed(description = f'Вы хотите узнать информацию о **{s_i[0]["name"]}** ?', title = '<:inventory_b:886909340550823936> | Инвентарь', color=server['embed_color'])
+            emb = discord.Embed(description = f'<:inventory_b:886909340550823936> | Инвентарь',  color=server['embed_color'])
             msg = await ctx.send(embed = emb)
-            r = await funs.reactions_check( ["✅", "❌"], ctx.author, msg, True)
-            if r != 'Timeout':
-                if str(r.emoji) == "✅":
-                    await inf(s_i[0], msg)
-                else:
-                    return
-            else:
-                await ctx.send('Время вышло')
+            await inf(s_i[0], msg)
 
         if len(inv) == 0:
             emb = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь', description = f'В вашем инвентаре не было найдено такого предмета!\nПопробуйте указать более точное название или осмотрите свой инвентарь более подробно!', color=server['embed_color'])
@@ -2122,7 +2115,7 @@ class rpg(commands.Cog):
 
         await ctx.send('Предмет(ы) добавлен(ы)!')
 
-    @commands.command(usage = '-', description = 'Создание локации.')
+    @commands.command(usage = '-', description = 'Создание моба.')
     async def create_mob(self, ctx):
         if funs.roles_check(ctx.author, ctx.guild.id) == False:
             await ctx.send("У вас недостаточно прав для использования этой команды!")
