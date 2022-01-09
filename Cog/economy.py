@@ -169,20 +169,34 @@ class economy(commands.Cog):
                         user_lvl = i[1]['lvl']
                         user_name = ctx.guild.get_member(int(i[0]))
                         if met == 'tel':
-                            text = text + f'{num1}. {user_name}: {user_lvl} lvl\n'
+                            if num1 == 1:
+                                text += '<:gold_s:929729448746549308> '
+                            elif num1 == 2:
+                                text += '<:silver_s:929729593286484029> '
+                            elif num1 == 3:
+                                text += '<:bronze_s:929729607836520448> '
+
+                            text += f'**#{num1}. {user_name}\nУровень:** {user_lvl} <:lvl:886876034149011486>\n\n'
                         if met == 'pc':
                             emb.add_field(name = '```        Место        ```', value = f'```{num1}```')
                             emb.add_field(name = '```             Имя             ```', value = f'```{user_name}```')
                             emb.add_field(name = '```    Уровень    ```', value = f'```{user_lvl}```')
 
                 elif topname == 'money':
-                    emb = discord.Embed(title = f'Топ лидеров по наличным {cc}', description = '',color=0x450fa8)
+                    emb = discord.Embed(title = f'Топ лидеров по монетам {cc}', description = '',color=0x450fa8)
                     for i in top:
                         num1 += 1
                         user_m = i[1]['money']
                         user_name = ctx.guild.get_member(int(i[0]))
                         if met == 'tel':
-                            text = text + f'{num1}. {user_name}: {user_m}{cc}\n'
+                            if num1 == 1:
+                                text += '<:gold_s:929729448746549308> '
+                            elif num1 == 2:
+                                text += '<:silver_s:929729593286484029> '
+                            elif num1 == 3:
+                                text += '<:bronze_s:929729607836520448> '
+
+                            text += f'**#{num1}. {user_name}\nМонеты:** {user_m}{cc}\n\n'
                         if met == 'pc':
                             emb.add_field(name = '```        Место        ```', value = f'```{num1}```')
                             emb.add_field(name = '```             Имя             ```', value = f'```{user_name}```')
@@ -195,7 +209,14 @@ class economy(commands.Cog):
                         user_v = funs.time_end(i[1]['voice_time'])
                         user_name = ctx.guild.get_member(int(i[0]))
                         if met == 'tel':
-                            text = text + f'{num1}. {user_name}: {user_v}\n'
+                            if num1 == 1:
+                                text += '<:gold_s:929729448746549308> '
+                            elif num1 == 2:
+                                text += '<:silver_s:929729593286484029> '
+                            elif num1 == 3:
+                                text += '<:bronze_s:929729607836520448> '
+
+                            text += f'**#{num1}. {user_name}:\nВремя:** {user_v}\n\n'
                         if met == 'pc':
                             emb.add_field(name = '```        Место        ```', value = f'```{num1}```')
                             emb.add_field(name = '```             Имя             ```', value = f'```{user_name}```')
@@ -211,14 +232,21 @@ class economy(commands.Cog):
                             user_lvl = i[1]['lvl']
                             user_name = ctx.guild.get_member(int(i[0]))
                             if met == 'tel':
-                                text = text + f'{num1}. {user_name}: {user_lvl} lvl\n'
+                                if num1 == 1:
+                                    text += '<:gold_s:929729448746549308> '
+                                elif num1 == 2:
+                                    text += '<:silver_s:929729593286484029> '
+                                elif num1 == 3:
+                                    text += '<:bronze_s:929729607836520448> '
+
+                                text += f'**#{num1}. {user_name}\nУровень:** {user_lvl} <:lvl:886876034149011486>\n\n'
                             if met == 'pc':
                                 emb.add_field(name = '```       Место       ```', value = f'```{num1}```')
                                 emb.add_field(name = '```         Имя         ```', value = f'```{user_name}```')
                                 emb.add_field(name = '```    Уровень    ```', value = f'```{user_lvl}```')
 
                 elif topname == 'money':
-                    emb = discord.Embed(title = 'Топ лидеров по наличным', description = '',color=0x450fa8)
+                    emb = discord.Embed(title = 'Топ лидеров по монетам', description = '',color=0x450fa8)
                     for i in top:
                         num1 += 1
                         if num1 >= numberpage and num2 < 5:
@@ -226,7 +254,14 @@ class economy(commands.Cog):
                             user_m = i[1]['money']
                             user_name = ctx.guild.get_member(int(i[0]))
                             if met == 'tel':
-                                text = text + f'{num1}. {user_name}: {user_m}{cc}\n'
+                                if num1 == 1:
+                                    text += '<:gold_s:929729448746549308> '
+                                elif num1 == 2:
+                                    text += '<:silver_s:929729593286484029> '
+                                elif num1 == 3:
+                                    text += '<:bronze_s:929729607836520448> '
+
+                                text += f'**#{num1}. {user_name}\nМонеты:** {user_m}{cc}\n\n'
                             if met == 'pc':
                                 emb.add_field(name = '```        Место        ```', value = f'```{num1}```')
                                 emb.add_field(name = '```             Имя             ```', value = f'```{user_name}```')
@@ -241,14 +276,21 @@ class economy(commands.Cog):
                             user_v = funs.time_end(i[1]['voice_time'])
                             user_name = ctx.guild.get_member(int(i[0]))
                             if met == 'tel':
-                                text = text + f'{num1}. {user_name}: {user_v}\n'
+                                if num1 == 1:
+                                    text += '<:gold_s:929729448746549308> '
+                                elif num1 == 2:
+                                    text += '<:silver_s:929729593286484029> '
+                                elif num1 == 3:
+                                    text += '<:bronze_s:929729607836520448> '
+
+                                text += f'**#{num1}. {user_name}:\nВремя:** {user_v}\n\n'
                             if met == 'pc':
                                 emb.add_field(name = '```        Место        ```', value = f'```{num1}```')
                                 emb.add_field(name = '```             Имя             ```', value = f'```{user_name}```')
                                 emb.add_field(name = '```     Активность     ```', value = f'```{user_v}```')
 
             if met == 'tel':
-                emb.add_field(name = '_____', value = text)
+                emb.add_field(name = '`_ _`', value = text)
             emb.set_footer(text=f"Страница {page}/{l}")
             emb.set_thumbnail(url = "https://img.icons8.com/nolan/2x/prize.png")
             return emb
