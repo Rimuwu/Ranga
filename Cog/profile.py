@@ -259,11 +259,11 @@ class profile(commands.Cog):
 
         reaction = 'a'
 
-        if user['inv'] == {}:
+        if user['inv'] == []:
             emb_i = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь', description = 'Тут пусто 🔎',color=0xf03e65)
             pages = [emb_i]
 
-        elif user['inv'] != {}:
+        elif user['inv'] != []:
 
             inv = {}
 
