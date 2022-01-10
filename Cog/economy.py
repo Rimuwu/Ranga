@@ -290,7 +290,7 @@ class economy(commands.Cog):
                                 emb.add_field(name = '```     Активность     ```', value = f'```{user_v}```')
 
             if met == 'tel':
-                emb.add_field(name = '`_ _`', value = text)
+                emb.add_field(name = '_ _', value = text)
             emb.set_footer(text=f"Страница {page}/{l}")
             emb.set_thumbnail(url = "https://img.icons8.com/nolan/2x/prize.png")
             return emb
