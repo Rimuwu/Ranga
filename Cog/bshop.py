@@ -29,7 +29,7 @@ class bs(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=['backshop','backgrounds','bs','bgshop','bg','бс'], usage = '(number)', description = 'Покупка фонов для профиля')
+    @commands.command(aliases=['backshop','backgrounds','bs','bgshop','bg','бс'], usage = '[number]', description = 'Покупка фонов для профиля')
     async def bshop(self,ctx, number:int = 0):
 
         bs = list(backs.find())

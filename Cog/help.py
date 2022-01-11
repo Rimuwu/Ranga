@@ -60,146 +60,89 @@ class help(commands.Cog):
                             except:
                                 cogs[c.cog_name].update({ c.help: [c] })
 
-
-            sections = {
-            'bs': 'Фоны',
-            'clubs': 'Клубы',
-            'economy': 'Экономика',
-            'info': 'Информация',
-            'mod': 'Модерация',
-            'profile': 'Профиль',
-            'reactions': 'Реакции',
-            'remain': 'Остальное',
-            'rpg': 'Продвинутая экономика',
-            'settings': 'Настройки',
-            'voice': 'Управление приватками'
+            ct_d = {
+            'bs': ['🖼', 'Фоны', 'Команды относящиеся к покупке и установке фонов.'],
+            'clubs': ['🏰', 'Клубы', 'Команды относящиеся к управлению / настройке клубов.'],
+            'economy': ['<:pokecoin:780356652359745537>', 'Экономика', 'Команды относящиеся к экономике. Игры, магазин, взаимодействие.'],
+            'info': ['🧾', 'Информация', 'Команды для получения информации о сервере и пользователях.'],
+            'mod': ['🔑', 'Модерация', 'Команды для управления пользователями и наказаниями.'],
+            'profile': ['🎴', 'Профиль', 'Команды для просмотра профиля и взаимодействия с ним.'],
+            'reactions': ['☠', 'Реакции', 'RP (role play) реакции для более живого общения!'],
+            'remain': ['🥢', 'Команды без категории', 'Команды которые не нашли себе место среди других.'],
+            'rpg': ['🏹', 'РПГ', 'Команды для настройки и игры в РПГ.'],
+            'settings': ['🔧', 'Настройки', 'Команды для управления всеми системами бота.'],
+            'voice': ['🔊', 'Управление приватками', 'Команды для управления приватными войс каналами.'],
             }
 
-            s_keys = sorted(cogs.keys())
+            for c in ct_d:
+                i = ct_d[c]
+                emb.add_field( name = f'{i[0]} | {i[1]}', value = i[2], inline = True  )
 
-            for key in s_keys:
-                commands = []
-                if len(cogs[key].keys()) > 1:
-                    for k in cogs[key].keys():
-                        if k != 'commands':
-                            for c in cogs[key][k]:
-                                commands.append(c.name)
+            options = []
+            options.append(discord.SelectOption(label = "Главная", emoji = "🍡" ))
+            for cc in ct_d.keys():
+                if cc != 'clubs': #так как все в комментариях, по факту для бота не существует такой категории
+                    i = ct_d[cc]
+                    options.append(discord.SelectOption(label = i[1], emoji = i[0] ))
 
-                for i in cogs[key]["commands"]:
-                    commands.append(i.name)
-
-
-                text = ''
-                text2 = ''
-
-                for i in sorted(commands):
-                    if len(text) > 1000:
-                        text2 += f' `{i}` \n'
-                    else:
-                        text += f' `{i}` \n'
-
-                emb.add_field( name = f'{sections[key]}', value= f"{text}", inline = True  )
-
-                if text2 != '':
-                    emb.add_field( name = f'{sections[key]} 2', value= f"{text2}", inline = True  )
-
-            emb.set_footer(text = 'Для просмотра информации по категориям кликайте ◀ ▶')
-            msg = await ctx.send(embed = emb)
-
-            def embed(number):
-                nonlocal sections
-                nonlocal s_keys
+            def embed(c_n):
+                nonlocal ct_d
                 nonlocal cogs
-                nonlocal server
                 nonlocal ctx
-                cog = cogs[s_keys[number]]
-                text = ''
+                nonlocal emb
 
-                for i in cog['commands']:
-                    text += f'{ctx.prefix}{i} {i.usage}\n\n'
+                if c_n == 'Главная':
+                    semb = emb
 
-                emb = discord.Embed(title = sections[s_keys[number]] , description = f"**Для просмотра подробной информации пропишите {ctx.prefix}help (command)**\n\n{text}" ,color=server['embed_color'])
-
-                if len(cog.keys()) != 1:
-                    for i in cog.keys():
-                        if i != 'commands':
-                            t = ''
-                            for n in cog[i]:
-                                t += f'{ctx.prefix}{n} {n.usage}\n\n'
-                            emb.add_field( name = f'{i}', value= f"{t}", inline = True  )
-
-                if number + 1 == len(s_keys):
-                    ss = 0
                 else:
-                    ss = number + 1
+                    for i in ct_d:
+                        c = ct_d[i]
+                        if c[1] == c_n:
+                            i_l = c
+                            cog = cogs[i]
 
-                if number - 1 == 0:
-                    s = len(s_keys) - 1
-                else:
-                    s = number - 1
+                    text = ''
 
-                emb.set_footer(text = f'Кликайте ({sections[s_keys[s]]}) ◀ ▶ ({sections[s_keys[ss]]}) [{s_keys.index(s_keys[number]) +1} | {len(s_keys)}]')
-                emb.add_field( name = f'Инфорация об аргументах', value= f"Скобки при использовании команды указывать НЕ НАДО\n() - обязательный аргумент\n[] - необзательный аргумент\n / - выберите одно из двух\n<= меньше или равно\n", inline = True  )
+                    for i in cog['commands']:
+                        text += f'{ctx.prefix}{i} {i.usage}\n\n'
 
+                    semb = discord.Embed(title = f'{i_l[0]} | {i_l[1]}', description = f"{i_l[2]}\nДля просмотра подробной информации о команде, пропишите\n {ctx.prefix}help (command)\n\n{text}" ,color=server['embed_color'])
 
-                return emb
+                    if len(cog.keys()) != 1:
+                        for i in cog.keys():
+                            if i != 'commands':
+                                t = ''
+                                for n in cog[i]:
+                                    t += f'{ctx.prefix}{n} {n.usage}\n\n'
+                                semb.add_field( name = f'{i}', value= f"{t}", inline = True  )
 
-            solutions = ['◀', '▶', '❌']
-            member = ctx.author
-            reaction = 'a'
+                    semb.add_field( name = f'Инфорация об аргументах', value= f"Скобки при использовании команды указывать НЕ НАДО\n() - обязательный аргумент\n[] - необзательный аргумент\n / - выберите одно из двух\n<= меньше или равно\n", inline = True  )
 
-            number = -1
+                return semb
 
-            def check( reaction, user):
-                nonlocal msg
-                return user == ctx.author and str(reaction.emoji) in solutions and str(reaction.message) == str(msg)
+            class Dropdown(discord.ui.Select):
+                def __init__(self, ctx, msg, options, placeholder, min_values, max_values:int, rem_args):
+                    super().__init__(placeholder=placeholder, min_values=min_values, max_values=min_values, options=options)
 
-            async def rr():
-                nonlocal reaction
-                nonlocal number
-                nonlocal s_keys
+                async def callback(self, interaction: discord.Interaction):
+                    if ctx.author.id == interaction.user.id:
+                        await msg.edit(embed = embed(self.values[0]))
 
-                if str(reaction.emoji) == '◀':
-                    await msg.remove_reaction('◀', member)
-                    number -= 1
-                    if number > 0:
-                        await msg.edit(embed = embed(number))
-                        await reackt()
                     else:
-                        number = len(s_keys) -1
-                        await msg.edit(embed = embed(number))
-                        await reackt()
+                        await interaction.response.send_message(f'Жми на свои кнопки!', ephemeral = True)
 
-                elif str(reaction.emoji) == '▶':
-                    await msg.remove_reaction('▶', member)
-                    number += 1
-                    if number == len(s_keys):
-                        number = 0
-                        await msg.edit(embed = embed(number))
-                        await reackt()
-                    else:
-                        await msg.edit(embed = embed(number))
-                        await reackt()
 
-                elif str(reaction.emoji) == '❌':
-                    await msg.clear_reactions()
-                    return
+            class DropdownView(discord.ui.View):
+                def __init__(self, ctx, msg, options:list, placeholder:str, min_values:int = 1, max_values:int = 1, timeout: float = 120.0, rem_args:list = []):
+                    super().__init__(timeout=timeout)
+                    self.add_item(Dropdown(ctx, msg, options, placeholder, min_values, max_values, rem_args))
 
-            async def reackt():
-                nonlocal reaction
-                try:
-                    reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check = check)
-                except asyncio.TimeoutError:
-                    await msg.clear_reactions()
-                    return
-                else:
-                    await rr()
-            try:
-                for x in solutions:
-                    await msg.add_reaction(x)
-                await reackt()
-            except:
-                return
+                async def on_timeout(self):
+                    self.stop()
+                    await msg.edit(view = None)
+
+            msg = await ctx.send(embed = emb)
+            await msg.edit(view=DropdownView(ctx, msg, options = options, placeholder = '❓ | Выберите категорию', min_values = 1, max_values=1, timeout = 120.0, rem_args = []))
 
 
 def setup(bot):
