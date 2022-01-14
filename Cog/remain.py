@@ -122,6 +122,39 @@ class remain(commands.Cog):
 
         await mid.edit(content = mid.content, view= url_button(url, emoji, label))
 
+    @commands.command(hidden = True)
+    async def tt(self, ctx):
+
+        class Dropdown(discord.ui.Select):
+            def __init__(self, ctx, msg, options, placeholder, min_values, max_values:int, rem_args):
+                #options.append(discord.SelectOption(label=f''))
+
+                super().__init__(placeholder=placeholder, min_values=min_values, max_values=min_values, options=options)
+
+            async def callback(self, interaction: discord.Interaction):
+                if ctx.author.id == interaction.user.id:
+                    self.view.stop()
+                    await interaction.response.send_message(f'ок, {self.values[0]}', ephemeral = True)
+
+                else:
+                    await interaction.response.send_message(f'Жми на свои кнопки!', ephemeral = True)
+
+
+        class DropdownView(discord.ui.View):
+            def __init__(self, ctx, msg, options:list, placeholder:str, min_values:int = 1, max_values:int = 1, timeout: float = 20.0, rem_args:list = []):
+                super().__init__(timeout=timeout)
+                self.add_item(Dropdown(ctx, msg, options, placeholder, min_values, max_values, rem_args))
+
+            async def on_timeout(self):
+                await msg.edit(view = None)
+
+        options = []
+        for i in list(range(1,26)):
+            options.append(discord.SelectOption(label=i))
+
+        msg = await ctx.send('-')
+        await msg.edit(view=DropdownView(ctx, msg, options = options, placeholder = 'Сделайте выбор...', min_values = 1, max_values=1, timeout = 20.0, rem_args = []))
+
     #
     # @commands.command(hidden = True)
     # async def test(self, ctx, member: discord.Member, time:int):
@@ -152,23 +185,6 @@ class remain(commands.Cog):
     #
     #     await ctx.send('Pick your favourite colour:', view=DropdownView())
 
-    # @commands.command(hidden = True)
-    # async def t(self, ctx):
-    #
-    #     user = funs.user_check(ctx.author, ctx.guild)
-    #     server = servers.find_one({"server": ctx.guild.id})
-    #
-    #     tl = [x['name'] for x in user['inv']] * 3
-    #
-    #     def chunks(lst, n):
-    #         for i in range(0, len(lst), n):
-    #             yield lst[i:i + n]
-    #
-    #     nl = chunks(tl, 50)
-    #
-    #     pprint.pprint(list(nl))
-    #
-    #
 
 
 

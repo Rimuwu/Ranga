@@ -2749,7 +2749,7 @@ class settings(commands.Cog):
         for i in channel:
             wl.append(i.id)
 
-        server['mod']['flud_ch_nor'].append(wl)
+        server['mod']['flud_ch_nor'] = wl
         servers.update_one({'server':ctx.guild.id},{'$set':{'mod': server['mod']}})
         await ctx.send("Каналы были настроены!")
 

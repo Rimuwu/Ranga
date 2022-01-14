@@ -23,10 +23,10 @@ class help(commands.Cog):
         self.bot = bot
 
     @commands.command(aliases=["помощь", "h", "рудз", 'хелп'], description='Команда помощи.')
-    async def help(self,ctx, command = None):
+    async def help(self, ctx, *, command = None):
         server = servers.find_one({'server':ctx.guild.id})
         if command != None:
-            com = self.bot.get_command(command)
+            com = self.bot.get_command("".join(command))
             if com != None:
                 if com.aliases != []:
                     text = f'{com.description}\n**Другие названия:** {", ".join(com.aliases)}'

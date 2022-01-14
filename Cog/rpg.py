@@ -2051,27 +2051,30 @@ class rpg(commands.Cog):
         if len(inv) > 1:
 
             class Dropdown(discord.ui.Select):
-                def __init__(self, inv, ctx, msg, emb):
-                    options = []
-                    for k in inv:
-                        options.append(discord.SelectOption(label=f'{k}'))
+                def __init__(self, ctx, msg, options, placeholder, min_values, max_values:int, rem_args):
+                    #options.append(discord.SelectOption(label=f''))
 
-                    super().__init__(placeholder='Выберите используемый предмет...', min_values=1, max_values=1, options=options)
+                    super().__init__(placeholder=placeholder, min_values=min_values, max_values=min_values, options=options)
+                    inv = rem_args[0]
 
                 async def callback(self, interaction: discord.Interaction):
                     if ctx.author.id == interaction.user.id:
-
-                        await inf(inv[self.values[0]]['it'], msg)
+                        print(self.values[0])
                         self.view.stop()
+                        await inf(inv[self.values[0]]['it'], msg)
+
 
                     else:
                         await interaction.response.send_message(f'Откройте свой инвентарь!', ephemeral = True)
 
 
             class DropdownView(discord.ui.View):
-                def __init__(self, inv, ctx, msg, emb):
-                    super().__init__()
-                    self.add_item(Dropdown(inv, ctx, msg, emb))
+                def __init__(self, ctx, msg, options:list, placeholder:str, min_values:int = 1, max_values:int = 1, timeout: float = 20.0, rem_args:list = []):
+                    super().__init__(timeout=timeout)
+                    self.add_item(Dropdown(ctx, msg, options, placeholder, min_values, max_values, rem_args))
+
+                async def on_timeout(self):
+                    await msg.edit(view = None)
 
             text = ''
             n = 0
@@ -2080,9 +2083,14 @@ class rpg(commands.Cog):
                 n += 1
                 text += f'{n}# {k} x{i["count"]}\n'
 
+            options = []
+            for k in inv:
+                options.append(discord.SelectOption(label=f'{k}', emoji = inv[k]['it']['emoji']))
+
             emb = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь', description = f'В инвентаре найдено несколько совпадений:\n{text}', color=server['embed_color'])
             msg = await ctx.send(embed = emb)
-            await msg.edit(embed = emb, view=DropdownView(inv, ctx, msg, emb))
+
+            await msg.edit(view=DropdownView(ctx, msg, options = options, placeholder = 'Сделайте выбор...', min_values = 1, max_values=1, timeout = 20.0, rem_args = [inv, emb]))
 
 
 

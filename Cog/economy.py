@@ -1130,7 +1130,6 @@ class economy(commands.Cog):
 
         emb = discord.Embed(title = f"Ежедневный котик", description = f"<:foot:779718609177411635> Ежедневный котик принёс вам: {u_r}{server['economy']['currency']}\n{text}", color=server['embed_color'])
         emb.set_image(url=url)
-        emb.set_thumbnail(url= 'https://i.pinimg.com/originals/94/14/3b/94143bc201d8b4942c252a19c0db605c.gif')
         await ctx.send(embed = emb)
 
         funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] + u_r)
