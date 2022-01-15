@@ -170,7 +170,7 @@ class profile(commands.Cog):
         except:
             s_emb = discord.Embed(description = 'Статус: Предзагрузка завершена.\nРабота над: Получение изображения\nОшибка: Изображение не получено',color=0xf03e65)
             s_emb.set_image(url="https://insurein.ru/wp-content/uploads/2018/02/oshibka.jpg")
-            msg = await ctx.send(embed=s_emb)
+            await edit.msg(embed=s_emb)
             return
 
 
