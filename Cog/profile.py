@@ -148,20 +148,30 @@ class profile(commands.Cog):
         t = dict(sorted(server['users'].items(),key=lambda x: x[1]['voice_time'], reverse=True))
         topvoice = list(t.keys()).index(str(member.id)) +1
 
+        s_emb = discord.Embed(description = 'Статус: Предзагрузка завершена.\nРабота над: Получение изображения',color=0xf03e65)
+        s_emb.set_image(url="https://i0.wp.com/heisenbergreport.com/wp-content/uploads/2018/10/ezgif.com-resize-2.gif?fit=800%2C400&ssl=1")
+        msg = await ctx.send(embed=s_emb)
+
         alpha = Image.open('elements/alpha.png')
 
-        if bc['format'] == "png" :
+        try:
+            if bc['format'] == "png" :
 
-            response = requests.get(url, stream = True)
-            response = Image.open(io.BytesIO(response.content))
-            response = response.convert("RGBA")
-            img = response.resize((800, 400), Image.ANTIALIAS) # улучшение качества
+                response = requests.get(url, stream = True)
+                response = Image.open(io.BytesIO(response.content))
+                response = response.convert("RGBA")
+                img = response.resize((800, 400), Image.ANTIALIAS) # улучшение качества
 
-        if bc['format'] == "gif":
+            if bc['format'] == "gif":
 
-            response = requests.get(url, stream=True)
-            response.raw.decode_content = True
-            img = Image.open(response.raw)
+                response = requests.get(url, stream=True)
+                response.raw.decode_content = True
+                img = Image.open(response.raw)
+        except:
+            s_emb = discord.Embed(description = 'Статус: Предзагрузка завершена.\nРабота над: Получение изображения\nОшибка: Изображение не получено',color=0xf03e65)
+            s_emb.set_image(url="https://insurein.ru/wp-content/uploads/2018/02/oshibka.jpg")
+            msg = await ctx.send(embed=s_emb)
+            return
 
 
         mask = Image.new('L',(800, 400))
@@ -256,6 +266,10 @@ class profile(commands.Cog):
 
         embed = discord.Embed(color=0xf03e65)
         embed.set_author(name = ctx.author, url = ctx.author.avatar.url)
+
+        s_emb = discord.Embed(description = 'Статус: Изображение получено.\nРабота над: Инвентарь',color=0xf03e65)
+        s_emb.set_image(url= 'https://images-ext-2.discordapp.net/external/WP1Bq4Oy8xzNSPfCpM1lWnP3Qv_6C75lnMXwhw2XiHA/%3Ffit%3D800%252C400%26ssl%3D1/https/i0.wp.com/heisenbergreport.com/wp-content/uploads/2018/10/ezgif.com-resize-2.gif')
+        await msg.edit(embed=s_emb)
 
         reaction = 'a'
 
@@ -412,6 +426,10 @@ class profile(commands.Cog):
 
             emb_s.add_field(name="<:p_backpack:886909262712930325> | Снаряжение", value=f'Оружие: {weapon}\n<:armor:827220888130682880> | {armor}\n<:pet1:886919865544368158> | {pet}')
 
+        s_emb = discord.Embed(description = 'Статус: Загрузка инвентаря завершена\nРабота над: Генерация картинки',color=0xf03e65)
+        s_emb.set_image(url= 'https://images-ext-2.discordapp.net/external/WP1Bq4Oy8xzNSPfCpM1lWnP3Qv_6C75lnMXwhw2XiHA/%3Ffit%3D800%252C400%26ssl%3D1/https/i0.wp.com/heisenbergreport.com/wp-content/uploads/2018/10/ezgif.com-resize-2.gif')
+        await msg.edit(embed = s_emb)
+
 
         if bc['format'] == "png":
             img = bl_f(img)
@@ -428,6 +446,7 @@ class profile(commands.Cog):
             for e in pages:
                 e.set_image(url="attachment://user_card.png")
 
+            atach = "attachment://user_card.png"
             emb_s.set_image(url="attachment://user_card.png")
 
         else:
@@ -451,12 +470,13 @@ class profile(commands.Cog):
             fs[0].save('user_card.gif', save_all=True, append_images=fs[1:], loop = 0, optimize=True, quality=75)
 
             file = discord.File(fp = "user_card.gif", filename="user_card.gif")
+            atach = "attachment://user_card.gif"
             for e in pages:
                 e.set_image(url="attachment://user_card.gif")
             emb_s.set_image(url="attachment://user_card.gif")
 
-
-        msg = await ctx.send(file=file, embed=emb_s)
+        await msg.delete()
+        msg = await ctx.send( embed=emb_s, file = file)
 
         try:
             os.remove('user_card.gif')
