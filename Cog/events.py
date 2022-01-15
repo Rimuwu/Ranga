@@ -1311,10 +1311,13 @@ class MainCog(commands.Cog):
                     try:
                         channel2 = await after.channel.guild.create_voice_channel(name=f"{r} {member.display_name}",category=mainCategory)
                         voice['private_voices'].update({f"{channel2.id}": member.id})
-
-                        servers.update_one({'server': server['server']},{'$set': {'voice': voice}})
-                        await member.move_to(channel2)
-                        await channel2.set_permissions(member, manage_channels=True, mute_members=True, deafen_members=True, manage_permissions=True)
+                        try:
+                            await member.move_to(channel2)
+                        except:
+                            await channel2.delete()
+                        else:
+                            servers.update_one({'server': server['server']},{'$set': {'voice': voice}})
+                            await channel2.set_permissions(member, manage_channels=True, mute_members=True, deafen_members=True, manage_permissions=True)
                     except Exception:
                         pass
 

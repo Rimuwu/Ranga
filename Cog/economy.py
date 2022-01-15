@@ -1408,18 +1408,14 @@ class economy(commands.Cog):
         if repet < 0:
             await ctx.send('Укажите число повторных игр больше 0!')
 
+        ar = amout * repet
+        funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - ar)
+
         def r(list, n1, n2, n3):
             if list[n1] == list[n2] and list[n2] == list[n3]:
                 return True
             else:
                 return False
-
-        def p_w(list, n1, n2, n3):
-            if list[n1] == list[n2] or list[n1] == list[n2] or list[n2] == list[n3]:
-                if list[n1] == list[n2] and list[n2] == list[n3]:
-                    return False
-                else:
-                    return True
 
         slots = ['🍡','🍬','🍧','🍭','🍱','🍫','🍩']*5
         random.shuffle(slots)
@@ -1449,31 +1445,22 @@ class economy(commands.Cog):
             elif r(user_slots, 2,4,6) == True:
                 win = True
 
-            elif p_w(user_slots, 0,1,2) == True:
-                p_win = True
-            elif p_w(user_slots, 3,4,5) == True:
-                p_win = True
-            elif p_w(user_slots, 6,7,8) == True:
-                p_win = True
-
             text = f'[  |  SLOTS  |  ]\n {s[0]} | {s[1]} | {s[2]} \n\n {s[3]} | {s[4]} | {s[5]} \n\n {s[6]} | {s[7]} | {s[8]} \n| -------------- |\n\n'
 
             if win == True:
-                funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - amout)
                 text += f"Вы сорвали куш! Ваша награда составляет {int(amout * server['economy']['games']['slots']['percent'])}{server['economy']['currency']}"
-                funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] + int(amout * server['economy']['games']['slots']['percent']))
-            elif p_win == True:
-                text += f'Вы выбили 2 из 3, монеты остаются у вас!'
+
+                funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - ar + int(amout * server['economy']['games']['slots']['percent']))
+
             else:
                 text += 'Вы проиграли!'
-                funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - amout)
 
             await ctx.send(text)
 
         if repet > 1:
             wins = 0
             p_wins = 0
-            u_money = amout * repet
+            u_money = 0 #amout * repet
             for i in range(repet):
                 slots = ['🍡','🍬','🍧','🍭','🍱','🍫','🍩']*5
                 random.shuffle(slots)
@@ -1506,19 +1493,9 @@ class economy(commands.Cog):
                     wins += 1
                     u_money += int(amout * server['economy']['games']['slots']['percent'])
 
-                elif p_w(user_slots, 0,1,2) == True:
-                    p_wins += 1
-                elif p_w(user_slots, 3,4,5) == True:
-                    p_wins += 1
-                elif p_w(user_slots, 6,7,8) == True:
-                    p_wins += 1
-                else:
-                    u_money -= amout
-
-            emd = discord.Embed(title = f"Слоты", description = f"Побед: {wins}\nИгры без потерь: {p_wins}\nПроигрыши: {repet - wins - p_wins}\nВозрат монет: {u_money}", color=server['embed_color'])
+            emd = discord.Embed(title = f"Слоты", description = f"Побед: {wins}\nПроигрыши: {repet - wins - p_wins}\nВозрат монет: {u_money}", color=server['embed_color'])
             await ctx.send(embed = emd)
-            funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - (amout * repet))
-            funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] + u_money)
+            funs.user_update(ctx.author.id, ctx.guild, 'money', user['money'] - ar + u_money)
 
     @commands.command(usage = '(number) (money) (@member)', description = 'Игра в шанс.', help = 'Игры', aliases = ['шанс', 'duel'])
     async def chance(self, ctx, number:int = None, money:int = None, member:discord.Member = None ):
