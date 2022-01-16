@@ -125,35 +125,42 @@ class remain(commands.Cog):
     @commands.command(hidden = True)
     async def tt(self, ctx):
 
-        class Dropdown(discord.ui.Select):
-            def __init__(self, ctx, msg, options, placeholder, min_values, max_values:int, rem_args):
-                #options.append(discord.SelectOption(label=f''))
-
-                super().__init__(placeholder=placeholder, min_values=min_values, max_values=min_values, options=options)
-
-            async def callback(self, interaction: discord.Interaction):
-                if ctx.author.id == interaction.user.id:
-                    self.view.stop()
-                    await interaction.response.send_message(f'ок, {self.values[0]}', ephemeral = True)
-
-                else:
-                    await interaction.response.send_message(f'Жми на свои кнопки!', ephemeral = True)
-
-
-        class DropdownView(discord.ui.View):
-            def __init__(self, ctx, msg, options:list, placeholder:str, min_values:int = 1, max_values:int = 1, timeout: float = 20.0, rem_args:list = []):
-                super().__init__(timeout=timeout)
-                self.add_item(Dropdown(ctx, msg, options, placeholder, min_values, max_values, rem_args))
-
-            async def on_timeout(self):
-                await msg.edit(view = None)
+        # class Dropdown(discord.ui.Select):
+        #     def __init__(self, ctx, msg, options, placeholder, min_values, max_values:int, rem_args):
+        #         #options.append(discord.SelectOption(label=f''))
+        #
+        #         super().__init__(placeholder=placeholder, min_values=min_values, max_values=min_values, options=options)
+        #
+        #     async def callback(self, interaction: discord.Interaction):
+        #         if ctx.author.id == interaction.user.id:
+        #             await interaction.response.send_message(f'ок, {self.values[0]}', ephemeral = True)
+        #
+        #         else:
+        #             await interaction.response.send_message(f'Жми на свои кнопки!', ephemeral = True)
+        #
+        #
+        # class DropdownView(discord.ui.View):
+        #     def __init__(self, ctx, msg, options:list, placeholder:str, min_values:int = 1, max_values:int = 1, timeout: float = 20.0, rem_args:list = []):
+        #         super().__init__(timeout=timeout)
+        #         self.add_item(Dropdown(ctx, msg, options, placeholder, min_values, max_values, rem_args))
+        #
+        #     async def on_timeout(self):
+        #         self.stop()
+        #         await msg.edit(view = None)
+        #
+        # options = []
+        # for i in list(range(1,26)):
+        #     options.append(discord.SelectOption(label=i))
+        #
+        # msg = await ctx.send('-')
+        # await msg.edit(view=DropdownView(ctx, msg, options = options, placeholder = 'Сделайте выбор...', min_values = 1, max_values=1, timeout = 20.0, rem_args = []))
 
         options = []
         for i in list(range(1,26)):
             options.append(discord.SelectOption(label=i))
 
-        msg = await ctx.send('-')
-        await msg.edit(view=DropdownView(ctx, msg, options = options, placeholder = 'Сделайте выбор...', min_values = 1, max_values=1, timeout = 20.0, rem_args = []))
+        msg = await ctx.send('-' )
+        print(msg.components)
 
     #
     # @commands.command(hidden = True)
@@ -184,6 +191,36 @@ class remain(commands.Cog):
     #             self.add_item(Dropdown())
     #
     #     await ctx.send('Pick your favourite colour:', view=DropdownView())
+
+    @commands.command(hidden = True)
+    async def tr(self, ctx):
+        if ctx.author.id != 323512096350535680:
+            return
+
+
+        for i in list(range(0,172)): #list(range(0,172))
+            try:
+                bc = backs.find_one({"bid": i})
+                url = bc['url']
+
+                response = requests.get(url, stream = True)
+                response = Image.open(io.BytesIO(response.content))
+
+                image = response
+                output = BytesIO()
+                image.save(output, 'png')
+                image_pix=BytesIO(output.getvalue())
+
+                file = discord.File(fp = image_pix, filename=f"back.png")
+
+                msg = await ctx.send(file = file)
+                print(i, msg.attachments[0].url)
+                backs.update_one({"bid": i}, {"$set": {'link': bc['url'], 'url': msg.attachments[0].url}})
+            except:
+                pass
+
+
+
 
 
 
