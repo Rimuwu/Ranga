@@ -193,14 +193,14 @@ class remain(commands.Cog):
     #     await ctx.send('Pick your favourite colour:', view=DropdownView())
 
     @commands.command(hidden = True)
-    async def tr(self, ctx):
+    async def tr(self, ctx, arg1:int = -1, arg2:int = 172):
         if ctx.author.id != 323512096350535680:
             return
 
         print('запуск')
 
         er_l = []
-        for i in list(range(-1,172)):
+        for i in list(range(arg1, arg2)):
             try:
                 bc = backs.find_one({"bid": i})
                 url = bc['url']
