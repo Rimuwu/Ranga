@@ -197,8 +197,10 @@ class remain(commands.Cog):
         if ctx.author.id != 323512096350535680:
             return
 
+        print('запуск')
+
         er_l = []
-        for i in list(range(159,160)): #list(range(30,172))
+        for i in list(range(-1,172)):
             try:
                 bc = backs.find_one({"bid": i})
                 url = bc['url']
