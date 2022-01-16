@@ -198,23 +198,41 @@ class remain(commands.Cog):
             return
 
         er_l = []
-        for i in list(range(0,172)): #list(range(0,172))
+        for i in list(range(159,160)): #list(range(30,172))
             try:
                 bc = backs.find_one({"bid": i})
                 url = bc['url']
 
-                response = requests.get(url, stream = True)
-                response = Image.open(io.BytesIO(response.content))
+                if bc['format'] == 'png':
+                    response = requests.get(url, stream = True)
+                    response = Image.open(io.BytesIO(response.content))
 
-                image = response
-                output = BytesIO()
-                image.save(output, 'png')
-                image_pix=BytesIO(output.getvalue())
+                    image = response
+                    output = BytesIO()
+                    image.save(output, 'png')
+                    image_pix=BytesIO(output.getvalue())
 
-                file = discord.File(fp = image_pix, filename=f"back.png")
+                    file = discord.File(fp = image_pix, filename=f"back.png")
 
-                msg = await ctx.send(file = file)
+                else:
+                    fs = []
+                    response = requests.get(url, stream=True)
+                    response.raw.decode_content = True
+                    img = Image.open(response.raw)
+
+                    for frame in ImageSequence.Iterator(img):
+
+                        b = io.BytesIO()
+                        frame.save(b, format="GIF",optimize=True, quality=100)
+                        frame = Image.open(b)
+                        fs.append(frame)
+
+                    fs[0].save('back.gif', save_all=True, append_images=fs[1:], loop = 0, optimize=True, quality=100)
+                    file = discord.File(fp = "back.gif", filename="back.gif")
+
+                msg = await ctx.send(content = f'🖼 | Фон {i}', file = file)
                 print(i, msg.attachments[0].url)
+
                 backs.update_one({"bid": i}, {"$set": {'link': bc['url'], 'url': msg.attachments[0].url}})
             except:
                 er_l.append(i)
