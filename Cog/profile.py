@@ -154,24 +154,24 @@ class profile(commands.Cog):
 
         alpha = Image.open('elements/alpha.png')
 
-        try:
-            if bc['format'] == "png" :
+        # try:
+        if bc['format'] == "png" :
 
-                response = requests.get(url, stream = True)
-                response = Image.open(io.BytesIO(response.content))
-                response = response.convert("RGBA")
-                img = response.resize((800, 400), Image.ANTIALIAS) # улучшение качества
+            response = requests.get(url, stream = True)
+            response = Image.open(io.BytesIO(response.content))
+            response = response.convert("RGBA")
+            img = response.resize((800, 400), Image.ANTIALIAS) # улучшение качества
 
-            if bc['format'] == "gif":
+        if bc['format'] == "gif":
 
-                response = requests.get(url, stream=True)
-                response.raw.decode_content = True
-                img = Image.open(response.raw)
-        except:
-            s_emb = discord.Embed(description = 'Статус: Предзагрузка завершена.\nРабота над: Получение изображения\nОшибка: Изображение не получено',color=0xf03e65)
-            s_emb.set_image(url="https://insurein.ru/wp-content/uploads/2018/02/oshibka.jpg")
-            await msg.edit(embed=s_emb)
-            return
+            response = requests.get(url, stream=True)
+            response.raw.decode_content = True
+            img = Image.open(response.raw)
+        # except:
+        #     s_emb = discord.Embed(description = 'Статус: Предзагрузка завершена.\nРабота над: Получение изображения\nОшибка: Изображение не получено',color=0xf03e65)
+        #     s_emb.set_image(url="https://insurein.ru/wp-content/uploads/2018/02/oshibka.jpg")
+        #     await msg.edit(embed=s_emb)
+        #     return
 
 
         mask = Image.new('L',(800, 400))
