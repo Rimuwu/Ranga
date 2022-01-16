@@ -197,7 +197,7 @@ class remain(commands.Cog):
         if ctx.author.id != 323512096350535680:
             return
 
-
+        er_l = []
         for i in list(range(0,172)): #list(range(0,172))
             try:
                 bc = backs.find_one({"bid": i})
@@ -217,7 +217,10 @@ class remain(commands.Cog):
                 print(i, msg.attachments[0].url)
                 backs.update_one({"bid": i}, {"$set": {'link': bc['url'], 'url': msg.attachments[0].url}})
             except:
+                er_l.append(i)
                 pass
+
+        print(er_l)
 
 
 
