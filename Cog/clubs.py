@@ -59,6 +59,7 @@ class clubs(commands.Cog):
 
             try:
                 rpg_guild_id = name
+                server['rpg']['guilds'][rpg_guild_id]
 
             except:
                 name = "".join(name)
@@ -145,9 +146,11 @@ class clubs(commands.Cog):
             top_lvl = {"1": {'m': None, 'lvl': 0}, "2": {'m': None, 'lvl': 0}, "3": {'m': None, 'lvl': 0}}
             top_mon = {"1": {'m': None, 'money': 0}, "2": {'m': None, 'money': 0}, "3": {'m': None, 'money': 0}}
 
-            for g_u_id in rpg_guild['members'].keys():
-                u = ctx.author.guild.get_member(int(g_u_id))
-                guser = funs.user_check(u, ctx.author.guild)
+
+            for g_u_id in list(rpg_guild['members'].keys()):
+                u = ctx.guild.get_member(int(g_u_id))
+                print(u)
+                guser = funs.user_check(u, ctx.guild)
                 if guser['lvl'] > top_lvl['1']['lvl']:
                     top_lvl['1'] = {'m': u, 'lvl': guser['lvl']}
                 elif guser['lvl'] > top_lvl['2']['lvl']:
@@ -162,10 +165,25 @@ class clubs(commands.Cog):
                 elif guser['money'] > top_mon['3']['money']:
                     top_mon['3'] = {'m': u, 'money': guser['money']}
 
-            top_emb = discord.Embed(description = f"**📊 | Лидеры гильдии:**", color=0xf03e65)
-            top_emb.add_field(name = f"<:lvl:886876034149011486> | Лидеры по уровню", value = f"<:gold_s:929729448746549308> 1# {top_lvl['1']['m'].mention}\nУровень: {top_lvl['1']['lvl']}\n<:silver_s:929729593286484029> 2# {top_lvl['2']['m'].mention}\nУровень: {top_lvl['2']['lvl']}\n<:bronze_s:929729607836520448> 3# {top_lvl['3']['m'].mention}\nУровень: {top_lvl['3']['lvl']}\n", inline = True)
+            lvl_text = f"<:gold_s:929729448746549308> 1# {top_lvl['1']['m'].mention}\nУровень: {top_lvl['1']['lvl']}\n"
 
-            top_emb.add_field(name = f"<:pokecoin:780356652359745537> | Лидеры по монетам", value = f"<:gold_s:929729448746549308> 1# {top_mon['1']['m'].mention}\nМонеты: {top_mon['1']['money']}\n<:silver_s:929729593286484029> 2# {top_mon['2']['m'].mention}\nМонеты: {top_mon['2']['money']}\n<:bronze_s:929729607836520448> 3# {top_mon['3']['m'].mention}\nМонеты: {top_mon['3']['money']}\n", inline = True)
+            if top_lvl['2']['m'] != None:
+                lvl_text += f"<:silver_s:929729593286484029> 2# {top_lvl['2']['m'].mention}\nУровень: {top_lvl['2']['lvl']}\n"
+            if top_lvl['3']['m'] != None:
+                lvl_text += f"<:bronze_s:929729607836520448> 3# {top_lvl['3']['m'].mention}\nУровень: {top_lvl['3']['lvl']}"
+
+
+            top_emb = discord.Embed(description = f"**📊 | Лидеры гильдии:**", color=0xf03e65)
+            top_emb.add_field(name = f"<:lvl:886876034149011486> | Лидеры по уровню", value = lvl_text, inline = True)
+
+            money_text = f"<:gold_s:929729448746549308> 1# {top_mon['1']['m'].mention}\nМонеты: {top_mon['1']['money']}\n"
+
+            if top_mon['2']['m'] != None:
+                money_text += f"<:silver_s:929729593286484029> 2# {top_mon['2']['m'].mention}\nМонеты: {top_mon['2']['money']}\n"
+            if top_mon['3']['m'] != None:
+                money_text += f"<:bronze_s:929729607836520448> 3# {top_mon['3']['m'].mention}\nМонеты: {top_mon['3']['money']}"
+
+            top_emb.add_field(name = f"<:pokecoin:780356652359745537> | Лидеры по монетам", value = money_text, inline = True)
 
             # if rpg_guild['banner_url'] == None:
             #     url = 'https://cdn.discordapp.com/attachments/932577316649967678/932676860511420436/468ba62d-d841-4f48-8b42-f7b8a50ca2bf_Forgotten_Future___Web___Artstation.jpg'
