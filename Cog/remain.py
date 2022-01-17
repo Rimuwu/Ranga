@@ -191,56 +191,57 @@ class remain(commands.Cog):
     #             self.add_item(Dropdown())
     #
     #     await ctx.send('Pick your favourite colour:', view=DropdownView())
+    # 
+    # @commands.command(hidden = True)
+    # async def tr(self, ctx, arg1:int = -1, arg2:int = 172):
+    #     if ctx.author.id != 323512096350535680:
+    #         return
+    #
+    #     print('запуск')
+    #
+    #     er_l = []
+    #     for i in list(range(arg1, arg2)):
+    #         try:
+    #             bc = backs.find_one({"bid": i})
+    #             url = bc['url']
+    #
+    #             if bc['format'] == 'png':
+    #                 response = requests.get(url, stream = True)
+    #                 response = Image.open(io.BytesIO(response.content))
+    #
+    #                 image = response
+    #                 output = BytesIO()
+    #                 image.save(output, 'png')
+    #                 image_pix=BytesIO(output.getvalue())
+    #
+    #                 file = discord.File(fp = image_pix, filename=f"back.png")
+    #
+    #             else:
+    #                 fs = []
+    #                 response = requests.get(url, stream=True)
+    #                 response.raw.decode_content = True
+    #                 img = Image.open(response.raw)
+    #
+    #                 for frame in ImageSequence.Iterator(img):
+    #
+    #                     b = io.BytesIO()
+    #                     frame.save(b, format="GIF",optimize=True, quality=100)
+    #                     frame = Image.open(b)
+    #                     fs.append(frame)
+    #
+    #                 fs[0].save('back.gif', save_all=True, append_images=fs[1:], loop = 0, optimize=True, quality=100)
+    #                 file = discord.File(fp = "back.gif", filename="back.gif")
+    #
+    #             msg = await ctx.send(content = f'🖼 | Фон {i}', file = file)
+    #             print(i, msg.attachments[0].url)
+    #
+    #             backs.update_one({"bid": i}, {"$set": {'link': bc['url'], 'url': msg.attachments[0].url}})
+    #         except:
+    #             er_l.append(i)
+    #             pass
+    #
+    #     print(er_l)
 
-    @commands.command(hidden = True)
-    async def tr(self, ctx, arg1:int = -1, arg2:int = 172):
-        if ctx.author.id != 323512096350535680:
-            return
-
-        print('запуск')
-
-        er_l = []
-        for i in list(range(arg1, arg2)):
-            try:
-                bc = backs.find_one({"bid": i})
-                url = bc['url']
-
-                if bc['format'] == 'png':
-                    response = requests.get(url, stream = True)
-                    response = Image.open(io.BytesIO(response.content))
-
-                    image = response
-                    output = BytesIO()
-                    image.save(output, 'png')
-                    image_pix=BytesIO(output.getvalue())
-
-                    file = discord.File(fp = image_pix, filename=f"back.png")
-
-                else:
-                    fs = []
-                    response = requests.get(url, stream=True)
-                    response.raw.decode_content = True
-                    img = Image.open(response.raw)
-
-                    for frame in ImageSequence.Iterator(img):
-
-                        b = io.BytesIO()
-                        frame.save(b, format="GIF",optimize=True, quality=100)
-                        frame = Image.open(b)
-                        fs.append(frame)
-
-                    fs[0].save('back.gif', save_all=True, append_images=fs[1:], loop = 0, optimize=True, quality=100)
-                    file = discord.File(fp = "back.gif", filename="back.gif")
-
-                msg = await ctx.send(content = f'🖼 | Фон {i}', file = file)
-                print(i, msg.attachments[0].url)
-
-                backs.update_one({"bid": i}, {"$set": {'link': bc['url'], 'url': msg.attachments[0].url}})
-            except:
-                er_l.append(i)
-                pass
-
-        print(er_l)
 
 
 

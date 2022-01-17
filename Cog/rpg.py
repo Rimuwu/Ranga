@@ -2094,7 +2094,7 @@ class rpg(commands.Cog):
 
 
 
-    @commands.command(usage = '(id) [member]', description = 'Выдать предмет.')
+    @commands.command(usage = '(id) (r) [member]', description = 'Выдать предмет.')
     async def item_add(self, ctx, id:int, rp:int, member:discord.Member = None):
         if member == None:
             member = ctx.author

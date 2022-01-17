@@ -724,6 +724,7 @@ class MainCog(commands.Cog):
                         img = Image.open(response.raw)
 
                         alpha = Image.open('elements/alpha.png')
+                        alpha = alpha.resize((960, 470), Image.ANTIALIAS)
 
 
                     idraw = ImageDraw.Draw(alpha)
@@ -774,41 +775,41 @@ class MainCog(commands.Cog):
                     else:
                         idraw.text((tp1, tp2), f"{name}#{tag}", font = headline,fill = f"{server['welcome']['nam_fill']}")
 
+                    # try:
+
+                    url = str(member.avatar.url)
+
                     try:
+                        response1 = requests.get(url, stream = True)
+                        response1 = Image.open(io.BytesIO(response1.content))
 
-                        url = str(member.avatar.url)
+                    except Exception:
+                        byteImgIO = io.BytesIO()
+                        response = requests.get(url, stream = True)
+                        response.raw.decode_content = True
+                        response1 = Image.open(response.raw)
 
-                        try:
-                            response1 = requests.get(url, stream = True)
-                            response1 = Image.open(io.BytesIO(response1.content))
+                    response1 = response1.convert("RGB")
+                    response1 = response1.resize((200, 200), Image.ANTIALIAS)
 
-                        except Exception:
-                            byteImgIO = io.BytesIO()
-                            response = requests.get(url, stream = True)
-                            response.raw.decode_content = True
-                            response1 = Image.open(response.raw)
+                    im = response1
+                    im = crop(im, size)
+                    im.putalpha(prepare_mask(size, 4))
 
-                        response1 = response1.convert("RGB")
-                        response1 = response1.resize((200, 200), Image.ANTIALIAS)
+                    overlay_image = alpha.filter(ImageFilter.GaussianBlur(radius=15))
+                    if server['welcome']['el_fill'] == None:
+                        mask_image = make_ellipse_mask((960, 470), ap1 - 10, ap2 - 10, ap1 + size[0] + 10, ap2 + size[1] + 10, 1).resize((960, 470), Image.ANTIALIAS)
+                        alpha = Image.composite(overlay_image, alpha, mask_image)
+                    else:
+                        idraw.ellipse((ap1 - 10, ap2 - 10, ap1 + size[0] + 10, ap2 + size[1] + 10), fill = f"{server['welcome']['el_fill']}")
 
-                        im = response1
-                        im = crop(im, size)
-                        im.putalpha(prepare_mask(size, 4))
+                    #аватарка
+                    bg_img = alpha
+                    fg_img = im
+                    im = trans_paste(fg_img, bg_img, 1.0, (ap1, ap2, ap1 + size[0], ap2 + size[0]))
 
-                        overlay_image = alpha.filter(ImageFilter.GaussianBlur(radius=15))
-                        if server['welcome']['el_fill'] == None:
-                            mask_image = make_ellipse_mask((960, 470), ap1 - 10, ap2 - 10, ap1 + size[0] + 10, ap2 + size[1] + 10, 1)
-                            alpha = Image.composite(overlay_image, alpha, mask_image)
-                        else:
-                            idraw.ellipse((ap1 - 10, ap2 - 10, ap1 + size[0] + 10, ap2 + size[1] + 10), fill = f"{server['welcome']['el_fill']}")
-
-                        #аватарка
-                        bg_img = alpha
-                        fg_img = im
-                        im = trans_paste(fg_img, bg_img, 1.0, (ap1, ap2, ap1 + size[0], ap2 + size[0]))
-
-                    except:
-                        pass
+                    # except:
+                    #     pass
 
                     if server['welcome']['wel_text'] == None:
                         text = f"Welcome {name}#{tag} to {member.guild.name}"

@@ -8,6 +8,10 @@ import time
 import pymongo
 import pprint
 from fuzzywuzzy import fuzz
+import requests
+from PIL import Image, ImageFont, ImageDraw, ImageOps, ImageSequence, ImageFilter
+import io
+from io import BytesIO
 
 
 sys.path.append("..")
@@ -54,11 +58,7 @@ class clubs(commands.Cog):
         elif name != None:
 
             try:
-                name = int(name)
-                try:
-                    g_guild = guilds[str(name)]
-                except:
-                    pass
+                rpg_guild_id = name
 
             except:
                 name = "".join(name)
@@ -79,18 +79,6 @@ class clubs(commands.Cog):
             rpg_guild = server['rpg']['guilds'][rpg_guild_id]
             expnc = 5 * rpg_guild['lvl'] * rpg_guild['lvl'] + 50 * rpg_guild['lvl'] + 100
 
-
-            main_emb = discord.Embed(description = f"**🏰 | {rpg_guild['name']} #{rpg_guild['tag']}**",color=0xf03e65)
-            main_emb.add_field(name = '📰 | Описание:', value = f'{rpg_guild["bio"]}', inline = True)
-            main_emb.add_field(name = '🛡 | Статитстика:', value = f"<:lvl:886876034149011486> | Уровень: {rpg_guild['lvl']}\n🔼 | Опыт: {rpg_guild['exp']} / {expnc}", inline = True)
-            if rpg_guild['global_club'] == False:
-                main_emb.add_field(name = '🎈 | Доступность: Закрыт', value = f'❓ | В гильдию можно вступить только по приглашению админа / создателя!', inline = True)
-            if rpg_guild['global_club'] == True:
-                if rpg_guild['lvl_enter'] == 0:
-                    main_emb.add_field(name = '🎈 | Доступность: Открыт', value = f'❓ | Все могут вступить в данную гильдию.', inline = True)
-                else:
-                    main_emb.add_field(name = '🎈 | Доступность: Открыт', value = f"<:lvl:886876034149011486> | Минимальный уровень: {rpg_guild['lvl_enter']}\n❓ | Или по приглашению создателя / админа гильдии.", inline = True)
-
             for m in rpg_guild['members'].keys():
                 if rpg_guild['members'][m]['role'] == 'owner':
                     guild_owner = m
@@ -100,9 +88,183 @@ class clubs(commands.Cog):
                 ml = 'Отсутствует'
             else:
                 ml = rpg_guild['main_location']
-            main_emb.add_field(name = '<:recipe:827221967886745600> | Информация:', value = f"👑 | Создатель: <@{guild_owner}>\n👥 | Участников: `{len(rpg_guild['members'].keys())}` / `{rpg_guild['max_users']}`\n<:pokecoin:780356652359745537> | Хранилище монет: {rpg_guild['bank']}\n🗺 | Локация штаба: {ml}\n🗡 | Захваченных территорий: {len(rpg_guild['locations'])}", inline = True)
 
-            await ctx.send(embed = main_emb )
+            main_emb = discord.Embed(description = f"**🏰 | {rpg_guild['name']} #{rpg_guild['tag']}** ID: {rpg_guild_id}", color=0xf03e65)
+            main_emb.add_field(name = '<:recipe:827221967886745600> | Информация:', value = f"👑 | Создатель: <@{guild_owner}>\n👥 | Участников: `{len(rpg_guild['members'].keys())}` / `{rpg_guild['max_users']}`\n<:pokecoin:780356652359745537> | Хранилище монет: {rpg_guild['bank']}\n🗺 | Локация штаба: {ml}\n🗡 | Захваченных территорий: {len(rpg_guild['locations'])}", inline = True)
+            main_emb.add_field(name = '🛡 | Статитстика:', value = f"<:lvl:886876034149011486> | Уровень: {rpg_guild['lvl']}\n🔼 | Опыт: {rpg_guild['exp']} / {expnc}", inline = True)
+
+            main_emb.add_field(name = '📰 | Описание:', value = f'{rpg_guild["bio"]}', inline = False)
+            if rpg_guild['global_club'] == False:
+                main_emb.add_field(name = '🎈 | Доступность: Закрыт', value = f'❓ | В гильдию можно вступить только по приглашению админа / создателя!', inline = True)
+            if rpg_guild['global_club'] == True:
+                if rpg_guild['lvl_enter'] == 0:
+                    main_emb.add_field(name = '🎈 | Доступность: Открыт', value = f'❓ | Все могут вступить в данную гильдию.', inline = True)
+                else:
+                    main_emb.add_field(name = '🎈 | Доступность: Открыт', value = f"<:lvl:886876034149011486> | Минимальный уровень: {rpg_guild['lvl_enter']}\n❓ | Или по приглашению создателя / админа гильдии.", inline = True)
+
+            admin_list = []
+            rest_members = []
+
+            for mkey in rpg_guild['members'].keys():
+                mem = rpg_guild['members'][mkey]
+
+                if mem['role'] == 'admin':
+                    admin_list.append({mkey:'admin'})
+
+                elif mem['role'] == 'member':
+                    rest_members.append({mkey:'member'})
+
+            members_n = []
+            members_n += [{str(guild_owner): 'owner'}]
+            members_n += admin_list
+            members_n += rest_members
+
+            def chunks(lst, n):
+                for i in range(0, len(lst), n):
+                    yield lst[i:i + n]
+
+            members = list(chunks(members_n, 6))
+            emb_members_list = []
+
+            for l_m in members:
+                memb = discord.Embed(description = f"**👥 | Участники:**", color=0xf03e65)
+                for n in l_m:
+                    for m_key in list(n.keys()):
+                        # gl_member = server['users'][m_key]
+                        mrole = n[m_key]
+                        member = ctx.guild.get_member(int(m_key))
+                        if mrole == 'owner':
+                            memb.add_field(name = f'{member}', value = f'👑 | Роль: Гильдмастер', inline = True)
+                        elif mrole == 'admin':
+                            memb.add_field(name = f'{member}', value = f'🛡 | Роль: Администратор', inline = True)
+                        elif mrole == 'member':
+                            memb.add_field(name = f'{member}', value = f'🗡 | Роль: Участник', inline = True)
+
+                emb_members_list.append(memb)
+
+            top_lvl = {"1": {'m': None, 'lvl': 0}, "2": {'m': None, 'lvl': 0}, "3": {'m': None, 'lvl': 0}}
+            top_mon = {"1": {'m': None, 'money': 0}, "2": {'m': None, 'money': 0}, "3": {'m': None, 'money': 0}}
+
+            for g_u_id in rpg_guild['members'].keys():
+                u = ctx.author.guild.get_member(int(g_u_id))
+                guser = funs.user_check(u, ctx.author.guild)
+                if guser['lvl'] > top_lvl['1']['lvl']:
+                    top_lvl['1'] = {'m': u, 'lvl': guser['lvl']}
+                elif guser['lvl'] > top_lvl['2']['lvl']:
+                    top_lvl['2'] = {'m': u, 'lvl': guser['lvl']}
+                elif guser['lvl'] > top_lvl['3']['lvl']:
+                    top_lvl['3'] = {'m': u, 'lvl': guser['lvl']}
+
+                if guser['money'] > top_mon['1']['money']:
+                    top_mon['1'] = {'m': u, 'money': guser['money']}
+                elif guser['money'] > top_mon['2']['money']:
+                    top_mon['2'] = {'m': u, 'money': guser['money']}
+                elif guser['money'] > top_mon['3']['money']:
+                    top_mon['3'] = {'m': u, 'money': guser['money']}
+
+            top_emb = discord.Embed(description = f"**📊 | Лидеры гильдии:**", color=0xf03e65)
+            top_emb.add_field(name = f"<:lvl:886876034149011486> | Лидеры по уровню", value = f"<:gold_s:929729448746549308> 1# {top_lvl['1']['m'].mention}\nУровень: {top_lvl['1']['lvl']}\n<:silver_s:929729593286484029> 2# {top_lvl['2']['m'].mention}\nУровень: {top_lvl['2']['lvl']}\n<:bronze_s:929729607836520448> 3# {top_lvl['3']['m'].mention}\nУровень: {top_lvl['3']['lvl']}\n", inline = True)
+
+            top_emb.add_field(name = f"<:pokecoin:780356652359745537> | Лидеры по монетам", value = f"<:gold_s:929729448746549308> 1# {top_mon['1']['m'].mention}\nМонеты: {top_mon['1']['money']}\n<:silver_s:929729593286484029> 2# {top_mon['2']['m'].mention}\nМонеты: {top_mon['2']['money']}\n<:bronze_s:929729607836520448> 3# {top_mon['3']['m'].mention}\nМонеты: {top_mon['3']['money']}\n", inline = True)
+
+            # if rpg_guild['banner_url'] == None:
+            #     url = 'https://cdn.discordapp.com/attachments/932577316649967678/932676860511420436/468ba62d-d841-4f48-8b42-f7b8a50ca2bf_Forgotten_Future___Web___Artstation.jpg'
+            # else:
+            #     url = rpg_guild['banner_url']
+            #
+            # alpha = Image.open('elements/alpha.png').resize((1600, 400), Image.ANTIALIAS)
+            # response = requests.get(url, stream = True)
+            # response = Image.open(io.BytesIO(response.content))
+            # response = response.convert("RGBA")
+            # img = response.resize((1600, 400), Image.ANTIALIAS) # улучшение качества
+            #
+            # img.show()
+
+
+
+
+            class Dropdown(discord.ui.Select):
+                def __init__(self, ctx, msg, options, placeholder, min_values, max_values:int, rem_args):
+                    #options.append(discord.SelectOption(label=f''))
+
+                    super().__init__(placeholder=placeholder, min_values=min_values, max_values=min_values, options=options)
+
+                async def callback(self, interaction: discord.Interaction):
+                    if ctx.author.id == interaction.user.id:
+                        await embed(msg, self.values[0])
+
+                    else:
+                        await interaction.response.send_message(f'Жми на свои кнопки!', ephemeral = True)
+
+
+            class DropdownView(discord.ui.View):
+                def __init__(self, ctx, msg, options:list, placeholder:str, min_values:int = 1, max_values:int = 1, timeout: float = 20.0, rem_args:list = []):
+                    super().__init__()
+                    self.add_item(Dropdown(ctx, msg, options, placeholder, min_values, max_values, rem_args))
+
+                # async def on_error(self, error, item, interaction):
+                #     print(error)
+
+            sections = {
+            'Участники': emb_members_list,
+            'Информация': main_emb,
+            'Лидеры': top_emb,
+            }
+
+            def op():
+                options = []
+                options.append(discord.SelectOption(emoji = f'🏰', label = 'Информация'))
+                options.append(discord.SelectOption(emoji = f'👥', label = 'Участники'))
+                options.append(discord.SelectOption(emoji = f'📊', label = 'Лидеры'))
+                return options
+
+            async def embed(msg, sec):
+                nonlocal server, ctx, sections
+                if sec in ['Информация', 'Участники', 'Лидеры']:
+                    emb = sections[sec]
+
+                    if sec == 'Участники':
+                        emb_l = emb
+
+                        if len(emb_l) > 1:
+
+                            options = []
+                            options.append(discord.SelectOption(label = f'Вернуться', emoji = '🚪'))
+                            a = 0
+                            for p in emb_l:
+                                a += 1
+                                options.append(discord.SelectOption(label = f'Страница {a}', emoji = '🧭'))
+
+                            await msg.edit(embed = emb[0], view=DropdownView(ctx, msg, options = options, placeholder = '🧾 | Выберите страницу...', min_values = 1, max_values=1, timeout = 120.0, rem_args = []))
+                        else:
+                            await msg.edit(embed = emb[0])
+
+                    else:
+                        await msg.edit(embed = emb)
+
+                elif sec == 'Вернуться':
+                    options = op()
+                    await msg.edit(embed = sections['Информация'], view=DropdownView(ctx, msg, options = options, placeholder = '🧾 | Выберите категорию...', min_values = 1, max_values=1, timeout = 20.0, rem_args = []))
+
+                else:
+                    n = int(sec[9:]) - 1
+
+                    options = []
+                    options.append(discord.SelectOption(label = f'Вернуться', emoji = '🚪'))
+                    a = 0
+                    for p in sections['Участники']:
+                        a += 1
+                        options.append(discord.SelectOption(label = f'Страница {a}', emoji = '🧭'))
+
+                    await msg.edit(embed = sections['Участники'][n], view=DropdownView(ctx, msg, options = options, placeholder = '🧾 | Выберите страницу...', min_values = 1, max_values=1, timeout = 120.0, rem_args = []))
+
+
+
+            options = op()
+            msg = await ctx.send(embed = main_emb)
+            await msg.edit(view=DropdownView(ctx, msg, options = options, placeholder = '🧾 | Выберите категорию...', min_values = 1, max_values=1, timeout = 20.0, rem_args = []))
+
+
 
 
 
@@ -749,7 +911,7 @@ class clubs(commands.Cog):
                     g_id = str(max(simpl_list)+1)
 
 
-                server['rpg']['guilds'][g_id] = { "name": name, 'tag': tag, "bio": 'Пусто', "flag": None, "lvl": 1, "exp": 0, "created": time.strftime('%X, %d %B, %Y'), "members": {str(ctx.author.id): {"role": 'owner'}}, 'global_club': status, 'lvl_enter': lvl_enter, 'max_users': 50, 'bank': 0, 'inv': [], 'main_location': None, 'locations': [] }
+                server['rpg']['guilds'][g_id] = { "name": name, 'tag': tag, "bio": 'Пусто', "flag": None, "lvl": 1, "exp": 0, "created": time.strftime('%X, %d %B, %Y'), "members": {str(ctx.author.id): {"role": 'owner'}}, 'global_club': status, 'lvl_enter': lvl_enter, 'max_users': 50, 'bank': 0, 'inv': [], 'main_location': None, 'locations': [], 'banner_url': None }
 
                 servers.update_one( {"server": ctx.guild.id}, {"$set": {'rpg': server['rpg']}} )
 

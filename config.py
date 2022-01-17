@@ -17,3 +17,5 @@ start_channel = 917043186592002068
 check_channel = 917055118560608306
 #чат
 chat_channel = 917030955749883965
+# канал для хранения фонов (discord_cloud)
+cloud_channel = 932284796481204314

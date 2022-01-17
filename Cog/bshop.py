@@ -63,16 +63,20 @@ class bs(commands.Cog):
             b = backs.find_one({"bid": number})
 
             if str(number) in user['back_inv'] or number in user['back_inv']:
-                status_b = ok
+                status_b = f"{ok} | Приобретён"
             else:
-                status_b = no
+                status_b = f"{no} | Не приобретён"
 
 
             if b['display'] == 0 and number not in user['back_inv'] or b['display'] == 0 and str(number) not in user['back_inv']:
                 status_b = f'{no} Не доступен {no}'
 
-            emb = discord.Embed(title = "Покупка фонов", description =
-            f"Стоимость: {d[str(number)]['price']}\n Автор: <@{d[str(number)]['creator_id']}>\n Статус: {status_b}", color = int(d[str(number)]["emb_color"]))
+            emb = discord.Embed(description = '**🖼 | Библиотека фонов**', color = b['color'])
+            emb.add_field(name= f"📜 | Информация", value = f"Стоимость: {d[str(number)]['price']}\nАвтор: <@{d[str(number)]['creator_id']}>\nСтатус: {status_b}", inline = False)
+
+            if status_b == f"{ok} | Приобретён":
+                emb.add_field(name= f"🎋 | Для владельца", value = f"Так как фон приобретён, при нажатии 🛒 вы установите фон.", inline = False)
+
             emb.set_image(url =f'{d[str(number)]["url"]}')
             emb.set_footer(text = f'ID {number} | {len(bs)-1}')
             return emb
@@ -91,7 +95,7 @@ class bs(commands.Cog):
             if str(reaction.emoji) == '◀':
                 await msg.remove_reaction('◀', member)
                 number -= 1
-                if number > 0:
+                if number > -1:
                     await msg.edit(embed = embed(number))
                     await reackt()
                 else:
@@ -697,9 +701,38 @@ class bs(commands.Cog):
         s['bs'].update( {str(id): {'status': True} })
         settings.update_one({"sid": 1},{'$set': {'bs': s['bs']}})
 
+        if type in ['Статичная картинка', 'png']:
+            response = requests.get(bs["url"], stream = True)
+            response = Image.open(io.BytesIO(response.content))
+
+            image = response
+            output = BytesIO()
+            image.save(output, 'png')
+            image_pix=BytesIO(output.getvalue())
+
+            file = discord.File(fp = image_pix, filename=f"back.png")
+
+        else:
+            fs = []
+            response = requests.get(bs["url"], stream=True)
+            response.raw.decode_content = True
+            img = Image.open(response.raw)
+
+            for frame in ImageSequence.Iterator(img):
+
+                b = io.BytesIO()
+                frame.save(b, format="GIF",optimize=True, quality=100)
+                frame = Image.open(b)
+                fs.append(frame)
+
+            fs[0].save('back.gif', save_all=True, append_images=fs[1:], loop = 0, optimize=True, quality=100)
+            file = discord.File(fp = "back.gif", filename="back.gif")
+
+        ss_channel = await self.bot.fetch_channel(config.cloud_channel)
+        msg = await ss_channel.send(content = f'🖼 | Фон {len(list(backs.find()))}', file = file)
 
         b = { 'bid': len(list(backs.find())),
-              'url': bs["url"],
+              'url': msg.attachments[0].url,
               'price': price,
               'creator_id': bs['author'],
               'display': display,
