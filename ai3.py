@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import nextcord as discord
 from nextcord.ext import tasks, commands
-
+from nextcord.utils import utcnow
 import requests
 from PIL import Image, ImageFont, ImageDraw, ImageOps, ImageSequence, ImageFilter
 import io
@@ -154,7 +154,6 @@ class functions:
                                'week_act': [0, None],
                     },
 
-                    'guild': None,
                     'Nitro': False,
                     'back': 0,
                     'back_inv': [0],
@@ -577,6 +576,10 @@ class functions:
             if len(reason) > 200:
                 await ctx.send(f"Причина более 200 символов, будте более кратки, в данный момент длинна {len(reason)} символов")
                 return
+
+        if reason == None:
+            reason = 'Не указана'
+
         try:
             server['mod']['warns'][str(user.id)]
         except KeyError:
@@ -596,13 +599,20 @@ class functions:
         elif pun == 1: #мьют
             try:
                 await user.add_roles(bot.get_guild(ctx.guild.id).get_role(server['mod']['muterole']))
-                a = server['mute_members']
-                a.update({str(user.id): time.time() + punishment['time'] })
-                servers.update_one({"server": ctx.guild.id}, {"$set": {"mute_members": a}})
-                ttt = functions.time_end(time.time() + punishment['time'])
-                wtext = f'Мьют: `{ttt}`'
-            except Exception:
-                await ctx.send("Роль мьюта не настроена")
+            except:
+                pass
+
+            a = server['mute_members']
+            a.update({str(user.id): time.time() + punishment['time'] })
+            servers.update_one({"server": ctx.guild.id}, {"$set": {"mute_members": a}})
+            ttt = functions.time_end(punishment['time'])
+            wtext = f'Мьют: `{ttt}`'
+
+            try:
+                await user.edit(timeout=utcnow() + timedelta(seconds = punishment['time']))
+            except:
+                pass
+
 
         elif pun == 2: #кик
             wtext = f'Кик'
@@ -1557,22 +1567,7 @@ async def lvl(message, server):
     expn = 5 * user['lvl']*user['lvl'] + 50 * user['lvl'] + 100
     expi = random.randint(0, server['economy']['lvl_xp'])
     expii = user['xp'] + expi
-
     functions.user_update(message.author.id, message.guild, "xp", expii)
-
-    if user != None:
-        if user['guild'] != None:
-            rpg = server['rpg']
-            guild = rpg['guild'][f'{user["guild"]}']
-            exp = guild['exp'] + random.randint(0, 5)
-            guild.update({'exp': exp})
-            servers.update_one( {"server": guild.id}, {"$set": {'rpg': rpg}} )
-            expnc = 5 * guild['lvl'] * guild['lvl'] + 50 * guild['lvl'] + 100
-
-            if expnc <= exp:
-                guild.update({'exp': 0})
-                guild.update({'lvl': guild['lvl']+1 })
-                servers.update_one( {"server": guild.id}, {"$set": {'rpg': rpg}} )
 
     if expn <= user['xp']:
         try:
@@ -1592,8 +1587,10 @@ async def mod_flud(message, server, met = None):
 
     for mess in messages:
         if mess.author.id == message.author.id:
+            print(message)
             if message.content != '':
                 l.append(mess)
+
 
 
     if met == None:
@@ -1881,7 +1878,7 @@ async def on_message(message):
     except Exception:
         pass
 
-    if functions.user_check(message.author, message.guild, 'dcheck') != False:
+    if functions.user_check(message.author, message.guild) != False:
         if cooldown(message.author.id, message.guild.id ) == True:
             if len(message.content) >= 5:
                 await lvl(message, server)
