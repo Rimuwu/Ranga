@@ -11,6 +11,7 @@ import asyncio
 import time
 import pymongo
 import os
+import sys
 
 sys.path.append("..")
 from ai3 import functions as funs
@@ -282,8 +283,6 @@ class settings(commands.Cog):
         if funs.roles_check(ctx.author, ctx.guild.id) == False:
             await ctx.send("У вас недостаточно прав для использования этой команды!")
             return
-
-        print(message)
 
         if message == () or message == 'text':
             await ctx.send(funs.text_replase("text"))
@@ -2242,27 +2241,25 @@ class settings(commands.Cog):
         emb = discord.Embed(title = f'Отключённые команды',description = ', '.join(a),color=server['embed_color'])
         await ctx.send(embed = emb)
 
+    @commands.has_permissions( administrator = True)
     @commands.command(usage = '(roles)', description = 'Добавить административную роль.', help = 'Настройка модерации')
     async def add_admin_roles(self, ctx, *role:discord.Role):
         global servers
-        if funs.roles_check(ctx.author, ctx.guild.id) == False:
-            await ctx.send("У вас недостаточно прав для использования этой команды!")
-            return
+
         server = servers.find_one({'server':ctx.guild.id})
         a = server['mod']['admin_roles']
         for i in role:
             a.append(i.id)
-        await ctx.send('Пользователи с данными ролью(ми) теперь могут настраивать бота и управлять модерацией!')
-        a = server['mod']
-        a.update({'admin_roles': a})
-        servers.update_one({'server':ctx.guild.id},{'$set': {'mod': a }})
 
+        await ctx.send('Пользователи с данными ролью(ми) теперь могут настраивать бота и управлять модерацией!')
+        server['mod'].update({'admin_roles': a})
+        servers.update_one({'server':ctx.guild.id},{'$set': {'mod': server['mod'] }})
+
+    @commands.has_permissions( administrator = True)
     @commands.command(usage = '(roles)', description = 'Удалить административную роль.', help = 'Настройка модерации')
     async def remove_admin_roles(self, ctx, *role:discord.Role):
         global servers
-        if funs.roles_check(ctx.author, ctx.guild.id) == False:
-            await ctx.send("У вас недостаточно прав для использования этой команды!")
-            return
+
         server = servers.find_one({'server':ctx.guild.id})
         a = server['mod']['admin_roles']
         for i in role:
@@ -2276,12 +2273,11 @@ class settings(commands.Cog):
         a.update({'admin_roles': a})
         servers.update_one({'server':ctx.guild.id},{'$set': {'mod': a }})
 
+    @commands.has_permissions( administrator = True)
     @commands.command(usage = '-', description = 'Список админ ролей.', help = 'Настройка модерации')
     async def admins_roles(self, ctx):
         global servers
-        if funs.roles_check(ctx.author, ctx.guild.id) == False:
-            await ctx.send("У вас недостаточно прав для использования этой команды!")
-            return
+
         server = servers.find_one({'server':ctx.guild.id})
         a = server['mod']['admin_roles']
         text = ''

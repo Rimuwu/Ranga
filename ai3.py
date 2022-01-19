@@ -1587,7 +1587,6 @@ async def mod_flud(message, server, met = None):
 
     for mess in messages:
         if mess.author.id == message.author.id:
-            print(message)
             if message.content != '':
                 l.append(mess)
 
