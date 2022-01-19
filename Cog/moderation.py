@@ -108,16 +108,17 @@ class mod(commands.Cog):
 
         server = servers.find_one({"server": ctx.guild.id})
 
-        if server['mod']['muterole'] is not None:
-            role = discord.utils.get(ctx.guild.roles, id = server['mod']['muterole']) #id роли
-            await member.add_roles(role)
-
         if member is None:
             await ctx.send("Вы не указали пользователя!")
         elif timem is None:
             await ctx.send("Вы не указали время!\nФормат: 10m (s/m/h/d/w)")
 
         else:
+
+            if server['mod']['muterole'] is not None:
+                role = ctx.guild.get_role(server['mod']['muterole']) #id роли
+                if role != None:
+                    await member.add_roles(role)
 
             if reason == None:
                 reason = 'Не указана'
