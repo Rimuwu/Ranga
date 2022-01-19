@@ -41,29 +41,25 @@ class clubs(commands.Cog):
         user_guild_id = None
         rpg_guild_id = None
         member_in_guild = False
+        member = ctx.author
 
-        try:
-            member_id = int(name[3:-1])
-            member = ctx.guild.get_member(member_id)
+        if name != None:
+            try:
+                rpg_guild = server['rpg']['guilds'][name]
+                rpg_guild_id = name
+            except:
+                pass
+
+        if rpg_guild_id == None:
 
             for i in server['rpg']['guilds'].keys():
                 g = server['rpg']['guilds'][i]
                 if str(member.id) in g['members'].keys():
                     member_in_guild = True
-                    rpg_guild_id = i
-        except:
-            member = ctx.author
-
-            for i in server['rpg']['guilds'].keys():
-                g = server['rpg']['guilds'][i]
-                if str(member.id) in g['members'].keys():
-                    # member_in_guild = True
                     user_guild_id = i
 
-            name = None
-
-        if name == None and member_in_guild == False:
-            emb = discord.Embed(description = 'Введите тег / название / id / @пользователь гильдии!',color=server['embed_color'])
+        if name == None and member_in_guild == False and rpg_guild_id == None:
+            emb = discord.Embed(description = 'Введите `тег / название / id` гильдии!\nТак же вы можете @упоминуть пользователя для получения его гильдии!',color=server['embed_color'])
             emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
             await ctx.send(embed = emb)
             return
@@ -71,7 +67,7 @@ class clubs(commands.Cog):
         elif member_in_guild == True and name == None:
             rpg_guild_id = user_guild_id
 
-        elif name != None:
+        elif name != None and rpg_guild_id == None:
 
             try:
                 rpg_guild = server['rpg']['guilds'][rpg_guild_id]
@@ -86,8 +82,30 @@ class clubs(commands.Cog):
                     elif fuzz.token_sort_ratio(i_tag, name) > 80 or fuzz.ratio(i_tag, name) > 80 or i_tag == name:
                         rpg_guild_id = i
 
+        if rpg_guild_id == None and name != None:
+            try:
+                try:
+                    member_id = int(name[3:-1])
+                    member = ctx.guild.get_member(member_id)
+
+                    for i in server['rpg']['guilds'].keys():
+                        g = server['rpg']['guilds'][i]
+                        if str(member.id) in g['members'].keys():
+                            rpg_guild_id = i
+
+                except:
+                    member_id = int(name)
+                    member = ctx.guild.get_member(member_id)
+
+                    for i in server['rpg']['guilds'].keys():
+                        g = server['rpg']['guilds'][i]
+                        if str(member.id) in g['members'].keys():
+                            rpg_guild_id = i
+            except:
+                pass
+
         if rpg_guild_id == None:
-            emb = discord.Embed(description = 'Гильдия не была найдена!\nВведите более корректно тег / название / id гильдии!',color=server['embed_color'])
+            emb = discord.Embed(description = 'Гильдия не была найдена!\nВведите более корректно тег / название / id гильдии!\nТак же вы можете @упоминуть пользователя для получения его гильдии!',color=server['embed_color'])
             emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
             await ctx.send(embed = emb)
 
