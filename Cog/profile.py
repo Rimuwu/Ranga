@@ -251,11 +251,11 @@ class profile(commands.Cog):
 
         idraw.text((60,195), f"{text} #{topvoice}" , font = para)
 
-        if user['guild'] != None:
-            club = server['rpg']['guild'][f'{user["guild"]}']
-            idraw.text((15,360), f"{name}#{tag} [{club['tag']}]", font = headline) #первое значение это отступ с лева, второе сверху
-        else:
-            idraw.text((15,360), f"{name}#{tag}", font = headline)
+        # if user['guild'] != None:
+        #     club = server['rpg']['guild'][f'{user["guild"]}']
+        #     idraw.text((15,360), f"{name}#{tag} [{club['tag']}]", font = headline) #первое значение это отступ с лева, второе сверху
+        # else:
+        #     idraw.text((15,360), f"{name}#{tag}", font = headline)
 
         idraw.text((60,242), f"{user['money']} #{topmn}", font = para)
         idraw.text((260,50), f"{len(user['rep'][0])}", font = para)
