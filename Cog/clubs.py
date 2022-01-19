@@ -22,7 +22,6 @@ client = funs.mongo_c()
 db = client.bot
 backs = db.bs
 servers = db.servers
-clubs = db.clubs
 
 
 class clubs(commands.Cog):
@@ -85,22 +84,16 @@ class clubs(commands.Cog):
         if rpg_guild_id == None and name != None:
             try:
                 try:
-                    member_id = int(name[3:-1])
+                    member_id = int(name[2:-1])
                     member = ctx.guild.get_member(member_id)
-
-                    for i in server['rpg']['guilds'].keys():
-                        g = server['rpg']['guilds'][i]
-                        if str(member.id) in g['members'].keys():
-                            rpg_guild_id = i
-
                 except:
                     member_id = int(name)
                     member = ctx.guild.get_member(member_id)
 
-                    for i in server['rpg']['guilds'].keys():
-                        g = server['rpg']['guilds'][i]
-                        if str(member.id) in g['members'].keys():
-                            rpg_guild_id = i
+                for i in server['rpg']['guilds'].keys():
+                    g = server['rpg']['guilds'][i]
+                    if str(member.id) in g['members'].keys():
+                        rpg_guild_id = i
             except:
                 pass
 
