@@ -22,6 +22,7 @@ client = funs.mongo_c()
 db = client.bot
 backs = db.bs
 servers = db.servers
+clubs = db.clubs
 
 
 class clubs(commands.Cog):
@@ -85,15 +86,22 @@ class clubs(commands.Cog):
             try:
                 try:
                     member_id = int(name[2:-1])
+                    print(member_id)
                     member = ctx.guild.get_member(member_id)
+
+                    for i in server['rpg']['guilds'].keys():
+                        g = server['rpg']['guilds'][i]
+                        if str(member.id) in g['members'].keys():
+                            rpg_guild_id = i
+
                 except:
                     member_id = int(name)
                     member = ctx.guild.get_member(member_id)
 
-                for i in server['rpg']['guilds'].keys():
-                    g = server['rpg']['guilds'][i]
-                    if str(member.id) in g['members'].keys():
-                        rpg_guild_id = i
+                    for i in server['rpg']['guilds'].keys():
+                        g = server['rpg']['guilds'][i]
+                        if str(member.id) in g['members'].keys():
+                            rpg_guild_id = i
             except:
                 pass
 
@@ -117,7 +125,7 @@ class clubs(commands.Cog):
                 ml = rpg_guild['main_location']
 
             main_emb = discord.Embed(description = f"**🏰 | {rpg_guild['name']} #{rpg_guild['tag']}** ID: {rpg_guild_id}", color=0xf03e65)
-            main_emb.add_field(name = '<:recipe:827221967886745600> | Информация:', value = f"👑 | Создатель: <@{guild_owner}>\n👥 | Участников: `{len(rpg_guild['members'].keys())}` / `{rpg_guild['max_users']}`\n<:pokecoin:780356652359745537> | Хранилище монет: {rpg_guild['bank']}\n🗺 | Локация штаба: {ml}\n🗡 | Захваченных территорий: {len(rpg_guild['locations'])}", inline = True)
+            main_emb.add_field(name = '<:recipe:827221967886745600> | Информация:', value = f"👑 | Создатель: <@{guild_owner}>\n👥 | Участников: `{len(rpg_guild['members'].keys())}` / `{rpg_guild['max_users']}`\n<:pokecoin:780356652359745537> | Хранилище монет: {rpg_guild['bank']}\n🗺 | Штаб: {ml}\n🗡 | Захвачено: {len(rpg_guild['locations'])}", inline = True)
             main_emb.add_field(name = '🛡 | Статитстика:', value = f"<:lvl:886876034149011486> | Уровень: {rpg_guild['lvl']}\n🔼 | Опыт: {rpg_guild['exp']} / {expnc}", inline = True)
 
             main_emb.add_field(name = '📰 | Описание:', value = f'{rpg_guild["bio"]}', inline = False)
@@ -210,20 +218,134 @@ class clubs(commands.Cog):
 
             top_emb.add_field(name = f"<:pokecoin:780356652359745537> | Лидеры по монетам", value = money_text, inline = True)
 
-            # if rpg_guild['banner_url'] == None:
-            #     url = 'https://cdn.discordapp.com/attachments/932577316649967678/932676860511420436/468ba62d-d841-4f48-8b42-f7b8a50ca2bf_Forgotten_Future___Web___Artstation.jpg'
-            # else:
-            #     url = rpg_guild['banner_url']
-            #
-            # alpha = Image.open('elements/alpha.png').resize((1600, 400), Image.ANTIALIAS)
-            # response = requests.get(url, stream = True)
-            # response = Image.open(io.BytesIO(response.content))
-            # response = response.convert("RGBA")
-            # img = response.resize((1600, 400), Image.ANTIALIAS) # улучшение качества
-            #
-            # img.show()
+
+            if rpg_guild['banner_url'] == None:
+                url = 'https://cdn.discordapp.com/attachments/932577316649967678/934129438881374280/71509-1542236334.jpg'
+            else:
+                url = rpg_guild['banner_url']
 
 
+            def trans_paste(fg_img,bg_img,alpha=10,box=(0,0)):
+                fg_img_trans = Image.new("RGBA",fg_img.size)
+                fg_img_trans = Image.blend(fg_img_trans,fg_img,alpha)
+                bg_img.paste(fg_img_trans,box,fg_img_trans)
+                return bg_img
+
+            def prepare_mask(size, antialias = 2):
+                mask = Image.new('L', (size[0] * antialias, size[1] * antialias), 0)
+                ImageDraw.Draw(mask).ellipse((0, 0) + mask.size, fill=255)
+                mask = mask.filter(ImageFilter.GaussianBlur(2.5))
+                return mask.resize(size, Image.ANTIALIAS)
+
+            def crop(im, s):
+                mask = Image.open('elements/elips_mask.png').convert('L').resize(s, Image.ANTIALIAS)
+
+                output = ImageOps.fit(im, s, centering=(0.5, 0.5))
+                output.putalpha(mask)
+                return output
+
+
+            #                                                   задний фон и альфа
+
+            response = requests.get(url, stream = True)
+            response = Image.open(io.BytesIO(response.content))
+            response = response.convert("RGBA")
+            img = response.resize((1100, 400), Image.ANTIALIAS) # улучшение качества
+
+
+            alpha = Image.open('elements/alpha.png').resize((1100, 400), Image.ANTIALIAS)
+
+            mask = Image.new('L',(1100, 400))
+            bar = Image.new('RGB',(1100, 400))
+
+            #                                         панель
+            ImageDraw.Draw(mask).polygon(xy=[(0, 0),(700, 0),(300,400),(0,400)], fill = 190)
+            ImageDraw.Draw(bar).polygon(xy=[(0, 0),(700, 0),(300,400),(0,400)], fill = (0,0,0,0))
+
+
+            bar = bar.filter(ImageFilter.BoxBlur(0.5))
+            mask = mask.filter(ImageFilter.BoxBlur(1.5))
+            alpha = Image.composite(bar, alpha, mask)
+
+
+            #                                       флаг
+            if rpg_guild['flag'] != None:
+                sz = 100
+
+                response1 = requests.get(flag, stream = True)
+                response1 = Image.open(io.BytesIO(response1.content))
+                response1 = response1.convert("RGBA")
+                response1 = response1.resize((sz, sz), Image.ANTIALIAS)
+                im = crop(response1, (sz, sz))
+
+                wh = Image.new(mode = 'RGB', color = 'white', size = (sz+10,sz+10))
+                wh = crop(wh, (sz+10,sz+10))
+
+                bg_img = wh
+                fg_img = im
+                rim = trans_paste(fg_img, bg_img, 1.0, (5, 5, sz+5, sz+5))
+
+                bg_img = alpha
+                fg_img = rim
+                alpha = trans_paste(fg_img, bg_img, 1.0, (15, 15, 15 + sz+10, 15 + sz+10))
+                v_s = 145
+
+            if rpg_guild['flag'] == None:
+                v_s = 50
+
+            text_image = Image.open(f"elements/guild_banner.png")
+            alpha = trans_paste(text_image, alpha, 1.0)
+
+            #                                  информация
+            name = rpg_guild['name']
+            tag = rpg_guild['tag']
+            coins = rpg_guild['bank']
+            lvl = rpg_guild['lvl']
+            exp = rpg_guild['exp']
+            terr = len(rpg_guild['locations'])
+
+            exp_pr = int(exp / ((5 * lvl * lvl + 50 * lvl + 100) / 100)) #процент опыта
+
+            if len(name) > 25:
+                banner_size = 30
+                banner_v = 30
+            elif len(name) >= 25:
+                banner_size = 35
+                banner_v = 35
+            elif len(name) >= 20:
+                banner_size = 42
+                banner_v = 30
+            else:
+                banner_size = 55
+                banner_v = 25
+
+            idraw = ImageDraw.Draw(alpha)
+
+            f1 = ImageFont.truetype("fonts/ofont.ru_FloraC.ttf", size = banner_size)
+            f1_0 = ImageFont.truetype("fonts/ofont.ru_FloraC.ttf", size = 25)
+            f2 = ImageFont.truetype("fonts/BBCT.ttf", size = 40)
+
+            idraw.text((v_s,banner_v), name, font = f1)
+            idraw.text((v_s,banner_v + 50), f'#{tag}', font = f1_0)
+            idraw.text((80,335), "{:,}".format(coins).replace(',', '.'), font = f2)
+            idraw.text((80,267), f'Lv: {lvl} | Xp: {exp_pr}%', font = f2)
+            idraw.text((80,202), f'Locations: {terr}', font = f2)
+
+            bg_img = img
+            fg_img = alpha
+            img = trans_paste(fg_img, bg_img, 1.0)
+
+            output = BytesIO()
+            img.save(output, 'png')
+            image_pix=BytesIO(output.getvalue())
+
+            file = discord.File(fp = image_pix, filename="guild_banner.png")
+            atach = "attachment://guild_banner.png"
+
+            main_emb.set_image(url="attachment://guild_banner.png")
+            top_emb.set_image(url="attachment://guild_banner.png")
+            for em in emb_members_list:
+                em.set_image(url="attachment://guild_banner.png")
 
 
             class Dropdown(discord.ui.Select):
@@ -304,7 +426,7 @@ class clubs(commands.Cog):
 
 
             options = op()
-            msg = await ctx.send(embed = main_emb)
+            msg = await ctx.send(embed = main_emb, file = file)
             await msg.edit(view=DropdownView(ctx, msg, options = options, placeholder = '🧾 | Выберите категорию...', min_values = 1, max_values=1, timeout = 20.0, rem_args = []))
 
 
