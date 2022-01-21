@@ -22,7 +22,6 @@ client = funs.mongo_c()
 db = client.bot
 backs = db.bs
 servers = db.servers
-clubs = db.clubs
 
 
 class clubs(commands.Cog):
@@ -288,10 +287,12 @@ class clubs(commands.Cog):
                 bg_img = alpha
                 fg_img = rim
                 alpha = trans_paste(fg_img, bg_img, 1.0, (15, 15, 15 + sz+10, 15 + sz+10))
-                v_s = 145
+
 
             if rpg_guild['flag'] == None:
-                v_s = 50
+                rpg_icon = Image.open(f"elements/icon_rpg.png").resize((130, 130), Image.ANTIALIAS)
+                alpha = trans_paste(rpg_icon, alpha, 1.0, (5, 5, 135, 135))
+
 
             text_image = Image.open(f"elements/guild_banner.png")
             alpha = trans_paste(text_image, alpha, 1.0)
@@ -325,8 +326,8 @@ class clubs(commands.Cog):
             f1_0 = ImageFont.truetype("fonts/ofont.ru_FloraC.ttf", size = 25)
             f2 = ImageFont.truetype("fonts/BBCT.ttf", size = 40)
 
-            idraw.text((v_s,banner_v), name, font = f1)
-            idraw.text((v_s,banner_v + 50), f'#{tag}', font = f1_0)
+            idraw.text((145,banner_v), name, font = f1)
+            idraw.text((145,banner_v + 50), f'#{tag}', font = f1_0)
             idraw.text((80,335), "{:,}".format(coins).replace(',', '.'), font = f2)
             idraw.text((80,267), f'Lv: {lvl} | Xp: {exp_pr}%', font = f2)
             idraw.text((80,202), f'Locations: {terr}', font = f2)

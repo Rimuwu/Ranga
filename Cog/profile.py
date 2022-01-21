@@ -122,15 +122,11 @@ class profile(commands.Cog):
             return mask.resize(size, Image.ANTIALIAS)
 
         def crop(im, s):
-            w, h = im.size
-            k = w / s[0] - h / s[1]
+            mask = Image.open('elements/elips_mask.png').convert('L').resize(s, Image.ANTIALIAS)
 
-            if k > 0:
-                im = im.crop(((w - h) / 2, 0, (w + h) / 2, h))
-            elif k < 0:
-                im = im.crop((0, (h - w) / 2, w, (h + w) / 2))
-
-            return im.resize(s, Image.ANTIALIAS)
+            output = ImageOps.fit(im, s, centering=(0.5, 0.5))
+            output.putalpha(mask)
+            return output
 
         def bl_f(im):
             mask = Image.new('L',(800, 400))
@@ -230,7 +226,6 @@ class profile(commands.Cog):
         response1 = response1.convert("RGBA")
         response1 = response1.resize((150, 150), Image.ANTIALIAS)
         size = (150, 150)
-        await ctx.trigger_typing()
 
         im = response1
         im = crop(im, size)
@@ -258,7 +253,7 @@ class profile(commands.Cog):
         #     idraw.text((15,360), f"{name}#{tag}", font = headline)
         idraw.text((15,360), f"{name}#{tag}", font = headline)
 
-        idraw.text((60,242), f"{user['money']} #{topmn}", font = para)
+        idraw.text((60,242), f"{'{:,}'.format(user['money']).replace(',', '.')} #{topmn}", font = para)
         idraw.text((260,50), f"{len(user['rep'][0])}", font = para)
         idraw.text((260,90), str(len(user['rep'][1])), font = para)
         idraw.text((230,288), f"{user['xp']} / {expn}" , font = para)

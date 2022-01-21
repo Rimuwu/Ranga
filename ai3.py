@@ -23,11 +23,8 @@ import os
 client = pymongo.MongoClient(config.cluster_token)
 db = client.bot
 
-users = db.users
 backs = db.bs
 servers = db.servers
-clubs = db.clubs
-frames = db.frames
 settings = db.settings
 
 peoplesCD = {}
