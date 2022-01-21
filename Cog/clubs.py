@@ -323,7 +323,7 @@ class clubs(commands.Cog):
             idraw = ImageDraw.Draw(alpha)
 
             f1 = ImageFont.truetype("fonts/ofont.ru_FloraC.ttf", size = banner_size)
-            f1_0 = ImageFont.truetype("fonts/ofont.ru_FloraC.ttf", size = 25)
+            f1_0 = ImageFont.truetype("fonts/ofont.ru_FloraC.ttf", size = 35)
             f2 = ImageFont.truetype("fonts/BBCT.ttf", size = 40)
 
             idraw.text((145,banner_v), name, font = f1)
