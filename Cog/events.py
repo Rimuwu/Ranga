@@ -30,16 +30,13 @@ voice_dict = {}
 start_time = time.time()
 
 stat_list = [
-               "Играю с твоей душой...",
-               'Я волк, но в душе я дракон, рррррр!',
-               "Пинг 52к + баги == Ранга",
-               "Моя любимая рыбка - карась",
-               'Мошенница - Акудама SSS ранга, Награда: 100.000.000$',
-               'Чем сильнее я становлюсь, тем сильнее мои враги...',
-               'IT | Демон | 1.?.9',
-               'Взлом: 67%',
-               'Взлом: 105%',
-               'Взлом: 3%',
+               "🎏 | Играю с твоей душой...",
+               '🎍 | Я волк, но в душе я дракон, рррррр!',
+               "🍕 | Пинг 52к + баги == Ранга",
+               "🍜 | Моя любимая рыбка - карась",
+               '🧨 | Мошенница - Акудама SSS ранга, Награда: 100.000.000$',
+               '🏹 | Чем сильнее я становлюсь, тем сильнее мои враги...',
+               '🍣 | Демон | AW',
             ]
 
 async def voice_check(guild):
@@ -161,8 +158,8 @@ class MainCog(commands.Cog):
 
     @tasks.loop(seconds = 30)
     async def chan_nam_change(self):
-        h = time.strftime('%H')
-        if h == '0' or h == '00' or h == '6' or h == '12' or h == '18':
+        m = time.strftime('%M')
+        if m == '0' or m == '00':
             channel = self.bot.get_channel(config.chat_channel)
             rnd_emoji = ['🍕', '🥞', '🍖', '🍡', '🎂', '🎍', '🎋', '🍬', '🍭', '🍹', '🍸', '🍱', '🍻', '🍩']
             await channel.edit(name = f'{random.choice(rnd_emoji)}┃чат')
@@ -173,6 +170,7 @@ class MainCog(commands.Cog):
 
     @tasks.loop(seconds=1)
     async def manage_check(self):
+        print(time.strftime('%S'))
         if time.strftime('%S') == '00':
 
             m_t = time.time()
@@ -852,6 +850,7 @@ class MainCog(commands.Cog):
                     if server['welcome']['emb'] == True:
                         emb = discord.Embed(description = text, color= server['embed_color'])
                         emb.set_image(url=f"attachment://welcome_card.{ul}")
+                        emb.set_footer(text=f"Аккаунт создан: {member.created_at.strftime('%X, %d %B, %Y')}")
                         await channel.send(file=file, embed = emb)
 
                 except Exception:
@@ -1298,17 +1297,15 @@ class MainCog(commands.Cog):
                     voice = server['voice']
                     r = random.choice(rr)
                     try:
-                        channel2 = await after.channel.guild.create_voice_channel(name=f"{r} {member.display_name}",category=mainCategory)
-                        voice['private_voices'].update({f"{channel2.id}": member.id})
-                        try:
-                            await member.move_to(channel2)
-                        except:
+                        await member.move_to(channel2)
+                    except:
+                        await channel2.delete()
+                    else:
+                        if len(channel2.members) < 1:
                             await channel2.delete()
                         else:
                             servers.update_one({'server': server['server']},{'$set': {'voice': voice}})
                             await channel2.set_permissions(member, manage_channels=True, mute_members=True, deafen_members=True, manage_permissions=True)
-                    except Exception:
-                        pass
 
 
         if before.channel is None and after.channel is not None:

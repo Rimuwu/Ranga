@@ -424,579 +424,24 @@ class clubs(commands.Cog):
 
                     await msg.edit(embed = sections['Участники'][n], view=DropdownView(ctx, msg, options = options, placeholder = '🧾 | Выберите страницу...', min_values = 1, max_values=1, timeout = 120.0, rem_args = []))
 
-
-
             options = op()
             msg = await ctx.send(embed = main_emb, file = file)
             await msg.edit(view=DropdownView(ctx, msg, options = options, placeholder = '🧾 | Выберите категорию...', min_values = 1, max_values=1, timeout = 20.0, rem_args = []))
 
 
-
-
-
-
-        # if name is None or arg == None:
-        #     name = user['guild']
-        #     dom = db.clubs.find_one({"name": name})
-        #
-        # else:
-        #     if arg in lname:
-        #         dom = db.clubs.find_one({"name": name})
-        #     elif arg in ltag:
-        #         dom = db.clubs.find_one({"tag": name})
-        #         name = dom['name']
-        #     else:
-        #         await ctx.send(f"Поиск по {arg} не доступен")
-        #         return
-        #
-        # print(dom)
-        #
-        #
-        # if dom != None:
-        #     members = dom['members']
-        #     data = dom['created']
-        #     ls = dom['members']
-        #     ad = dom['admins']
-        #     text = len(ls)
-        #     clvl = dom['lvl']
-        #     lvl_enter = dom['lvl_enter']
-        #     index_page = 1
-        #
-        #     solutions = ['📜', '👥', '🎴', '👑', '🛒', '❌']
-        #
-        #     sola0 = ['📜', '👥', '❌']
-        #     sola5 = ['📜', '👥', '🎴', '❌']
-        #     sola10 = ['📜', '👥', '🎴', '👑', '❌']
-        #     sola15 = ['📜', '👥', '🎴', '👑', '❌']
-        #     sola20 = ['📜', '👥', '🎴', '👑', '🛒', '❌']
-        #
-        #     solutions2 = ['📜', '👥', '📢', '👑', '🛒', '❌']
-        #
-        #     solb0 = ['📜', '👥', '❌']
-        #     solb5 = ['📜', '👥', '❌']
-        #     solb10 = ['📜', '👥', '👑', '❌']
-        #     solb15 = ['📜', '👥', '👑', '❌']
-        #     solb20 = ['📜', '👥', '👑', '🛒', '❌']
-        #
-        #     arrows = ["📑", "🔼", "🔽", '❌']
-        #     shop = ["📑", "1️⃣", '❌']
-        #
-        #     member = ctx.author
-        #     reaction = 'a'
-        #
-        #     if dom['global_club'] == False:
-        #         st = "Закрытый"
-        #     else:
-        #         st = f"Открытый\nУровень входа: {lvl_enter}"
-        #
-        #     if dom['flag'] == None:
-        #         expnc = 5 * dom['lvl'] * dom['lvl'] + 50 * dom['lvl'] + 100
-        #
-        #         emb1 = discord.Embed(color=0xf03e65).add_field(name = 'Описание:', value = f'{dom["bio"]}', inline = True
-        #         ).add_field(name = 'Уровень клуба:', value = f'LvL: {dom["lvl"]}\nExp: {dom["exp"]} |  {expnc}').add_field(name = 'Владелец:', value = f'<@{dom["owner"]}>'
-        #         ).add_field(name = 'Дата создания:', value = f'{data}').add_field(name = 'Статус клуба:', value = f'{st}'
-        #         ).add_field(name = 'Участников:', value = f'{text}'
-        #         ).add_field(name = 'Тег:', value = f'[{dom["tag"]}]').set_author(name = f'ClubInfo | {dom["name"]}').add_field(name = 'Банк:', value = f'Монетки: {dom["bank"]}')
-        #
-        #         emb2 = discord.Embed(color=0xf03e65).set_author( name = f'ClubUsers 1 | {dom["name"]}')
-        #         embu2 = discord.Embed(color=0xf03e65).set_author(name = f'ClubUsers 2 | {dom["name"]}')
-        #         embu3 = discord.Embed(color=0xf03e65).set_author( name = f'ClubUsers 3 | {dom["name"]}')
-        #         embu3 = discord.Embed(color=0xf03e65).set_author( name = f'ClubUsers 4 | {dom["name"]}')
-        #
-        #         emb4 = discord.Embed(color=0xf03e65).set_author(name = f'ClubAnnouncements | {dom["name"]}')
-        #
-        #         emb5 = discord.Embed(color=0xf03e65).set_author(name = f'ClubTop | {dom["name"]}')
-        #
-        #         emb6 = discord.Embed(color=0xf03e65).set_author( name = f'db.clubshop | {dom["name"]}').add_field(name = 'Банк:',
-        #         value = f'Монетки: {dom["bank"]}', inline = False).add_field(name = ':one:', value = f'+5 слотов для пользователей\n`Цена: 2.000 монет\nСлотов: {dom["max_users"]}`')
-        #
-        #         emb6er1 = discord.Embed(color=0xf03e65).set_author(name = f'db.clubshop | {dom["name"]}').add_field(name = 'Банк:',
-        #         value = f'Монетки: {dom["bank"]}', inline = False).add_field(name = ':one: - слоты для пользователей', value = f'+5 слотов для пользователей\n`Не хватает монет`')
-        #
-        #
-        #
-        #     if dom['flag'] != None:
-        #         expnc = 5 * dom['lvl'] * dom['lvl'] + 50 * dom['lvl'] + 100
-        #
-        #         emb1 = discord.Embed(color=0xf03e65).add_field(name = 'Описание:', value = f'{dom["bio"]}', inline = True
-        #         ).add_field(name = 'Уровень клуба:', value = f'LvL: {dom["lvl"]}\nExp: {dom["exp"]} |  {expnc}').add_field(name = 'Владелец:', value = f'<@{dom["owner"]}>'
-        #         ).add_field(name = 'Дата создания:', value = f'{data}').add_field(name = 'Статус клуба:', value = f'{st}'
-        #         ).add_field(name = 'Участников:', value = f'{text}'
-        #         ).add_field(name = 'Тег:', value = f'[{dom["tag"]}]').add_field(name = 'Банк:', value = f'Монетки: {dom["bank"]}')
-        #
-        #         emb2 = discord.Embed(color=0xf03e65).set_author(icon_url = '{}'.format(dom["flag"]), name = f'ClubUsers 1 | {dom["name"]}')
-        #         embu2 = discord.Embed(color=0xf03e65).set_author(icon_url = '{}'.format(dom["flag"]), name = f'ClubUsers 2 | {dom["name"]}')
-        #         embu3 = discord.Embed(color=0xf03e65).set_author(icon_url = '{}'.format(dom["flag"]), name = f'ClubUsers 3 | {dom["name"]}')
-        #         embu3 = discord.Embed(color=0xf03e65).set_author(icon_url = '{}'.format(dom["flag"]), name = f'ClubUsers 4 | {dom["name"]}')
-        #
-        #         emb4 = discord.Embed(color=0xf03e65).set_author(icon_url = '{}'.format(dom["flag"]), name = f'ClubAnnouncements | {dom["name"]}')
-        #
-        #         emb1.set_thumbnail(url = dom["flag"]).set_author(name = f'ClubInfo | {dom["name"]}', icon_url = '{}'.format(dom["flag"]))
-        #         emb2.set_thumbnail(url = dom["flag"])
-        #         emb3 = discord.Embed(color=0xf03e65).set_image(url = dom["flag"]).set_author(name = f'ClubBanner | {dom["name"]}')
-        #         emb4.set_thumbnail(url = dom["flag"])
-        #
-        #         emb5 = discord.Embed(color=0xf03e65).set_author(icon_url = '{}'.format(dom["flag"]), name = f'ClubTop | {dom["name"]}')
-        #
-        #         emb6 = discord.Embed(color=0xf03e65).set_author(icon_url = '{}'.format(dom["flag"]), name = f'shop | {dom["name"]}').add_field(name = 'Банк:',
-        #         value = f'Монетки: {dom["bank"]}', inline = False).add_field(name = ':one: - слоты для пользователей', value = f'+5 слотов для пользователей\n`Цена: 2.000 монет\nСлотов: {dom["max_users"]}`')
-        #
-        #         emb6er1 = discord.Embed(color=0xf03e65).set_author(icon_url = '{}'.format(dom["flag"]), name = f'db.clubshop | {dom["name"]}').add_field(name = 'Банк:',
-        #         value = f'Монетки: {dom["bank"]}', inline = False).add_field(name = ':one:', value = f'+5 слотов для пользователей\n`Не хватает монет`')
-        #
-        #     c = 0
-        #     ul = len(ls)
-        #     while True:
-        #         for i in ls:
-        #             if c < 25:
-        #
-        #                 if i == dom['owner']:
-        #                     user2 = funs.user_check(int(i), member.guild)
-        #                     emb2.add_field(name = f"{user2['username']}", value = f"Роль: Глава")
-        #                     ls.remove(int(i))
-        #                     c = c + 1
-        #
-        #                 elif i in ad:
-        #                     user2 = funs.user_check(int(i), member.guild)
-        #                     emb2.add_field(name = f"{user2['username']}", value = f"Роль: Админ")
-        #                     ls.remove(int(i))
-        #                     c = c + 1
-        #
-        #                 else:
-        #                     user2 = funs.user_check(int(i), member.guild)
-        #                     emb2.add_field(name = f"{user2['username']}", value = f"Роль: Участник")
-        #                     ls.remove(int(i))
-        #                     c = c + 1
-        #
-        #             elif c < 50 and c > 25:
-        #
-        #                 if i == dom['owner']:
-        #                     user2 = funs.user_check(int(i), member.guild)
-        #                     embu2.add_field(name = f"{user2['username']}", value = f"Роль: Глава")
-        #                     ls.remove(int(i))
-        #                     c = c + 1
-        #
-        #                 elif i in ad:
-        #                     user2 = funs.user_check(int(i), member.guild)
-        #                     embu2.add_field(name = f"{user2['username']}", value = f"Роль: Админ")
-        #                     ls.remove(int(i))
-        #                     c = c + 1
-        #
-        #                 else:
-        #                     user2 = funs.user_check(int(i), member.guild)
-        #                     embu2.add_field(name = f"{user2['username']}", value = f"Роль: Участник")
-        #                     ls.remove(int(i))
-        #                     c = c + 1
-        #
-        #             elif c < 75 and c > 50:
-        #
-        #                 if i == dom['owner']:
-        #                     user2 = funs.user_check(int(i), member.guild)
-        #                     embu3.add_field(name = f"{user2['username']}", value = f"Роль: Глава")
-        #                     ls.remove(int(i))
-        #                     c = c + 1
-        #
-        #                 elif i in ad:
-        #                     user2 = funs.user_check(int(i), member.guild)
-        #                     embu3.add_field(name = f"{user2['username']}", value = f"Роль: Админ")
-        #                     ls.remove(int(i))
-        #                     c = c + 1
-        #
-        #                 else:
-        #                     user2 = funs.user_check(int(i), member.guild)
-        #                     embu3.add_field(name = f"{user2['username']}", value = f"Роль: Участник")
-        #                     ls.remove(int(i))
-        #                     c = c + 1
-        #
-        #             elif c < 100 and c > 75:
-        #
-        #                 if i == dom['owner']:
-        #                     user2 = funs.user_check(int(i), member.guild)
-        #                     embu4.add_field(name = f"{user2['username']}", value = f"Роль: Глава")
-        #                     ls.remove(int(i))
-        #                     c = c + 1
-        #
-        #                 elif i in ad:
-        #                     user2 = funs.user_check(int(i), member.guild)
-        #                     embu4.add_field(name = f"{user2['username']}", value = f"Роль: Админ")
-        #                     ls.remove(int(i))
-        #                     c = c + 1
-        #
-        #                 else:
-        #                     user2 = funs.user_check(int(i), member.guild)
-        #                     embu4.add_field(name = f"{user2['username']}", value = f"Роль: Участник")
-        #                     ls.remove(int(i))
-        #                     c = c + 1
-        #
-        #         if ls == []:
-        #             break
-        #
-        #     m = 0
-        #     l = 0
-        #     r = 0
-        #     tex1 = "-"
-        #     tex2 = "-"
-        #     tex3 = "-"
-        #     d = db.clubs.find_one({"name": name})
-        #     tp = d['members']
-        #     while True:
-        #         for i in tp:
-        #             u = funs.user_check(int(i), member.guild)
-        #             tp.remove(i)
-        #             if u['money'] > m:
-        #                 m = u['money']
-        #                 tex1 = f"Имя: <@{i}>\nМонетки: {u['money']}"
-        #
-        #             # if u['lvl'] > l:
-        #             #     l = u['lvl']
-        #             #     tex2 = f"Имя: <@{i}>\nУровень: {u['lvl']}"
-        #             #
-        #             # if u['+rep'] > r:
-        #             #     r = u['+rep']
-        #             #     tex3 = f"Имя: <@{i}>\nРепутация: {u['+rep']}"
-        #
-        #
-        #
-        #         if tp == []:
-        #             emb5.add_field(name = "Топ по монеткам", value = tex1)
-        #             # emb5.add_field(name = "Топ по уровню", value = tex2)
-        #             # emb5.add_field(name = "Топ по репутации", value = tex3)
-        #             break
-        #
-        #     msg = await ctx.send(embed = emb1)
-        #
-        #     def check( reaction, user):
-        #         nonlocal msg
-        #         if dom['flag'] == None:
-        #             if clvl < 5:
-        #                 return user == ctx.author and str(reaction.emoji) in solb0 and str(reaction.message) == str(msg)
-        #             elif clvl < 10 and clvl >= 5:
-        #                 return user == ctx.author and str(reaction.emoji) in solb5 and str(reaction.message) == str(msg)
-        #             elif clvl < 15 and clvl >= 10:
-        #                 return user == ctx.author and str(reaction.emoji) in solb10 and str(reaction.message) == str(msg)
-        #             elif clvl < 20 and clvl >= 15:
-        #                 return user == ctx.author and str(reaction.emoji) in solb15 and str(reaction.message) == str(msg)
-        #             elif clvl >= 20:
-        #                 return user == ctx.author and str(reaction.emoji) in solb20 and str(reaction.message) == str(msg)
-        #         else:
-        #             if clvl < 5:
-        #                 return user == ctx.author and str(reaction.emoji) in sola0 and str(reaction.message) == str(msg)
-        #             elif clvl < 10 and clvl >= 5:
-        #                 return user == ctx.author and str(reaction.emoji) in sola5 and str(reaction.message) == str(msg)
-        #             elif clvl < 15 and clvl >= 10:
-        #                 return user == ctx.author and str(reaction.emoji) in sola10 and str(reaction.message) == str(msg)
-        #             elif clvl < 20 and clvl >= 15:
-        #                 return user == ctx.author and str(reaction.emoji) in sola15 and str(reaction.message) == str(msg)
-        #             elif clvl >= 20:
-        #                 return user == ctx.author and str(reaction.emoji) in sola20 and str(reaction.message) == str(msg)
-        #
-        #
-        #     def check2( reaction, user):
-        #         nonlocal msg
-        #         return user == ctx.author and str(reaction.emoji) in arrows and str(reaction.message) == str(msg)
-        #
-        #     def check3( reaction, user):
-        #         nonlocal msg
-        #         return user == ctx.author and str(reaction.emoji) in shop and str(reaction.message) == str(msg)
-        #
-        #     async def rr2():
-        #         nonlocal reaction
-        #         nonlocal index_page
-        #         nonlocal clvl
-        #         nonlocal dom
-        #         if str(reaction.emoji) == '🔼':
-        #             await msg.remove_reaction('🔼', member)
-        #             if index_page == 1:
-        #                 pass
-        #             elif index_page == 2:
-        #                 await msg.edit(embed = emb2)
-        #                 index_page = index_page - 1
-        #             elif index_page == 3:
-        #                 await msg.edit(embed = embu2)
-        #                 index_page = index_page - 1
-        #             pass
-        #         elif str(reaction.emoji) == '🔽':
-        #             await msg.remove_reaction('🔽', member)
-        #             if index_page == 1:
-        #                 await msg.edit(embed = embu2)
-        #                 index_page = index_page + 1
-        #             elif index_page == 2:
-        #                 await msg.edit(embed = embu3)
-        #                 index_page = index_page + 1
-        #             elif index_page == 3:
-        #                 pass
-        #             pass
-        #
-        #         elif str(reaction.emoji) == '📑':
-        #             await msg.remove_reaction('📑', member)
-        #             await msg.clear_reactions()
-        #
-        #             if dom['flag'] == None:
-        #
-        #                 if clvl < 5:
-        #                     for x in solb0:
-        #                         await msg.add_reaction(x)
-        #
-        #                 elif clvl < 10 and clvl >= 5:
-        #                     for x in solb5:
-        #                         await msg.add_reaction(x)
-        #
-        #                 elif clvl < 15 and clvl >= 10:
-        #                     for x in solb10:
-        #                         await msg.add_reaction(x)
-        #
-        #                 elif clvl < 20 and clvl >= 15:
-        #                     for x in solb15:
-        #                         await msg.add_reaction(x)
-        #
-        #                 elif clvl >= 20:
-        #                     for x in solb20:
-        #                         await msg.add_reaction(x)
-        #
-        #             else:
-        #                 if clvl < 5:
-        #                     for x in sola0:
-        #                         await msg.add_reaction(x)
-        #
-        #                 elif clvl < 10 and clvl >= 5:
-        #                     for x in sola5:
-        #                         await msg.add_reaction(x)
-        #
-        #                 elif clvl < 15 and clvl >= 10:
-        #                     for x in sola10:
-        #                         await msg.add_reaction(x)
-        #
-        #                 elif clvl < 20 and clvl >= 15:
-        #                     for x in sola15:
-        #                         await msg.add_reaction(x)
-        #
-        #                 elif clvl >= 20:
-        #                     for x in sola20:
-        #                         await msg.add_reaction(x)
-        #
-        #             await reackt()
-        #
-        #         elif str(reaction.emoji) == '❌':
-        #             await msg.clear_reactions()
-        #
-        #     async def rr3():
-        #         nonlocal reaction
-        #         nonlocal dom
-        #         if str(reaction.emoji) == '1️⃣':
-        #             await msg.remove_reaction('1️⃣', member)
-        #
-        #
-        #             emb6 = discord.Embed(color=0xf03e65).set_author(icon_url = '{}'.format(dom["flag"]), name = f'db.clubshop | {dom["name"]}'
-        #             ).add_field(name = 'Банк:',value = f'Монетки: {dom["bank"]}', inline = False
-        #             ).add_field(name = ':one: - слоты для пользователей', value = f'+5 слотов для пользователей\n`Цена: 2.000 монет\nСлотов: {dom["max_users"]}`')
-        #             if dom['max_users'] == 100:
-        #                 await ctx.send('В клубе может быть до 100 человек')
-        #             else:
-        #                 if dom['bank'] >= 2000:
-        #                     db.clubs.update_one( {"name": dom['name']}, {"$inc":{"max_users": 5}} )
-        #                     db.clubs.update_one( {"name": dom['name']}, {"$inc":{"bank": -2000}} )
-        #                     dom = db.clubs.find_one({"name": name})
-        #                     await msg.edit(embed = emb6)
-        #
-        #                 else:
-        #                     await msg.edit(embed = emb6er1)
-        #                     await asyncio.sleep(4)
-        #                     await msg.edit(embed = emb6)
-        #
-        #
-        #
-        #             pass
-        #
-        #         elif str(reaction.emoji) == '📑':
-        #             await msg.remove_reaction('📑', member)
-        #             await msg.clear_reactions()
-        #             await msg.edit(embed = emb1)
-        #
-        #             if dom['flag'] == None:
-        #
-        #                 if clvl < 5:
-        #                     for x in solb0:
-        #                         await msg.add_reaction(x)
-        #
-        #                 elif clvl < 10 and clvl >= 5:
-        #                     for x in solb5:
-        #                         await msg.add_reaction(x)
-        #
-        #                 elif clvl < 15 and clvl >= 10:
-        #                     for x in solb10:
-        #                         await msg.add_reaction(x)
-        #
-        #                 elif clvl < 20 and clvl >= 15:
-        #                     for x in solb15:
-        #                         await msg.add_reaction(x)
-        #
-        #                 elif clvl >= 20:
-        #                     for x in solb20:
-        #                         await msg.add_reaction(x)
-        #
-        #             else:
-        #                 if clvl < 5:
-        #                     for x in sola0:
-        #                         await msg.add_reaction(x)
-        #
-        #                 elif clvl < 10 and clvl >= 5:
-        #                     for x in sola5:
-        #                         await msg.add_reaction(x)
-        #
-        #                 elif clvl < 15 and clvl >= 10:
-        #                     for x in sola10:
-        #                         await msg.add_reaction(x)
-        #
-        #                 elif clvl < 20 and clvl >= 15:
-        #                     for x in sola15:
-        #                         await msg.add_reaction(x)
-        #
-        #                 elif clvl >= 20:
-        #                     for x in sola20:
-        #                         await msg.add_reaction(x)
-        #
-        #             await reackt()
-        #
-        #         elif str(reaction.emoji) == '❌':
-        #             await msg.clear_reactions()
-        #
-        #
-        #     async def reackt2():
-        #         nonlocal reaction
-        #         try:
-        #             reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check = check2)
-        #         except asyncio.TimeoutError:
-        #             await msg.clear_reactions()
-        #         else:
-        #             await rr2(), await reackt2()
-        #
-        #     async def reackt3():
-        #         nonlocal reaction
-        #         try:
-        #             reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check = check3)
-        #         except asyncio.TimeoutError:
-        #             await msg.clear_reactions()
-        #         else:
-        #             await rr3(), await reackt3()
-        #
-        #
-        #     async def rr():
-        #         nonlocal reaction
-        #         nonlocal dom
-        #         nonlocal arrows
-        #         dom = db.clubs.find_one({"name": name})
-        #         if str(reaction.emoji) == '📜':
-        #             await msg.remove_reaction('📜', member)
-        #             await msg.edit(embed = emb1)
-        #             pass
-        #
-        #         elif str(reaction.emoji) == '👥':
-        #             await msg.remove_reaction('👥', member)
-        #             await msg.edit(embed = emb2)
-        #             if dom['max_users'] > 25 and ul > 25:
-        #                 await msg.clear_reactions()
-        #                 for x in arrows:
-        #                     await msg.add_reaction(x)
-        #                 await reackt2()
-        #             pass
-        #
-        #         elif str(reaction.emoji) == '🎴':
-        #             await msg.remove_reaction('🎴', member)
-        #             await msg.edit(embed = emb3)
-        #             pass
-        #
-        #
-        #         elif str(reaction.emoji) == '👑':
-        #             await msg.remove_reaction('👑', member)
-        #             await msg.edit(embed = emb5)
-        #             pass
-        #
-        #
-        #         elif str(reaction.emoji) == '🛒':
-        #             await msg.remove_reaction('🛒', member)
-        #             if ctx.author.id in dom['members']:
-        #                 await msg.edit(embed = emb6)
-        #                 if user in dom['admins']:
-        #                     await msg.clear_reactions()
-        #                     for x in shop:
-        #                         await msg.add_reaction(x)
-        #                     await reackt3()
-        #             pass
-        #
-        #         elif str(reaction.emoji) == '❌':
-        #             await msg.clear_reactions()
-        #             return
-        #
-        #
-        #     async def reackt():
-        #         nonlocal reaction
-        #
-        #         try:
-        #             reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check = check)
-        #         except asyncio.TimeoutError:
-        #             await msg.clear_reactions()
-        #         else:
-        #             await rr(), await reackt()
-        #
-        #
-        #
-        #     if dom['flag'] == None:
-        #
-        #         if clvl < 5:
-        #             for x in solb0:
-        #                 await msg.add_reaction(x)
-        #
-        #         elif clvl < 10 and clvl >= 5:
-        #             for x in solb5:
-        #                 await msg.add_reaction(x)
-        #
-        #         elif clvl < 15 and clvl >= 10:
-        #             for x in solb10:
-        #                 await msg.add_reaction(x)
-        #
-        #         elif clvl < 20 and clvl >= 15:
-        #             for x in solb15:
-        #                 await msg.add_reaction(x)
-        #
-        #         elif clvl >= 20:
-        #             for x in solb20:
-        #                 await msg.add_reaction(x)
-        #
-        #     else:
-        #         if clvl < 5:
-        #             for x in sola0:
-        #                 await msg.add_reaction(x)
-        #
-        #         elif clvl < 10 and clvl >= 5:
-        #             for x in sola5:
-        #                 await msg.add_reaction(x)
-        #
-        #         elif clvl < 15 and clvl >= 10:
-        #             for x in sola10:
-        #                 await msg.add_reaction(x)
-        #
-        #         elif clvl < 20 and clvl >= 15:
-        #             for x in sola15:
-        #                 await msg.add_reaction(x)
-        #
-        #         elif clvl >= 20:
-        #             for x in sola20:
-        #                 await msg.add_reaction(x)
-        #
-        #     await reackt()
-        #
-        # else:
-        #     emb = discord.Embed(description = 'Такого клуба не существует!', color=0xf03e65)
-        #     emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-        #     await ctx.send(embed = emb)
-
-    @commands.command(usage = '(tag <= 4 characters) (lvl_enter) (open_status + / -) (name <= 25 characters)', description = 'Создание гильдии.',aliases = ['создать_гилдию', 'g_create', 'gcreate', 'guildcreate'])
+    @commands.command(usage = '(tag <= 4 characters) (lvl_enter) (open_status + / -) (name <= 25 characters)', description = 'Создание гильдии.\nСтоимость 5к',aliases = ['создать_гилдию', 'g_create', 'gcreate', 'guildcreate'])
     async def guild_create(self, ctx, tag = None, lvl_enter:int = 0, open_status = "-", *, name = None):
         global users
 
         member = ctx.author
         player = funs.user_check(member, member.guild)
         server = servers.find_one({"server": ctx.guild.id})
+
+        if player['money'] < 5000:
+            emb = discord.Embed(description = f'У вас не достаточно монет для создания гильдии! Сейчас у вас {player["money"]}, а требуется 5к',color=server['embed_color'])
+            emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+            await ctx.send(embed = emb)
+            return
 
 
         if tag is None:
@@ -1080,18 +525,17 @@ class clubs(commands.Cog):
                 server['rpg']['guilds'][g_id] = { "name": name, 'tag': tag, "bio": 'Пусто', "flag": None, "lvl": 1, "exp": 0, "created": time.strftime('%X, %d %B, %Y'), "members": {str(ctx.author.id): {"role": 'owner'}}, 'global_club': status, 'lvl_enter': lvl_enter, 'max_users': 50, 'bank': 0, 'inv': [], 'main_location': None, 'locations': [], 'banner_url': None }
 
                 servers.update_one( {"server": ctx.guild.id}, {"$set": {'rpg': server['rpg']}} )
+                funs.user_update(member.id, ctx.guild, met, user['money'] - 5000)
 
 
-
-
-    #
-    # @commands.command(usage = '(url)', description = 'Установка баннера клуба. Стоимость 1к', aliases = ['баннер_клуба'])
+    # @commands.command(usage = '(url)', description = 'Установка баннера гильдии. Стоимость 1к', aliases = ['баннер_клуба'], usage = 'Размер изображения должен быть 1100х400')
     # async def club_banner(self, ctx, link = None):
     #     global users
     #     if users.find_one({"userid": ctx.author.id}) == None:
     #         await ctx.send(f'У данного пользователя не создан аккаунт, пропишите {ctx.prefix}help для создания!')
     #         return
-    #     user = users.find_one({"userid": ctx.author.id})
+    #
+    #     user = funs.user_check(member, member.guild)
     #
     #
     #     if link is None:
@@ -1101,6 +545,18 @@ class clubs(commands.Cog):
     #         return
     #
     #     else:
+    #
+    #         response = requests.get(url, stream = True)
+    #         response = Image.open(io.BytesIO(response.content))
+    #
+    #         if response.size != (1100, 400):
+    #             emb = discord.Embed(description = 'Требовалось указать ссылку на изображение 1100 на 400 пикселей!', color=0xf03e65)
+    #             emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+    #             await ctx.send(embed = emb)
+    #             return
+    #
+    #
+    #
     #         if user['guild'] != None:
     #             guild = db.clubs.find_one({"name": user['guild']})
     #             if guild['owner'] == ctx.author.id or ctx.author.id in guild["admins"]:
@@ -1140,8 +596,8 @@ class clubs(commands.Cog):
     #             await ctx.send(embed = emb)
     #
     #             await ctx.message.delete()
-    #
-    #
+
+
     # @commands.command(usage = '(bio)', description = 'Установка информации о клубе. Стоимость 200.', aliases = ['био_клуба'])
     # async def club_bio(self, ctx, *, bio = None):
     #     global users
@@ -1189,6 +645,7 @@ class clubs(commands.Cog):
     #         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
     #         await ctx.send(embed = emb)
     #         await ctx.message.delete()
+    #
     #
     #
     # @commands.command(usage = '(@member)', description = 'Приглашение в свой клуб.', aliases = ['пригласить'])
