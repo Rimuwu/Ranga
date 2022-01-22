@@ -81,9 +81,8 @@ class help(commands.Cog):
             options = []
             options.append(discord.SelectOption(label = "Главная", emoji = "🍡" ))
             for cc in ct_d.keys():
-                if cc != 'clubs': #так как все в комментариях, по факту для бота не существует такой категории
-                    i = ct_d[cc]
-                    options.append(discord.SelectOption(label = i[1], emoji = i[0] ))
+                i = ct_d[cc]
+                options.append(discord.SelectOption(label = i[1], emoji = i[0] ))
 
             def embed(c_n):
                 nonlocal ct_d

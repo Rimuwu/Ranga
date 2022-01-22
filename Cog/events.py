@@ -170,7 +170,6 @@ class MainCog(commands.Cog):
 
     @tasks.loop(seconds=1)
     async def manage_check(self):
-        print(time.strftime('%S'))
         if time.strftime('%S') == '00':
 
             m_t = time.time()
