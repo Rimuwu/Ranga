@@ -24,7 +24,6 @@ client = funs.mongo_c()
 db = client.bot
 backs = db.bs
 servers = db.servers
-frames = db.frames
 settings = db.settings
 
 voice_dict = {}
@@ -673,15 +672,11 @@ class MainCog(commands.Cog):
             return mask.resize(size, Image.ANTIALIAS)
 
         def crop(im, s):
-            w, h = im.size
-            k = w / s[0] - h / s[1]
+            mask = Image.open('elements/elips_mask.png').convert('L').resize(s, Image.ANTIALIAS)
 
-            if k > 0:
-                im = im.crop(((w - h) / 2, 0, (w + h) / 2, h))
-            elif k < 0:
-                im = im.crop((0, (h - w) / 2, w, (h + w) / 2))
-
-            return im.resize(s, Image.ANTIALIAS)
+            output = ImageOps.fit(im, s, centering=(0.5, 0.5))
+            output.putalpha(mask)
+            return output
 
         def make_ellipse_mask(size, x0, y0, x1, y1, blur_radius):
             img = Image.new("L", size, color=0)
@@ -691,7 +686,7 @@ class MainCog(commands.Cog):
 
         server = servers.find_one({"server": member.guild.id})
 
-        if server['send']['joinsend'] != 777777777777777777 or server['send']['joinsend'] != None:
+        if server['send']['joinsend'] != None:
 
             if server['send']['joinsend'] == 'dm':
                 channel = member
@@ -699,41 +694,39 @@ class MainCog(commands.Cog):
                 channel = self.bot.get_channel(server['send']['joinsend'])
 
             if channel != None:
-                if server['send']['avatar_join_url'] != "avatar_url_none":
+                ust = server['welcome']
 
-                    ust = server['welcome']
+                try:
+                    ust['join_type']
+                except:
+                    ust.update({'join_type': False})
 
-                    try:
-                        ust['join_type']
-                    except:
-                        ust.update({'join_type': False})
+                if ust['join_type'] == False: #png
 
-                    url = server['send']['avatar_join_url']
+                    response = requests.get(server['send']['avatar_join_url'], stream = True)
+                    response = Image.open(io.BytesIO(response.content))
+                    response = response.convert("RGBA")
+                    alpha = response.resize((960, 470), Image.ANTIALIAS) # улучшение качества
 
-                    if ust['join_type'] == False: #png
+                if ust['join_type'] == True: #gif
 
-                        response = requests.get(url, stream = True)
-                        response = Image.open(io.BytesIO(response.content))
-                        response = response.convert("RGBA")
-                        alpha = response.resize((960, 470), Image.ANTIALIAS) # улучшение качества
+                    response = requests.get(server['send']['avatar_join_url'], stream=True)
+                    response.raw.decode_content = True
+                    img = Image.open(response.raw)
 
-                    if ust['join_type'] == True: #gif
-
-                        response = requests.get(url, stream=True)
-                        response.raw.decode_content = True
-                        img = Image.open(response.raw)
-
-                        alpha = Image.open('elements/alpha.png')
-                        alpha = alpha.resize((960, 470), Image.ANTIALIAS)
+                    alpha = Image.open('elements/alpha.png')
+                    alpha = alpha.resize((960, 470), Image.ANTIALIAS)
 
 
-                    idraw = ImageDraw.Draw(alpha)
-                    name = member.name
-                    tag = member.discriminator
+                idraw = ImageDraw.Draw(alpha)
+                name = member.name
+                tag = member.discriminator
 
 
-                    headline = ImageFont.truetype("fonts/20421.ttf", size = 50)
-                    big = ImageFont.truetype("fonts/NotoSans-Bold.ttf", size = 100)
+                headline = ImageFont.truetype("fonts/20421.ttf", size = 50)
+                big = ImageFont.truetype("fonts/ofont.ru_FloraC.ttf", size = 120)
+
+                if server['send']['join_position_avatar'] == 0:
 
                     l = len(name)
                     if l < 11:
@@ -741,133 +734,128 @@ class MainCog(commands.Cog):
                     if l >= 11:
                         number = 9
 
-                    if server['send']['join_position_avatar'] == 0:
+                    wp1 = 245          #x
+                    wp2 = 275          #y
 
-                        wp1 = 245          #x
-                        wp2 = 275          #y
+                    tp2 = 400
+                    tp1 = int(400 - l * number) #текст
 
-                        tp2 = 400
-                        tp1 = int(400 - l * number) #текст
+                    size = (250,250)        #y
+                    ap1 = int(960 / 2 - size[0] / 2)         #x
+                    ap2 = 30          #y
 
-                        size = (250,250)        #y
-                        ap1 = int(960 / 2 - size[0] / 2)         #x
-                        ap2 = 30          #y
+                if server['send']['join_position_avatar'] == 1:
 
-                    if server['send']['join_position_avatar'] == 1:
+                    wp1 = 300          #x
+                    wp2 = 170          #y
 
-                        wp1 = 300          #x
-                        wp2 = 170          #y
+                    tp2 = 280 #y
+                    tp1 = 305 #текст имени  x
 
-                        tp2 = 280 #y
-                        tp1 = 305 #текст имени  x
+                    size = (250,250)
+                    ap1 = 20         #x
+                    ap2 = 115          #y
 
-                        size = (250,250)
-                        ap1 = 20         #x
-                        ap2 = 115          #y
+                if server['welcome']['wel_fill'] == None:
+                    idraw.text((wp1, wp2), f"WELCOME", font = big)
+                else:
+                    idraw.text((wp1, wp2), f"WELCOME", font = big, fill = f"{server['welcome']['wel_fill']}")
 
-                    if server['welcome']['wel_fill'] == None:
-                        idraw.text((wp1, wp2), f"WELCOME", font = big)
-                    else:
-                        idraw.text((wp1, wp2), f"WELCOME", font = big, fill = f"{server['welcome']['wel_fill']}")
+                if server['welcome']['nam_fill'] == None:
+                    idraw.text((tp1, tp2), f"{name}#{tag}", font = headline)
+                else:
+                    idraw.text((tp1, tp2), f"{name}#{tag}", font = headline,fill = f"{server['welcome']['nam_fill']}")
 
-                    if server['welcome']['nam_fill'] == None:
-                        idraw.text((tp1, tp2), f"{name}#{tag}", font = headline)
-                    else:
-                        idraw.text((tp1, tp2), f"{name}#{tag}", font = headline,fill = f"{server['welcome']['nam_fill']}")
+                try:
+                    aurl = str(member.avatar.url)
+                except:
+                    aurl = None
 
+                if aurl != None:
                     try:
-
-                        url = str(member.avatar.url)
-
-                        try:
-                            response1 = requests.get(url, stream = True)
-                            response1 = Image.open(io.BytesIO(response1.content))
-
-                        except Exception:
-                            byteImgIO = io.BytesIO()
-                            response = requests.get(url, stream = True)
-                            response.raw.decode_content = True
-                            response1 = Image.open(response.raw)
-
-                        response1 = response1.convert("RGB")
-                        response1 = response1.resize((200, 200), Image.ANTIALIAS)
-
-                        im = response1
-                        im = crop(im, size)
-                        im.putalpha(prepare_mask(size, 4))
-
-                        overlay_image = alpha.filter(ImageFilter.GaussianBlur(radius=15))
-                        if server['welcome']['el_fill'] == None:
-                            mask_image = make_ellipse_mask((960, 470), ap1 - 10, ap2 - 10, ap1 + size[0] + 10, ap2 + size[1] + 10, 1).resize((960, 470), Image.ANTIALIAS)
-                            alpha = Image.composite(overlay_image, alpha, mask_image)
-                        else:
-                            idraw.ellipse((ap1 - 10, ap2 - 10, ap1 + size[0] + 10, ap2 + size[1] + 10), fill = f"{server['welcome']['el_fill']}")
-
-                        #аватарка
-                        bg_img = alpha
-                        fg_img = im
-                        im = trans_paste(fg_img, bg_img, 1.0, (ap1, ap2, ap1 + size[0], ap2 + size[0]))
-
-                    except:
-                        pass
-
-                    if server['welcome']['wel_text'] == None:
-                        text = f"Welcome {name}#{tag} to {member.guild.name}"
-                    else:
-                        text = server['welcome']['wel_text']
-                        text = funs.text_replase(text, member)
-
-                    if ust['join_type'] == False:
-
-
-                        image = alpha
-                        output = BytesIO()
-                        image.save(output, 'png')
-                        image_pix=BytesIO(output.getvalue())
-
-                        file = discord.File(fp = image_pix, filename="welcome_card.png")
-                        ul = 'png'
-
-                    if ust['join_type'] == True:
-                        fs = []
-                        for frame in ImageSequence.Iterator(img):
-                            frame = frame.convert("RGBA")
-
-                            frame = frame.resize((960, 470), Image.ANTIALIAS)
-
-                            bg_img = frame
-                            fg_img = alpha
-                            img = trans_paste(fg_img, bg_img, 1.0)
-
-                            b = io.BytesIO()
-                            frame.save(b, format="GIF")
-                            frame = Image.open(b)
-                            fs.append(frame)
-
-
-                        fs[0].save('welcome_card.gif', save_all=True, append_images=fs[1:], loop = 0)
-
-                        file = discord.File(fp = "welcome_card.gif", filename="welcome_card.gif")
-                        ul = 'gif'
-
-
-                    try:
-                        if server['welcome']['emb'] == False:
-                            await channel.send(f"{text}", file = file)
-
-                        if server['welcome']['emb'] == True:
-                            emb = discord.Embed(description = text, color= server['embed_color'])
-                            emb.set_image(url=f"attachment://welcome_card.{ul}")
-                            await channel.send(file=file, embed = emb)
+                        response1 = requests.get(str(member.avatar.url), stream = True)
+                        response1 = Image.open(io.BytesIO(response1.content))
 
                     except Exception:
-                        pass
+                        byteImgIO = io.BytesIO()
+                        response = requests.get(str(member.avatar.url), stream = True)
+                        response.raw.decode_content = True
+                        response1 = Image.open(response.raw)
 
-                    try:
-                        os.remove(f'welcome_card.{ul}')
-                    except Exception:
-                        pass
+                    sz = 250
+                    response1 = response1.convert("RGB")
+                    response1 = response1.resize((sz, sz), Image.ANTIALIAS)
+                    response1 = crop(response1, (sz, sz))
 
+                    sz2 = sz + 20
+                    if server['welcome']['el_fill'] == None:
+                        wh = Image.new(mode = 'RGB', color = 'white', size = (sz2, sz2))
+                        wh = crop(wh, (sz2, sz2))
+
+                    else:
+                        wh = Image.new(mode = 'RGB', color = f"{server['welcome']['el_fill']}", size = (sz2, sz2))
+                        wh = crop(wh, (sz2, sz2))
+
+                    bg_img = wh
+                    fg_img = response1
+                    im = trans_paste(fg_img, bg_img, 1.0, (10, 10, sz+10, sz+10))
+
+                    bg_img = alpha
+                    fg_img = im
+                    alpha = trans_paste(fg_img, bg_img, 1.0, (ap1, ap2, sz2 + ap1, sz2 + ap2))
+
+
+                if server['welcome']['wel_text'] == None:
+                    text = f"Welcome {name}#{tag} to {member.guild.name}"
+                else:
+                    text = server['welcome']['wel_text']
+                    text = funs.text_replase(text, member)
+
+                if ust['join_type'] == False:
+
+
+                    image = alpha
+                    output = BytesIO()
+                    image.save(output, 'png')
+                    image_pix=BytesIO(output.getvalue())
+
+                    file = discord.File(fp = image_pix, filename="welcome_card.png")
+                    ul = 'png'
+
+                if ust['join_type'] == True:
+                    fs = []
+                    for frame in ImageSequence.Iterator(img):
+                        frame = frame.convert("RGBA")
+
+                        frame = frame.resize((960, 470), Image.ANTIALIAS)
+
+                        bg_img = frame
+                        fg_img = alpha
+                        img = trans_paste(fg_img, bg_img, 1.0)
+
+                        b = io.BytesIO()
+                        frame.save(b, format="GIF")
+                        frame = Image.open(b)
+                        fs.append(frame)
+
+
+                    fs[0].save('welcome_card.gif', save_all=True, append_images=fs[1:], loop = 0)
+
+                    file = discord.File(fp = "welcome_card.gif", filename="welcome_card.gif")
+                    ul = 'gif'
+
+
+                try:
+                    if server['welcome']['emb'] == False:
+                        await channel.send(f"{text}", file = file)
+
+                    if server['welcome']['emb'] == True:
+                        emb = discord.Embed(description = text, color= server['embed_color'])
+                        emb.set_image(url=f"attachment://welcome_card.{ul}")
+                        await channel.send(file=file, embed = emb)
+
+                except Exception:
+                    pass
         try:
             if server['nick_change'] != None:
 
