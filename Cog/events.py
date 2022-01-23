@@ -17,7 +17,7 @@ import aiohttp
 import pprint
 
 sys.path.append("..")
-from ai3 import functions as funs
+from functions import functions as funs
 import config
 
 client = funs.mongo_c()
@@ -120,6 +120,10 @@ class MainCog(commands.Cog):
     def __init__(self, bot):
         global servers
         self.bot = bot
+
+    @commands.Cog.listener()
+    async def on_connect(self):
+        await self.bot.change_presence( status = discord.Status.online, activity = discord.Game('Demon strating...'))
 
 
     @commands.Cog.listener()

@@ -10,7 +10,7 @@ import pymongo
 import config
 
 sys.path.append("..")
-from ai3 import functions as funs
+from functions import functions as funs
 
 client = funs.mongo_c()
 db = client.bot

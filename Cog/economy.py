@@ -9,7 +9,7 @@ import pymongo
 
 
 sys.path.append("..")
-from ai3 import functions as funs
+from functions import functions as funs
 import config
 
 client = funs.mongo_c()
@@ -357,15 +357,6 @@ class economy(commands.Cog):
             return
 
         server = servers.find_one({"server": ctx.guild.id})
-
-        if server['premium'] == True:
-            premit = 100
-        else:
-            premit = 50
-
-        if len(server['economy']['gl_shop']) > premit:
-            await ctx.send(f'Превышен лимит предметов которые можно добавить в магазин ({premit})')
-            return
 
         product = {}
 
@@ -1119,7 +1110,21 @@ class economy(commands.Cog):
             reward = server['economy']['daily_reward']['reward']
             reward_percent = server['economy']['daily_reward']['reward_percent']
 
-        url = f"https://ic.wampi.ru/2021/08/07/pizza_day_{user['cache']['week_act'][0]}.gif"
+        if user['cache']['week_act'][0] == 1:
+            url = "https://cdn.discordapp.com/attachments/932577316649967678/934767575257186354/pizza_day_1.gif"
+        if user['cache']['week_act'][0] == 2:
+            url = "https://cdn.discordapp.com/attachments/932577316649967678/934767575001337896/pizza_day_2.gif"
+        if user['cache']['week_act'][0] == 3:
+            url = "https://cdn.discordapp.com/attachments/932577316649967678/934767574707752980/pizza_day_3.gif"
+        if user['cache']['week_act'][0] == 4:
+            url = "https://cdn.discordapp.com/attachments/932577316649967678/934767574359629864/pizza_day_4.gif"
+        if user['cache']['week_act'][0] == 5:
+            url = "https://cdn.discordapp.com/attachments/932577316649967678/934767574082781254/pizza_day_5.gif"
+        if user['cache']['week_act'][0] == 6:
+            url = "https://cdn.discordapp.com/attachments/932577316649967678/934767573801766952/pizza_day_6.gif"
+        if user['cache']['week_act'][0] == 7:
+            url = "https://cdn.discordapp.com/attachments/932577316649967678/934767573537538048/pizza_day_7.gif"
+
 
         if user['cache']['week_act'][0] == 1:
             u_r = int(reward)

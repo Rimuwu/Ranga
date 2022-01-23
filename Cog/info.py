@@ -10,7 +10,7 @@ import requests
 
 
 sys.path.append("..")
-from ai3 import functions as funs
+from functions import functions as funs
 import config
 
 client = funs.mongo_c()

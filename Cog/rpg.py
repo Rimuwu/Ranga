@@ -12,7 +12,7 @@ from fuzzywuzzy import fuzz
 import pprint as pprint
 
 sys.path.append("..")
-from ai3 import functions as funs
+from functions import functions as funs
 import config
 
 

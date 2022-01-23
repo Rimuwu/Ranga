@@ -8,7 +8,7 @@ import sys
 import pymongo
 
 sys.path.append("..")
-from ai3 import functions as funs
+from functions import functions as funs
 import config
 
 client = funs.mongo_c()
@@ -111,7 +111,7 @@ class reactions(commands.Cog):
         if giff == 4:
             gif = "https://i.pinimg.com/originals/58/2e/31/582e311043fb847a9a2dd1d6548ab766.gif"
         if giff == 5:
-            gif = "https://www.booksie.com/uploads/userfiles/6742/images/fe7582e99876519a286ccc73252ac8b0.gif"
+            gif = "https://giffiles.alphacoders.com/131/131257.gif"
         if giff == 6:
             gif = "https://data.whicdn.com/images/294084710/original.gif"
         if giff == 7:
