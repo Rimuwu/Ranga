@@ -1189,9 +1189,9 @@ class MainCog(commands.Cog):
     async def on_guild_join(self,guild):
         funs.insert_server(guild)
 
-    @commands.Cog.listener()
-    async def on_guild_remove(self, guild):
-        servers.delete_one({"server": guild.id})
+    # @commands.Cog.listener()
+    # async def on_guild_remove(self, guild):
+    #     servers.delete_one({"server": guild.id})
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
