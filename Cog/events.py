@@ -1300,15 +1300,21 @@ class MainCog(commands.Cog):
                     voice = server['voice']
                     r = random.choice(rr)
                     try:
-                        await member.move_to(channel2)
-                    except:
-                        await channel2.delete()
-                    else:
-                        if len(channel2.members) < 1:
+                        channel2 = await after.channel.guild.create_voice_channel(name=f"{r} {member.display_name}'s Room",category=mainCategory)
+                        voice['private_voices'].update({f"{channel2.id}": member.id})
+
+                        try:
+                            await member.move_to(channel2)
+                        except:
                             await channel2.delete()
                         else:
-                            servers.update_one({'server': server['server']},{'$set': {'voice': voice}})
-                            await channel2.set_permissions(member, manage_channels=True, mute_members=True, deafen_members=True, manage_permissions=True)
+                            if len(channel2.members) < 1:
+                                await channel2.delete()
+                            else:
+                                servers.update_one({'server': server['server']},{'$set': {'voice': voice}})
+                                await channel2.set_permissions(member, manage_channels=True, manage_permissions=True)
+                    except Exception:
+                        pass
 
 
         if before.channel is None and after.channel is not None:
