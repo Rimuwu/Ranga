@@ -81,7 +81,7 @@ class profile(commands.Cog):
             else:
                 await ctx.send("Такой функции как "+ str(arg) + " не существует, имеется только + или -")
 
-    @commands.command(aliases = ["я", "профиль", "p"])
+    @commands.command(aliases = ["я", "профиль", "p"], usage = '[@mamber]', description = 'Открыть профиль [@пользователя]')
     @commands.cooldown(1, 2, commands.BucketType.guild)
     async def profile(self,ctx, member: discord.Member = None):
         if member == None:

@@ -682,16 +682,15 @@ async def on_message(message):
 
     st = time.time()
     s = settings.find_one({"sid": 1})
-    server = servers.find_one({"server": message.guild.id})
 
     if message.author.bot == True: return
     if message.guild == None:
         emb = discord.Embed(description = "Йоу, перейдите на сервер что бы использовать бота. \n Если у вас нету подходящего сервера, вы можете перейти на сервер поддержки бота > [Клик](https://discord.gg/cFa8K37pBa)", color=0xf03e65)
         await message.channel.send(embed = emb)
         return
-
     if message.guild.id in s['bl servers']: return
 
+    server = servers.find_one({"server": message.guild.id})
     if server == None:
         functions.insert_server(message.guild)
         server = servers.find_one({"server": message.guild.id})
