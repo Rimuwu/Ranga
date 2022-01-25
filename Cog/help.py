@@ -22,20 +22,23 @@ class help(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=["помощь", "h", "рудз", 'хелп'], description='Команда помощи.')
+    @commands.command(aliases=["помощь", "h", "рудз", 'хелп'], description='Команда помощи.', usage = '-')
     async def help(self, ctx, *, command = None):
         server = servers.find_one({'server':ctx.guild.id})
         if command != None:
             com = self.bot.get_command("".join(command))
             if com != None:
-                if com.aliases != []:
-                    text = f'{com.description}\n**Другие названия:** {", ".join(com.aliases)}'
-                else:
-                    text = f'{com.description}'
-                if com.help != None:
-                    text += f'\n\n{com.help}'
 
-                emb = discord.Embed(title=f"Команда {com.name}", description = f"Использование: **{ctx.prefix}{com.name}** `{com.usage}`\n{text}" ,color=server['embed_color']).set_footer(text = '() - обязательный аргумент, [] - необязательный аргумент')
+                emb = discord.Embed(title = f"❔ | Команда {com.name}\n" , description = f'{com.description}',
+                color=server['embed_color'])
+                emb.set_footer(text = '() - обязательный аргумент, [] - необязательный аргумент')
+                emb.add_field(name = 'Использование', value = f'`{ctx.prefix}{com.name} {com.usage}`')
+
+                if com.aliases != []:
+                    emb.add_field(name = 'Альтернативные н.', value = f'{", ".join(com.aliases)}')
+                if com.help != None:
+                    emb.add_field(name = 'Категория', value = f'{com.help}')
+
                 await ctx.send(embed=emb)
             else:
                 await ctx.send("Комманда не найдена!")

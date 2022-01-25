@@ -20,6 +20,62 @@ class functions:
 
     @staticmethod
     def time_end(seconds:int):
+
+        def ending_w(word, number:str):
+            n = int(len(str(number))) - 1
+            ord = int(str(number)[n:])
+
+            if word == 'секунда':
+                if ord in [1]:
+                    newword = word
+                elif ord in [2,3,4]:
+                    newword = 'секунды'
+                elif ord in [5,6,7,8,9,0]:
+                    newword = 'секунд'
+
+            elif word == 'минута':
+                if ord in [1]:
+                    newword = word
+                elif ord in [2,3,4]:
+                    newword = 'минуты'
+                elif ord in [5,6,7,8,9,0]:
+                    newword = 'минут'
+
+            elif word == 'час':
+                if ord in [1]:
+                    newword = word
+                elif ord in [2,3,4]:
+                    newword = 'часа'
+                elif ord in [5,6,7,8,9,0]:
+                    newword = 'часов'
+
+            elif word == 'день':
+                if ord in [1]:
+                    newword = word
+                elif ord in [2,3,4]:
+                    newword = 'дня'
+                elif ord in [5,6,7,8,9,0]:
+                    newword = 'дней'
+
+            elif word == 'неделя':
+                if ord in [1]:
+                    newword = word
+                elif ord in [2,3,4]:
+                    newword = 'недели'
+                elif ord in [5,6,7,8,9,0]:
+                    newword = 'недель'
+
+            elif word == 'месяц':
+                if ord in [1]:
+                    newword = word
+                elif ord in [2,3,4]:
+                    newword = 'месяца'
+                elif ord in [5,6,7,8,9,0]:
+                    newword = 'месяцев'
+
+            return newword
+
+
         mm = int(seconds//2592000)
         seconds -= mm*2592000
         w = int(seconds//604800)
@@ -32,31 +88,25 @@ class functions:
         seconds -= m*60
         s = int(seconds%60)
 
-        if mm < 10:
-            mm = f"0{mm}"
-        if w < 10:
-            w = f"0{w}"
-        if d < 10:
-            d = f"0{d}"
-        if h < 10:
-            h = f"0{h}"
-        if m < 10:
-            m = f"0{m}"
-        if s < 10:
-            s = f"0{s}"
+        if mm < 10: mm = f"0{mm}"
+        if w < 10: w = f"0{w}"
+        if d < 10: d = f"0{d}"
+        if h < 10: h = f"0{h}"
+        if m < 10: m = f"0{m}"
+        if s < 10: s = f"0{s}"
 
         if m == '00' and h == '00' and d == '00' and w == '00' and mm == '00':
-            return f"{s}s"
+            return f"{s} {ending_w('секунда',s)}"
         elif h == '00' and d == '00' and w == '00' and mm == '00':
-            return f"{m}m {s}s"
+            return f"{m} {ending_w('минута',m)}, {s} {ending_w('секунда',s)}"
         elif d == '00' and w == '00' and mm == '00':
-            return f"{h}h {m}m {s}s"
+            return f"{h} {ending_w('час',h)}, {m} {ending_w('минута',m)}, {s} {ending_w('секунда',s)}"
         elif w == '00' and mm == '00':
-            return f"{d}d {h}h {m}m {s}s"
+            return f"{d} {ending_w('день',d)}, {h} {ending_w('час',h)}, {m} {ending_w('минута',m)}, {s} {ending_w('секунда',s)}"
         elif mm == '00':
-            return f"{w}w {d}d {h}h {m}m {s}s"
+            return f"{w} {ending_w('неделя',w)}, {d} {ending_w('день',d)}, {h} {ending_w('час',h)}, {m} {ending_w('минута',m)}, {s} {ending_w('секунда',s)}"
         else:
-            return  f"{mm}M {w}w {d}d {h}h {m}m {s}s"
+            return  f"{mm} {ending_w('месяц',mm)}, {w} {ending_w('неделя',w)}, {d} {ending_w('день',d)}, {h} {ending_w('час',h)}, {m} {ending_w('минута',m)}, {s} {ending_w('секунда',s)}"
 
     @staticmethod
     def text_replase(text:str, member: discord.Member = None):
@@ -66,9 +116,9 @@ class functions:
 
         Time = time.strftime('%H:%M %d.%m.%Y')
         try:
-            n = int(len(member.guild.members))
-            n = int(math.log10(n))
-            ord = int(str(len(member.guild.members))[n:])
+            n = int(len(str(number))) - 1
+            ord = int(str(number)[n:])
+            
             if ord == 0 or ord == 1 or ord == 4 or ord == 5 or ord == 9:
                 ord = "ый"
             elif ord == 2 or ord == 6 or ord == 7 or ord == 8:

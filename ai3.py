@@ -30,7 +30,7 @@ backs = db.bs
 servers = db.servers
 settings = db.settings
 
-peoplesCD = {}
+# peoplesCD = {}
 start_time = time.time()
 
 # префикс ======================================= #
@@ -272,30 +272,30 @@ async def global_chat(message, s, server):
     except Exception:
         pass
 
-def cooldown(user_id, guild_id):
-    # Возращаем True если пользователь может получить опыт, False если у пользователя есть задержка
-    global peoplesCD
-
-    try: #проверка
-        if peoplesCD[str(guild_id)][str(user_id)] <= time.time():
-            peoplesCD[str(guild_id)].pop(str(user_id))
-            return True
-        else:
-            return False
-    except Exception:
-        pass
-
-    try: #добавление при не наличии пользователя
-        peoplesCD[str(guild_id)].update({ str(user_id): int(time.time()+60) })
-        return True
-    except Exception:
-        pass
-
-    try: #добавление при не наличии пользователя и сервера
-        peoplesCD.update({ str(guild_id): {str(user_id): int(time.time()+60) } })
-        return True
-    except Exception:
-        pass
+# def cooldown(user_id, guild_id):
+#     # Возращаем True если пользователь может получить опыт, False если у пользователя есть задержка
+#     global peoplesCD
+#
+#     try: #проверка
+#         if peoplesCD[str(guild_id)][str(user_id)] <= time.time():
+#             peoplesCD[str(guild_id)].pop(str(user_id))
+#             return True
+#         else:
+#             return False
+#     except Exception:
+#         pass
+#
+#     try: #добавление при не наличии пользователя
+#         peoplesCD[str(guild_id)].update({ str(user_id): int(time.time()+60) })
+#         return True
+#     except Exception:
+#         pass
+#
+#     try: #добавление при не наличии пользователя и сервера
+#         peoplesCD.update({ str(guild_id): {str(user_id): int(time.time()+60) } })
+#         return True
+#     except Exception:
+#         pass
 
 
 async def lvl_up_image(message, user, server):
@@ -675,12 +675,14 @@ async def punishment_mod(message, server, p, reason, shield):
                 pass
 
 
+cooldown = commands.CooldownMapping.from_cooldown(1, 60, commands.BucketType.member)#куллдаун на 10 сек после одного отправленного сообщения
+
 @bot.event
 async def on_message(message):
 
     st = time.time()
-
     s = settings.find_one({"sid": 1})
+    server = servers.find_one({"server": message.guild.id})
 
     if message.author.bot == True: return
     if message.guild == None:
@@ -689,8 +691,6 @@ async def on_message(message):
         return
 
     if message.guild.id in s['bl servers']: return
-
-    server = servers.find_one({"server": message.guild.id})
 
     if server == None:
         functions.insert_server(message.guild)
@@ -784,48 +784,46 @@ async def on_message(message):
     ctx = await bot.get_context(message)
     try:
         ctx.command = bot.get_command(ctx.invoked_with.lower())
+        com_f = True
+    except:
+        com_f = False
+
+    if com_f == True:
         if ctx.command != None:
             await ctx.trigger_typing()
-            try:
-                if ctx.command.name not in server['mod']['off_commands']:
-                    if functions.cooldown_check(message.author, message.guild, ctx.command.name, 'check') == False:
-                        await bot.process_commands(message) # Выполнение команды
-                        print(ctx.command.name, 'no_errors', functions.time_end(time.time() - st))
+            if ctx.command.name not in server['mod']['off_commands']:
+                if functions.cooldown_check(message.author, message.guild, ctx.command.name, 'check') == False:
+                    await bot.process_commands(message) # Выполнение команды
+                    print(ctx.command.name, 'no_errors', functions.time_end(time.time() - st))
 
-                        if ctx.command.name in server['mod']['cooldowns'].keys():
-                            functions.cooldown_check(message.author, message.guild, ctx.command.name, 'add')
+                    if ctx.command.name in server['mod']['cooldowns'].keys():
+                        functions.cooldown_check(message.author, message.guild, ctx.command.name, 'add')
 
-                    else:
-                        if server['mod']['cooldowns'][ctx.command.name]['type'] == 'users':
+                else:
+                    if server['mod']['cooldowns'][ctx.command.name]['type'] == 'users':
 
-                            if server['mod']['cooldowns'][ctx.command.name]['users'][str(message.author.id)] - int(time.time()) < 0:
-                                tt = 0
-                            else:
-                                tt = int(server['mod']['cooldowns'][ctx.command.name]['users'][str(message.author.id)] - time.time())
+                        if server['mod']['cooldowns'][ctx.command.name]['users'][str(message.author.id)] - int(time.time()) < 0:
+                            tt = 0
+                        else:
+                            tt = int(server['mod']['cooldowns'][ctx.command.name]['users'][str(message.author.id)] - time.time())
 
-                        elif server['mod']['cooldowns'][ctx.command.name]['type'] == 'server':
+                    elif server['mod']['cooldowns'][ctx.command.name]['type'] == 'server':
 
-                            if server['mod']['cooldowns'][ctx.command.name]['server_c'] - int(time.time()) < 0:
-                                tt = 0
-                            else:
-                                tt = int(server['mod']['cooldowns'][ctx.command.name]['server_c'] - time.time())
+                        if server['mod']['cooldowns'][ctx.command.name]['server_c'] - int(time.time()) < 0:
+                            tt = 0
+                        else:
+                            tt = int(server['mod']['cooldowns'][ctx.command.name]['server_c'] - time.time())
 
-                        elif server['mod']['cooldowns'][ctx.command.name]['type'] == 'roles':
+                    elif server['mod']['cooldowns'][ctx.command.name]['type'] == 'roles':
 
-                            if server['mod']['cooldowns'][ctx.command.name]['role_c'] - int(time.time()) < 0:
-                                tt = 0
-                            else:
-                                tt = int(server['mod']['cooldowns'][ctx.command.name]['role_c'] - time.time())
+                        if server['mod']['cooldowns'][ctx.command.name]['role_c'] - int(time.time()) < 0:
+                            tt = 0
+                        else:
+                            tt = int(server['mod']['cooldowns'][ctx.command.name]['role_c'] - time.time())
 
-                        emb = discord.Embed(title = 'Режим ожидания', description = f"Включён режим ожидания, вам осталось ждать {functions.time_end(tt)}", color =server['embed_color'])
-                        await message.channel.send(embed = emb)
-
-            except Exception:
-                await bot.process_commands(message)
-                print(ctx.command.name, 'error', functions.time_end(time.time() - st))
-
-    except Exception:
-        pass
+                    emb = discord.Embed(title = '⏲️ | Режим ожидания', description = f"Команда `{ctx.command}` может быть активированна повторно только через\n**{functions.time_end(tt)}**", color = server['embed_color'])
+                    emb.set_footer(icon_url = ctx.message.author.avatar.url, text = ctx.message.author)
+                    await message.channel.send(embed = emb)
 
     try:
         if message.channel.id == server['emoji']["emoji_channel"]:
@@ -838,9 +836,11 @@ async def on_message(message):
     except Exception:
         pass
 
+
     if functions.user_check(message.author, message.guild) != False:
-        if cooldown(message.author.id, message.guild.id ) == True:
-            if len(message.content) >= 5:
+        if len(message.content) >= 5:
+            retry_after = cooldown.update_rate_limit(message)
+            if not retry_after:
                 await lvl(message, server)
 
 #============================================конец=================================================================#
