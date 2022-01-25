@@ -19,59 +19,79 @@ settings = db.settings
 class functions:
 
     @staticmethod
-    def time_end(seconds:int):
+    def time_end(seconds:int, mini = False):
 
-        def ending_w(word, number:str):
+        def ending_w(word, number:str, mini):
             n = int(len(str(number))) - 1
             ord = int(str(number)[n:])
 
+
             if word == 'секунда':
-                if ord in [1]:
-                    newword = word
-                elif ord in [2,3,4]:
-                    newword = 'секунды'
-                elif ord in [5,6,7,8,9,0]:
-                    newword = 'секунд'
+                if mini != True:
+                    if ord in [1]:
+                        newword = word
+                    elif ord in [2,3,4]:
+                        newword = 'секунды'
+                    elif ord in [5,6,7,8,9,0]:
+                        newword = 'секунд'
+                else:
+                    newword = 's'
 
             elif word == 'минута':
-                if ord in [1]:
-                    newword = word
-                elif ord in [2,3,4]:
-                    newword = 'минуты'
-                elif ord in [5,6,7,8,9,0]:
-                    newword = 'минут'
+                if mini != True:
+                    if ord in [1]:
+                        newword = word
+                    elif ord in [2,3,4]:
+                        newword = 'минуты'
+                    elif ord in [5,6,7,8,9,0]:
+                        newword = 'минут'
+                else:
+                    newword = 'm'
 
             elif word == 'час':
-                if ord in [1]:
-                    newword = word
-                elif ord in [2,3,4]:
-                    newword = 'часа'
-                elif ord in [5,6,7,8,9,0]:
-                    newword = 'часов'
+                if mini != True:
+                    if ord in [1]:
+                        newword = word
+                    elif ord in [2,3,4]:
+                        newword = 'часа'
+                    elif ord in [5,6,7,8,9,0]:
+                        newword = 'часов'
+                else:
+                    newword = 'h'
 
             elif word == 'день':
-                if ord in [1]:
-                    newword = word
-                elif ord in [2,3,4]:
-                    newword = 'дня'
-                elif ord in [5,6,7,8,9,0]:
-                    newword = 'дней'
+                if mini != True:
+                    if ord in [1]:
+                        newword = word
+                    elif ord in [2,3,4]:
+                        newword = 'дня'
+                    elif ord in [5,6,7,8,9,0]:
+                        newword = 'дней'
+                else:
+                    newword = 'd'
 
             elif word == 'неделя':
-                if ord in [1]:
-                    newword = word
-                elif ord in [2,3,4]:
-                    newword = 'недели'
-                elif ord in [5,6,7,8,9,0]:
-                    newword = 'недель'
+                if mini != True:
+                    if ord in [1]:
+                        newword = word
+                    elif ord in [2,3,4]:
+                        newword = 'недели'
+                    elif ord in [5,6,7,8,9,0]:
+                        newword = 'недель'
+                else:
+                    newword = 'w'
+
 
             elif word == 'месяц':
-                if ord in [1]:
-                    newword = word
-                elif ord in [2,3,4]:
-                    newword = 'месяца'
-                elif ord in [5,6,7,8,9,0]:
-                    newword = 'месяцев'
+                if mini != True:
+                    if ord in [1]:
+                        newword = word
+                    elif ord in [2,3,4]:
+                        newword = 'месяца'
+                    elif ord in [5,6,7,8,9,0]:
+                        newword = 'месяцев'
+                else:
+                    newword = 'M'
 
             return newword
 
@@ -96,17 +116,17 @@ class functions:
         if s < 10: s = f"0{s}"
 
         if m == '00' and h == '00' and d == '00' and w == '00' and mm == '00':
-            return f"{s} {ending_w('секунда',s)}"
+            return f"{s} {ending_w('секунда',s,mini)}"
         elif h == '00' and d == '00' and w == '00' and mm == '00':
-            return f"{m} {ending_w('минута',m)}, {s} {ending_w('секунда',s)}"
+            return f"{m} {ending_w('минута',m,mini)}, {s} {ending_w('секунда',s,mini)}"
         elif d == '00' and w == '00' and mm == '00':
-            return f"{h} {ending_w('час',h)}, {m} {ending_w('минута',m)}, {s} {ending_w('секунда',s)}"
+            return f"{h} {ending_w('час',h,mini)}, {m} {ending_w('минута',m,mini)}, {s} {ending_w('секунда',s,mini)}"
         elif w == '00' and mm == '00':
-            return f"{d} {ending_w('день',d)}, {h} {ending_w('час',h)}, {m} {ending_w('минута',m)}, {s} {ending_w('секунда',s)}"
+            return f"{d} {ending_w('день',d,mini)}, {h} {ending_w('час',h,mini)}, {m} {ending_w('минута',m,mini)}, {s} {ending_w('секунда',s,mini)}"
         elif mm == '00':
-            return f"{w} {ending_w('неделя',w)}, {d} {ending_w('день',d)}, {h} {ending_w('час',h)}, {m} {ending_w('минута',m)}, {s} {ending_w('секунда',s)}"
+            return f"{w} {ending_w('неделя',w,mini)}, {d} {ending_w('день',d,mini)}, {h} {ending_w('час',h,mini)}, {m} {ending_w('минута',m,mini)}, {s} {ending_w('секунда',s,mini)}"
         else:
-            return  f"{mm} {ending_w('месяц',mm)}, {w} {ending_w('неделя',w)}, {d} {ending_w('день',d)}, {h} {ending_w('час',h)}, {m} {ending_w('минута',m)}, {s} {ending_w('секунда',s)}"
+            return  f"{mm} {ending_w('месяц',mm,mini)}, {w} {ending_w('неделя',w,mini)}, {d} {ending_w('день',d,mini)}, {h} {ending_w('час',h,mini)}, {m} {ending_w('минута',m,mini)}, {s} {ending_w('секунда',s,mini)}"
 
     @staticmethod
     def text_replase(text:str, member: discord.Member = None):

@@ -238,11 +238,11 @@ class profile(commands.Cog):
         idraw = ImageDraw.Draw(alpha)
 
         if user['voice_time'] >= 86400:
-            text = funs.time_end(user['voice_time'])[:-4]
+            text = funs.time_end(user['voice_time'], True)[:-4]
         if user['voice_time'] >= 604800:
-            text = funs.time_end(user['voice_time'])[:-8]
+            text = funs.time_end(user['voice_time'], True)[:-8]
         else:
-            text = funs.time_end(user['voice_time'])
+            text = funs.time_end(user['voice_time'], True)
 
         idraw.text((60,195), f"{text} #{topvoice}" , font = para)
 
