@@ -116,9 +116,10 @@ class functions:
 
         Time = time.strftime('%H:%M %d.%m.%Y')
         try:
-            n = int(len(str(number))) - 1
-            ord = int(str(number)[n:])
-            
+            n = int(len(member.guild.members))
+            n = int(math.log10(n))
+            ord = int(str(len(member.guild.members))[n:])
+
             if ord == 0 or ord == 1 or ord == 4 or ord == 5 or ord == 9:
                 ord = "ый"
             elif ord == 2 or ord == 6 or ord == 7 or ord == 8:
