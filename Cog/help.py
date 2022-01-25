@@ -106,16 +106,16 @@ class help(commands.Cog):
                     text = ''
 
                     for i in cog['commands']:
-                        text += f'{ctx.prefix}{i} {i.usage}\n\n'
+                        text += f'**{ctx.prefix}{i} {i.usage}**\n`{i.description}`\n\n'
 
-                    semb = discord.Embed(title = f'{i_l[0]} | {i_l[1]}', description = f"{i_l[2]}\nДля просмотра подробной информации о команде, пропишите\n {ctx.prefix}help (command)\n\n{text}" ,color=server['embed_color'])
+                    semb = discord.Embed(title = f'{i_l[0]} | {i_l[1]}', description = f"{i_l[2]}\n **{ctx.prefix}help (command)** - посмотреть информацию о команде.\n\n{text}" ,color=server['embed_color'])
 
                     if len(cog.keys()) != 1:
                         for i in cog.keys():
                             if i != 'commands':
                                 t = ''
                                 for n in cog[i]:
-                                    t += f'{ctx.prefix}{n} {n.usage}\n\n'
+                                    t += f'**{ctx.prefix}{n}** {n.usage}\n\n'
                                 semb.add_field( name = f'{i}', value= f"{t}", inline = True  )
 
                     semb.add_field( name = f'Инфорация об аргументах', value= f"Скобки при использовании команды указывать НЕ НАДО\n() - обязательный аргумент\n[] - необзательный аргумент\n / - выберите одно из двух\n<= меньше или равно\n", inline = True  )
