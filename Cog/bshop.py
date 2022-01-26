@@ -195,13 +195,13 @@ class bs(commands.Cog):
         bs = list(backs.find())
         d = {}
 
-        solutions = ['◀', '▶', '🖼', '❌']
         if member == None:
             member = ctx.author
+
         reaction = 'a'
         number = 1
 
-        user = funs.user_check(ctx.author, ctx.guild)
+        user = funs.user_check(member, ctx.guild)
 
 
         if user["Nitro"] == True:
@@ -224,10 +224,17 @@ class bs(commands.Cog):
             }})
             nl += 1
 
+        if ctx.author != member:
+            text = f'\n🌮 | {ctx.author.mention}, вы просматриваете профиль {member.mention}'
+            solutions = ['◀', '▶', '❌']
+        else:
+            solutions = ['◀', '▶', '🖼', '❌']
+            text = ''
+
 
         def embed(number):
             emb = discord.Embed(title = "Инвентарь фонов", description =
-            f"🎭Автор: <@{d[str(number)]['creator_id']}> | 🖼Установлен: {user['back']}", color = int(d[str(number)]["emb_color"]))
+            f"🎭 | Автор: <@{d[str(number)]['creator_id']}> | 🖼 Установлен: {user['back']}\n🥞 | В наличии: {len(d.keys())} шутк" + text, color = int(d[str(number)]["emb_color"]))
             emb.set_image(url =f'{d[str(number)]["url"]}')
             emb.set_footer(text = f'ID {d[str(number)]["id"]}')
             return emb
@@ -245,7 +252,7 @@ class bs(commands.Cog):
             nonlocal user
             nonlocal ctx
             if str(reaction.emoji) == '◀':
-                await msg.remove_reaction('◀', member)
+                await msg.remove_reaction('◀', ctx.author)
                 number -= 1
                 if number > 0:
                     await msg.edit(embed = embed(number))
@@ -256,7 +263,7 @@ class bs(commands.Cog):
                     await reackt()
 
             elif str(reaction.emoji) == '▶':
-                await msg.remove_reaction('▶', member)
+                await msg.remove_reaction('▶', ctx.author)
                 number += 1
                 if number > int(list(d)[-1]):
                     number = 1

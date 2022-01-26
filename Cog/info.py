@@ -7,6 +7,7 @@ import asyncio
 import time
 import pymongo
 import requests
+from datetime import datetime, timedelta, timezone
 
 
 sys.path.append("..")
@@ -83,24 +84,70 @@ class info(commands.Cog):
         if member == None:
             member = ctx.author
 
+        user = await self.bot.fetch_user(member.id)
+        bd_user = funs.user_check(member, ctx.guild)
         server = servers.find_one({"server": ctx.guild.id})
 
 
         if member.nick == None:
-            nick = f"Имя: {member.name}\n"
+            nick = f"**Имя**: {member.name}\n"
         else:
-            nick = f"Имя: {member.name}\nНикнейм: {member.nick}\n"
+            nick = f"**Имя**: {member.name}\n**Никнейм**: {member.nick}\n"
 
-        emb = discord.Embed(title="Информация о пользователе.",color=server['embed_color'])
-        emb.add_field(name="Имя",
+        emb = discord.Embed(title="Информация о пользователе",color = member.color.value)
+        emb.add_field(name="🎋 | Имя / Никнейм",
               value=f"{nick}")
 
-        emb.add_field(name="Доп. инфа",
-              value=f"Высшая роль: <@&{member.top_role.id}>\n"
-                    f"Участник зашёл на сервер: {member.joined_at.strftime('%X, %d %B, %Y')}\n"
-                    f"Аккаунт создан: {member.created_at.strftime('%X, %d %B, %Y')}", inline=False)
+        sec = int(member.joined_at.timestamp())
+        emb.add_field(name="🎍 | Об аккаунте",
+              value=  f"**Зашёл:**: <t:{int(member.joined_at.timestamp())}> (<t:{int(member.joined_at.timestamp())}:R>)\n"
+                    f"**Cоздан**:  <t:{int(member.created_at.timestamp())}> (<t:{int(member.created_at.timestamp())}:R>)\n"
+                    , inline=False)
+
+        emb.add_field(name="🎨 | Сервер",
+        value= f"**Ролей**: {len(member.roles)}\n"
+        f"**Высшая роль**: <@&{member.top_role.id}>\n"
+        f"**Монет**: {'{:,}'.format(bd_user['money']).replace(',', '.')} <:pokecoin:780356652359745537>\n"
+        f"**Уровень**: {bd_user['lvl']} <:lvl:886876034149011486>\n"
+        , inline=False)
+
         emb.set_thumbnail(url= member.avatar.url)
         emb.set_footer(text=f"ID: {member.id}")
+
+        act_n = []
+        act_t = []
+        for i in list(member.activities):
+            act_n.append(i.name)
+            act_t.append(type(i))
+
+        print(act_n, '\n', act_t)
+
+        if discord.activity.Spotify in act_t:
+            s = member.activities[act_t.index(discord.activity.Spotify)]
+            emb.add_field(name = f"<:spoti:935937710152089610> | Слушает **{s.title}**",
+            value= f"**Артист**: {s.artist}\n"
+                   f"**Продолжительность**: {funs.time_end(int(s.duration.total_seconds()))}\n"
+            , inline=True)
+
+        if discord.activity.CustomActivity in act_t:
+            s = member.activities[act_t.index(discord.activity.CustomActivity)]
+            emb.add_field(name = f"🎴 | Статус",
+            value= f"{s.name}"
+            , inline=True)
+
+        if discord.activity.Streaming in act_t:
+            s = member.activities[act_t.index(discord.activity.Streaming)]
+            emb.add_field(name = f"🔮 | Стримит на {s.platform}",
+            value= f"**Название**: [{s.name}]({s.url})\n"
+             f"**Тема / Игра**: {s.game}\n"
+            , inline=True)
+
+        # print(list(member.activities))
+        # print(member.raw_status)
+        # print(member.status)
+
+        if user.banner != None:
+            emb.set_image(url = user.banner.url)
         await ctx.send(embed=emb)
 
 

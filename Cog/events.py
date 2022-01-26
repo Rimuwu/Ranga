@@ -654,7 +654,7 @@ class MainCog(commands.Cog):
             b_t = int(time.time() - b_t)
 
             channel = await self.bot.fetch_channel(config.check_channel)
-            emb = discord.Embed(description=f"Проверка мьютов: {funs.time_end(m_t)}\nПроверка ролей дохода: {funs.time_end(i_t)}\nУстановка баннера: {funs.time_end(b_t)}", color=0xE52B50)
+            emb = discord.Embed(description=f"Проверка мьютов: {funs.time_end(m_t)}\nПроверка ролей дохода: {funs.time_end(i_t)}\nУстановка баннера: {funs.time_end(b_t)}n\<t:{int(time.time())}:R>", color=0xE52B50)
             await channel.send(embed = emb)
 
 
@@ -923,7 +923,7 @@ class MainCog(commands.Cog):
 
                 channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
 
-                emb = discord.Embed(description="Пользователь присоединился к серверу", color=0x76E212)
+                emb = discord.Embed(description="Пользователь присоединился к серверу: <t:{int(time.time())}:R>", color=0x76E212)
 
                 if member.nick == None:
                     nick = f"Имя: {member.name}#{member.discriminator}\nУпоминание: {member.mention}"
@@ -1175,7 +1175,7 @@ class MainCog(commands.Cog):
             if 'member_remove' in server['mod']['log_channel']['logging'] or 'all' in server['mod']['log_channel']['logging'] or 'member' in server['mod']['log_channel']['logging']:
 
                 channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-                emb = discord.Embed(description= f"Пользователь {member.name}#{member.discriminator} покинул сервер", color=0xFFDB8B)
+                emb = discord.Embed(description= f"Пользователь {member.name}#{member.discriminator} покинул сервер: <t:{int(time.time())}:R>", color=0xFFDB8B)
                 try:
                     emb.set_thumbnail(url= member.avatar.url)
                 except:
@@ -1703,7 +1703,7 @@ class MainCog(commands.Cog):
                 counter = 0
                 log = server['mod']['log_channel']['logging']
                 channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-                emb = discord.Embed(title = f'Обновление пользователя', description = f'Пользователь {before.mention} был обновлён', color=0xE28112 )
+                emb = discord.Embed(title = f'Обновление пользователя: <t:{int(time.time())}:R>', description = f'Пользователь {before.mention} был обновлён', color=0xE28112 )
 
                 if 'member_status' in log or 'all' in log or 'member' in log:
                     if before.status != after.status:
@@ -1778,7 +1778,7 @@ class MainCog(commands.Cog):
                 counter = 0
                 log = server['mod']['log_channel']['logging']
                 channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-                emb = discord.Embed(title = f'Обновление {words[0]}', description = f'{words[1]} {before.mention} {words[2]}', color=0xE28112 )
+                emb = discord.Embed(title = f'Обновление {words[0]}: <t:{int(time.time())}:R>', description = f'{words[1]} {before.mention} {words[2]}', color=0xE28112 )
 
                 if 'channel_name' in log or 'all' in log or 'channel' in log:
                     if before.name != after.name:
@@ -2100,7 +2100,7 @@ class MainCog(commands.Cog):
                         inf = f'Название: `{channel.name}`\n ID: `{channel.id}`\n Позиция: `{channel.position}`\n Категория: `{channel.category}`'
 
                     channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-                    emb = discord.Embed(title = f'{words}', description = f'{words2}', color=0xFDE910 )
+                    emb = discord.Embed(title = f'{words}: <t:{int(time.time())}:R>', description = f'{words2}', color=0xFDE910 )
                     emb.add_field(name = f' | Информация', value = f'{inf}', inline = True)
                     await channel.send(embed = emb)
 
@@ -2131,7 +2131,7 @@ class MainCog(commands.Cog):
                 log = server['mod']['log_channel']['logging']
                 if 'member_unban' in log or 'all' in log or 'member' in log:
                     channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-                    emb = discord.Embed(title = f'Разбан пользователя', description = f'Пользователь {user.mention} был разбанен', color=0xE52B50 )
+                    emb = discord.Embed(title = f'Разбан пользователя: <t:{int(time.time())}:R>', description = f'Пользователь {user.mention} был разбанен', color=0xE52B50 )
                     await channel.send(embed = emb)
         except Exception:
             pass
@@ -2157,7 +2157,7 @@ class MainCog(commands.Cog):
 
                     if i in before and i not in after:
                         if 'emoji_delete' in log or 'all' in log or 'emoji' in log:
-                            emb = discord.Embed(title = f'Обновление эмоджи', description = f'Эмоджи {i} был удалён', color=0xFFDB8B )
+                            emb = discord.Embed(title = f'Обновление эмоджи: <t:{int(time.time())}:R>', description = f'Эмоджи {i} был удалён', color=0xFFDB8B )
                             counter += 1
 
 
@@ -2181,7 +2181,7 @@ class MainCog(commands.Cog):
                     else:
                         ttime = funs.time_end(invite.max_age)
 
-                    emb = discord.Embed(title = f'Приглашение создано', description = f'Код приглашения: `{invite.code}`\nПригласивший: {invite.inviter.mention}\nЛимит времени: {ttime}\nЛимит использования: {invite.max_uses}\nВременное членство: {invite.temporary}'.replace('True','<:n:869159450588635196>').replace('False','<:f:869169592201777224>'), color=0x0000FF )
+                    emb = discord.Embed(title = f'Приглашение создано: <t:{int(time.time())}:R>', description = f'Код приглашения: `{invite.code}`\nПригласивший: {invite.inviter.mention}\nЛимит времени: {ttime}\nЛимит использования: {invite.max_uses}\nВременное членство: {invite.temporary}'.replace('True','<:n:869159450588635196>').replace('False','<:f:869169592201777224>'), color=0x0000FF )
                     await channel.send(embed = emb)
         except Exception:
             pass
@@ -2197,7 +2197,7 @@ class MainCog(commands.Cog):
                 log = server['mod']['log_channel']['logging']
                 channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
                 if 'invite_delete' in log or 'all' in log or 'invite' in log:
-                    emb = discord.Embed(title = f'Приглашение удалено', description = f'Код приглашения: `{invite.code}`', color=0x0000FF )
+                    emb = discord.Embed(title = f'Приглашение удалено: <t:{int(time.time())}:R>', description = f'Код приглашения: `{invite.code}`', color=0x0000FF )
                     await channel.send(embed = emb)
         except Exception:
             pass
@@ -2214,7 +2214,7 @@ class MainCog(commands.Cog):
                 log = server['mod']['log_channel']['logging']
                 channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
                 if 'message_edit' in log or 'all' in log or 'message' in log:
-                    emb = discord.Embed(title = f'Сообщение изменено', description = f'Автор сообщения: {after.author.mention}\nКанал: {after.channel.mention}\nСообщение: [Jump]({after.jump_url})', color=0xFFDB8B )
+                    emb = discord.Embed(title = f'Сообщение изменено: <t:{int(time.time())}:R>', description = f'Автор сообщения: {after.author.mention}\nКанал: {after.channel.mention}\nСообщение: [Jump]({after.jump_url})', color=0xFFDB8B )
                     emb.add_field(name = f' | Изначальное сообщение', value = f'`{before.content}`', inline = True)
                     emb.add_field(name = f' | Сейчас сообщение', value = f'`{after.content}`', inline = True)
                     await channel.send(embed = emb)
@@ -2235,7 +2235,7 @@ class MainCog(commands.Cog):
                 channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
                 if 'message_delete' in log or 'all' in log or 'message' in log:
 
-                    emb = discord.Embed(title = f'Сообщение удалено', description = f'Автор: {message.author.mention}\nКанал: {message.channel.mention}\nID: {message.id}\nСообщение: `{message.content}`', color=0xFFDB8B )
+                    emb = discord.Embed(title = f'Сообщение удалено: <t:{int(time.time())}:R>', description = f'Автор: {message.author.mention}\nКанал: {message.channel.mention}\nID: {message.id}\nСообщение: `{message.content}`', color=0xFFDB8B )
                     await channel.send(embed = emb)
         except Exception:
             pass
@@ -2251,7 +2251,7 @@ class MainCog(commands.Cog):
                 counter = 0
                 log = server['mod']['log_channel']['logging']
                 channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-                emb = discord.Embed(title = f'Обновление сервера', description = f'Сервер был обновлён', color=0xE28112 )
+                emb = discord.Embed(title = f'Обновление сервера: <t:{int(time.time())}:R>', description = f'Сервер был обновлён', color=0xE28112 )
 
                 if 'guild_afk_channel' in log or 'all' in log or 'guild' in log:
                     if before.afk_channel != after.afk_channel:
@@ -2353,7 +2353,7 @@ class MainCog(commands.Cog):
                 log = server['mod']['log_channel']['logging']
                 channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
                 if 'role_create' in log or 'all' in log or 'role' in log:
-                    emb = discord.Embed(title = f'Роль создана', description = f'Роль {role.mention} была создана', color=0xFFDB8B )
+                    emb = discord.Embed(title = f'Роль создана: <t:{int(time.time())}:R>', description = f'Роль {role.mention} была создана', color=0xFFDB8B )
                     emb.add_field(name = ' | Информация', value = f'Название: `{role.name}`\nОтображение отдельно: {role.hoist}\nПозиция: {role.position}\nЦвет: {role.color}\nМожно упоминать: {role.mentionable}'.replace('True','<:n:869159450588635196>').replace('False','<:f:869169592201777224>'), inline = False)
                     text1 = ''
                     text2 = ''
@@ -2390,7 +2390,7 @@ class MainCog(commands.Cog):
                 log = server['mod']['log_channel']['logging']
                 channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
                 if 'role_delete' in log or 'all' in log or 'role' in log:
-                    emb = discord.Embed(title = f'Роль удалена', description = f'Роль {role.name} была удалена', color=0xE52B50 )
+                    emb = discord.Embed(title = f'Роль удалена: <t:{int(time.time())}:R>', description = f'Роль {role.name} была удалена', color=0xE52B50 )
 
                     await channel.send(embed = emb)
         except Exception:
@@ -2407,7 +2407,7 @@ class MainCog(commands.Cog):
                 counter = 0
                 log = server['mod']['log_channel']['logging']
                 channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
-                emb = discord.Embed(title = f'Роль обновлена', description = f'Роль {after.mention} была обновлена', color=0xd0b714 )
+                emb = discord.Embed(title = f'Роль обновлена: <t:{int(time.time())}:R>', description = f'Роль {after.mention} была обновлена', color=0xd0b714 )
 
                 if 'role_color' in log or 'all' in log or 'guild' in log:
                     if before.color != after.color:

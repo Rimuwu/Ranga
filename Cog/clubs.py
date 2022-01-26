@@ -522,7 +522,7 @@ class clubs(commands.Cog):
                     g_id = str(max(simpl_list)+1)
 
 
-                server['rpg']['guilds'][g_id] = { "name": name, 'tag': tag, "bio": 'Пусто', "flag": None, "lvl": 1, "exp": 0, "created": time.strftime('%X, %d %B, %Y'), "members": {str(ctx.author.id): {"role": 'owner'}}, 'global_club': status, 'lvl_enter': lvl_enter, 'max_users': 50, 'bank': 0, 'inv': [], 'main_location': None, 'locations': [], 'banner_url': None }
+                server['rpg']['guilds'][g_id] = { "name": name, 'tag': tag, "bio": 'Пусто', "flag": None, "lvl": 1, "exp": 0, "created": int(time.time()), "members": {str(ctx.author.id): {"role": 'owner'}}, 'global_club': status, 'lvl_enter': lvl_enter, 'max_users': 50, 'bank': 0, 'inv': [], 'main_location': None, 'locations': [], 'banner_url': None }
 
                 servers.update_one( {"server": ctx.guild.id}, {"$set": {'rpg': server['rpg']}} )
                 funs.user_update(member.id, ctx.guild, met, user['money'] - 5000)

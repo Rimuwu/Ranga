@@ -24,7 +24,6 @@ db = client.bot
 backs = db.bs
 servers = db.servers
 settings = db.settings
-nextcord = discord
 
 
 class remain(commands.Cog):
@@ -100,9 +99,11 @@ class remain(commands.Cog):
         await ctx.send(text)
 
     @commands.command(hidden = True)
-    async def time(self, ctx, time:int):
-        text = funs.time_end(time)
-        await ctx.send(text)
+    async def time(self, ctx, t:int):
+        if t == -1:
+            t = int(time.time())
+        text = funs.time_end(t)
+        await ctx.send(f'{text}\nRT <t:{t}>\nT - <t:{t}:t>\nR - <t:{t}:R>\n\n`{text}\nRT <t:{t}>\nT - <t:{t}:t>\nR - <t:{t}:R>`')
 
     @commands.command(hidden = True)
     async def add_url_button(self, ctx, message_id:int, url:str, emoji:str, *, label:str):

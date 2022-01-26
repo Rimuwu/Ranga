@@ -22,73 +22,73 @@ class functions:
     def time_end(seconds:int, mini = False):
 
         def ending_w(word, number:str, mini):
-            n = int(len(str(number))) - 1
-            ord = int(str(number)[n:])
-
+            if int(number) not in [11,12,13,14,15]:
+                ord = int(str(number)[int(len(str(number))) - 1:])
+            else:
+                ord = int(number)
 
             if word == 'секунда':
                 if mini != True:
-                    if ord in [1]:
+                    if ord == 1:
                         newword = word
                     elif ord in [2,3,4]:
                         newword = 'секунды'
-                    elif ord in [5,6,7,8,9,0]:
+                    elif ord > 4 or ord == 0:
                         newword = 'секунд'
                 else:
                     newword = 's'
 
             elif word == 'минута':
                 if mini != True:
-                    if ord in [1]:
+                    if ord == 1:
                         newword = word
                     elif ord in [2,3,4]:
                         newword = 'минуты'
-                    elif ord in [5,6,7,8,9,0]:
+                    elif ord > 4 or ord == 0:
                         newword = 'минут'
                 else:
                     newword = 'm'
 
             elif word == 'час':
                 if mini != True:
-                    if ord in [1]:
+                    if ord == 1:
                         newword = word
                     elif ord in [2,3,4]:
                         newword = 'часа'
-                    elif ord in [5,6,7,8,9,0]:
+                    elif ord > 4 or ord == 0:
                         newword = 'часов'
                 else:
                     newword = 'h'
 
             elif word == 'день':
                 if mini != True:
-                    if ord in [1]:
+                    if ord == 1:
                         newword = word
                     elif ord in [2,3,4]:
                         newword = 'дня'
-                    elif ord in [5,6,7,8,9,0]:
+                    elif ord > 4 or ord == 0:
                         newword = 'дней'
                 else:
                     newword = 'd'
 
             elif word == 'неделя':
                 if mini != True:
-                    if ord in [1]:
+                    if ord == 1:
                         newword = word
                     elif ord in [2,3,4]:
                         newword = 'недели'
-                    elif ord in [5,6,7,8,9,0]:
+                    elif ord > 4 or ord == 0:
                         newword = 'недель'
                 else:
                     newword = 'w'
 
-
             elif word == 'месяц':
                 if mini != True:
-                    if ord in [1]:
+                    if ord == 1:
                         newword = word
                     elif ord in [2,3,4]:
                         newword = 'месяца'
-                    elif ord in [5,6,7,8,9,0]:
+                    elif ord > 4 or ord == 0:
                         newword = 'месяцев'
                 else:
                     newword = 'M'
