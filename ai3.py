@@ -809,7 +809,6 @@ async def on_message(message):
         pass
 
     if message.channel.id in server['mod']['part_channels']:
-        print(message.content.find('discord.gg/'))
         if message.content.find('discord.gg/') != -1:
             user = functions.user_check(message.author, message.guild)
             try:

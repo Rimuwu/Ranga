@@ -200,14 +200,18 @@ class profile(commands.Cog):
         mask = Image.new('L',(800, 400))
         ImageDraw.Draw(mask).polygon(xy=[(x0,y0+10),(x0,y1+10),(469,y1+10),(460,y0+10)], fill = 255)
         ImageDraw.Draw(bar).polygon(xy=[(x0,y0+10),(x0,y1+10),(469,y1+10),(460,y0+10)], fill = (255, 255, 255), outline = (0, 0, 0))
+        bar = bar.filter(ImageFilter.BoxBlur(0.5))
+        mask = mask.filter(ImageFilter.BoxBlur(1.5))
         alpha = Image.composite(bar, alpha, mask)
 
         if user['xp'] > 0:
             pbar = Image.new('RGB', (800, 400))
             mask = Image.new('L', (800, 400))
             ImageDraw.Draw(mask).polygon(xy=[(x0,y0+10),(x0,y1+9),(x1+10,y1+10),(x1,y0+10)], fill = 255)
-            mask = mask.filter(ImageFilter.BoxBlur(2))
             ImageDraw.Draw(pbar).polygon(xy=[(x0, y0+10),(x0, y1+9),(x1+10, y1+10),(x1, y0+10)], fill=(progress_bar[0], progress_bar[1], progress_bar[2])) #основной прогресс бар
+
+            bar = bar.filter(ImageFilter.BoxBlur(0.5))
+            mask = mask.filter(ImageFilter.BoxBlur(1.5))
             alpha = Image.composite(pbar, alpha, mask)
 
 
@@ -246,18 +250,59 @@ class profile(commands.Cog):
 
         idraw.text((60,195), f"{text} #{topvoice}" , font = para)
 
-        # if user['guild'] != None:
-        #     club = server['rpg']['guild'][f'{user["guild"]}']
-        #     idraw.text((15,360), f"{name}#{tag} [{club['tag']}]", font = headline) #первое значение это отступ с лева, второе сверху
-        # else:
-        #     idraw.text((15,360), f"{name}#{tag}", font = headline)
-        idraw.text((15,360), f"{name}#{tag}", font = headline)
+        rpg_guild_id = None
+
+        for i in server['rpg']['guilds'].keys():
+            g = server['rpg']['guilds'][i]
+            if str(member.id) in g['members'].keys():
+                rpg_guild_id = i
+
+        if rpg_guild_id != None:
+            g = server['rpg']['guilds'][rpg_guild_id]
+            if g['flag'] != None:
+                sz = 75
+
+                response1 = requests.get(g['flag'], stream = True)
+                response1 = Image.open(io.BytesIO(response1.content))
+                response1 = response1.convert("RGBA")
+                response1 = response1.resize((sz, sz), Image.ANTIALIAS)
+                im = crop(response1, (sz, sz))
+
+                wh = Image.new(mode = 'RGB', color = 'white', size = (sz+4,sz+4))
+                wh = crop(wh, (sz+4,sz+4))
+
+                bg_img = wh
+                fg_img = im
+                rim = trans_paste(fg_img, bg_img, 1.0, (2, 2, sz+2, sz+2))
+                sz+=4
+
+                bg_img = alpha
+                fg_img = rim
+                alpha = trans_paste(fg_img, bg_img, 1.0, (710, 10, 710 + sz, 10 + sz))
+
+                tag_g = f"{g['tag']}"
+                if len(tag_g) == 1:
+                    t = (740,90)
+                elif len(tag_g) == 2:
+                    t = (730,90)
+                elif len(tag_g) == 3:
+                    t = (720,90)
+                elif len(tag_g) == 4:
+                    t = (710,90)
+
+                idraw.text(t, tag_g, font = headline)
+                idraw.text((15,360), f"{name}#{tag}", font = headline) #первое значение это отступ с лева, второе сверху
+            else:
+                idraw.text((15,360), f"{name}#{tag} [{g['tag']}]", font = headline) #первое значение это отступ с лева, второе сверху
+        else:
+            idraw.text((15,360), f"{name}#{tag}", font = headline) #первое значение это отступ с лева, второе сверху
 
         idraw.text((60,242), f"{'{:,}'.format(user['money']).replace(',', '.')} #{topmn}", font = para)
         idraw.text((260,50), f"{len(user['rep'][0])}", font = para)
         idraw.text((260,90), str(len(user['rep'][1])), font = para)
         idraw.text((230,288), f"{user['xp']} / {expn}" , font = para)
         idraw.text((60,288), f"{user['lvl']} #{toplvl}" , font = para)
+
 
 
         embed = discord.Embed(color=0xf03e65)
@@ -433,7 +478,7 @@ class profile(commands.Cog):
             fg_img = alpha
             img = trans_paste(fg_img, bg_img, 1.0)
 
-            image = img
+            image = img.convert("RGB")
             output = BytesIO()
             image.save(output, 'png')
             image_pix=BytesIO(output.getvalue())
@@ -449,7 +494,7 @@ class profile(commands.Cog):
             await ctx.trigger_typing()
             fs = []
             for frame in ImageSequence.Iterator(img):
-                frame = frame.convert("RGBA")
+                frame = frame.convert("RGB")
                 frame = frame.resize((800, 400), Image.ANTIALIAS)
 
                 bg_img = frame

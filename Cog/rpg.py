@@ -1916,7 +1916,7 @@ class rpg(commands.Cog):
         if len(s_i) == 1:
             emb = discord.Embed(description = f'Вы хотите использовать **{s_i[0]["name"]}** ?', title = '<:inventory_b:886909340550823936> | Инвентарь', color=server['embed_color'])
             msg = await ctx.send(embed= emb)
-            r = await funs.reactions_check( ["✅", "❌"], ctx.author, msg, True)
+            r = await funs.reactions_check(self.bot, ["✅", "❌"], ctx.author, msg, True)
             if r != 'Timeout':
                 if str(r.emoji) == "✅":
                     print('Использование')

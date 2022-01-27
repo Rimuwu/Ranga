@@ -5,6 +5,7 @@ import time
 from datetime import datetime, timedelta
 import pprint
 import pymongo
+import asyncio
 
 import config
 
@@ -709,7 +710,7 @@ class functions:
         return client
 
     @staticmethod
-    async def reactions_check(solutions: list, member: discord.Member, msg: discord.Message, clear:bool = False, timeout:float = 30.0):
+    async def reactions_check(bot, solutions: list, member: discord.Member, msg: discord.Message, clear:bool = False, timeout:float = 30.0):
 
         def check(reaction, user):
             nonlocal msg

@@ -3526,7 +3526,7 @@ class settings(commands.Cog):
             user = funs.user_check(m, ctx.guild)
             text += f"**{m.mention}** >\n`За сегодня`: {user['cache']['part']['daily']} (<t:{user['cache']['part']['day'][1]}:R>)\n`Всего`: {user['cache']['part']['all']}\n"
 
-        emb = discord.Embed(title = '🕸 | Активность партнёров', description = text, color = server['embed_color'])
+        emb = discord.Embed(title = '🕸 | Активность менеджеров', description = text, color = server['embed_color'])
         await ctx.send(embed = emb)
 
 
