@@ -55,8 +55,8 @@ class economy(commands.Cog):
             await ctx.send("Выберите что вы изменятете bank/money/lvl/xp/hp/hpmax/mana/manamax")
 
 
-    @commands.command(usage = '(@member) (amout)', description = 'Передача монет пользователю.', help = 'Взаимодействие', aliases = ['дать_монеты'])
-    async def give_money(self,ctx,member:discord.Member, amout):
+    @commands.command(usage = '(@member) (amout/all)', description = 'Передача монет пользователю.', help = 'Взаимодействие', aliases = ['дать_монеты'])
+    async def give_money(self,ctx,member:discord.Member, amout:int):
         if ctx.author.id == member.id:
             await ctx.send(f"Есть смысл дарить подарок самому себе?")
             return

@@ -654,7 +654,7 @@ class MainCog(commands.Cog):
             b_t = int(time.time() - b_t)
 
             channel = await self.bot.fetch_channel(config.check_channel)
-            emb = discord.Embed(description=f"Проверка мьютов: {funs.time_end(m_t)}\nПроверка ролей дохода: {funs.time_end(i_t)}\nУстановка баннера: {funs.time_end(b_t)}n\<t:{int(time.time())}:R>", color=0xE52B50)
+            emb = discord.Embed(description=f"Проверка мьютов: {funs.time_end(m_t)}\nПроверка ролей дохода: {funs.time_end(i_t)}\nУстановка баннера: {funs.time_end(b_t)}\n<t:{int(time.time())}:R>", color=0xE52B50)
             await channel.send(embed = emb)
 
 

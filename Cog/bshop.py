@@ -234,7 +234,7 @@ class bs(commands.Cog):
 
         def embed(number):
             emb = discord.Embed(title = "Инвентарь фонов", description =
-            f"🎭 | Автор: <@{d[str(number)]['creator_id']}> | 🖼 Установлен: {user['back']}\n🥞 | В наличии: {len(d.keys())} шутк" + text, color = int(d[str(number)]["emb_color"]))
+            f"🎭 | Автор: <@{d[str(number)]['creator_id']}> | 🖼 Установлен: {user['back']}\n🥞 | В наличии: {len(d.keys())} шт." + text, color = int(d[str(number)]["emb_color"]))
             emb.set_image(url =f'{d[str(number)]["url"]}')
             emb.set_footer(text = f'ID {d[str(number)]["id"]}')
             return emb

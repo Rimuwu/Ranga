@@ -100,7 +100,7 @@ class info(commands.Cog):
 
         sec = int(member.joined_at.timestamp())
         emb.add_field(name="🎍 | Об аккаунте",
-              value=  f"**Зашёл:**: <t:{int(member.joined_at.timestamp())}> (<t:{int(member.joined_at.timestamp())}:R>)\n"
+              value=  f"**Зашёл**: <t:{int(member.joined_at.timestamp())}> (<t:{int(member.joined_at.timestamp())}:R>)\n"
                     f"**Cоздан**:  <t:{int(member.created_at.timestamp())}> (<t:{int(member.created_at.timestamp())}:R>)\n"
                     , inline=False)
 
@@ -126,14 +126,15 @@ class info(commands.Cog):
             s = member.activities[act_t.index(discord.activity.Spotify)]
             emb.add_field(name = f"<:spoti:935937710152089610> | Слушает **{s.title}**",
             value= f"**Артист**: {s.artist}\n"
-                   f"**Продолжительность**: {funs.time_end(int(s.duration.total_seconds()))}\n"
+                   f"**Автор**: {funs.time_end(int(s.duration.total_seconds()))}\n"
             , inline=True)
 
         if discord.activity.CustomActivity in act_t:
             s = member.activities[act_t.index(discord.activity.CustomActivity)]
-            emb.add_field(name = f"🎴 | Статус",
-            value= f"{s.name}"
-            , inline=True)
+            if s.name != None:
+                emb.add_field(name = f"🎴 | Статус",
+                value= f"{s.name}"
+                , inline=True)
 
         if discord.activity.Streaming in act_t:
             s = member.activities[act_t.index(discord.activity.Streaming)]

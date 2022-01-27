@@ -207,8 +207,6 @@ class functions:
                 user = server[key][str(user.id)]
                 return user
             except Exception:
-                if user.bot == True:
-                    return False
 
                 a = server[key].copy()
                 a.update({ str(user.id): upd(server) })

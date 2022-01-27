@@ -124,17 +124,28 @@ class clubs(commands.Cog):
                 ml = rpg_guild['main_location']
 
             main_emb = discord.Embed(description = f"**🏰 | {rpg_guild['name']} #{rpg_guild['tag']}** ID: {rpg_guild_id}", color=0xf03e65)
-            main_emb.add_field(name = '<:recipe:827221967886745600> | Информация:', value = f"👑 | Создатель: <@{guild_owner}>\n👥 | Участников: `{len(rpg_guild['members'].keys())}` / `{rpg_guild['max_users']}`\n<:pokecoin:780356652359745537> | Хранилище монет: {rpg_guild['bank']}\n🗺 | Штаб: {ml}\n🗡 | Захвачено: {len(rpg_guild['locations'])}", inline = True)
-            main_emb.add_field(name = '🛡 | Статитстика:', value = f"<:lvl:886876034149011486> | Уровень: {rpg_guild['lvl']}\n🔼 | Опыт: {rpg_guild['exp']} / {expnc}", inline = True)
+            main_emb.add_field(name = '<:recipe:827221967886745600> | Информация', value =
+            f"**Создатель**: <@{guild_owner}>\n"
+            f"**Участников**: `{len(rpg_guild['members'].keys())}` / `{rpg_guild['max_users']}`\n"
+            f"**Создан**: <t:{rpg_guild['created']}> (<t:{rpg_guild['created']}:R>)\n"
+            , inline = False)
+
+            main_emb.add_field(name = '🏰 | Статитстика', value =
+            f"**Уровень**: {rpg_guild['lvl']} <:lvl:886876034149011486>\n"
+            f"**Опыт**: {rpg_guild['exp']} / {expnc}\n"
+            f"**Монет**: {rpg_guild['bank']} <:pokecoin:780356652359745537>\n"
+            f"**Штаб**: {ml}\n"
+            f"**Захвачено**: {len(rpg_guild['locations'])}"
+            , inline = False)
 
             main_emb.add_field(name = '📰 | Описание:', value = f'{rpg_guild["bio"]}', inline = False)
             if rpg_guild['global_club'] == False:
-                main_emb.add_field(name = '🎈 | Доступность: Закрыт', value = f'❓ | В гильдию можно вступить только по приглашению админа / создателя!', inline = True)
+                main_emb.add_field(name = '🎈 | Доступность: Закрыт', value = f'В гильдию можно вступить только по приглашению админа / создателя!', inline = True)
             if rpg_guild['global_club'] == True:
                 if rpg_guild['lvl_enter'] == 0:
-                    main_emb.add_field(name = '🎈 | Доступность: Открыт', value = f'❓ | Все могут вступить в данную гильдию.', inline = True)
+                    main_emb.add_field(name = '🎈 | Доступность: Открыт', value = f'Все могут вступить в данную гильдию.', inline = True)
                 else:
-                    main_emb.add_field(name = '🎈 | Доступность: Открыт', value = f"<:lvl:886876034149011486> | Минимальный уровень: {rpg_guild['lvl_enter']}\n❓ | Или по приглашению создателя / админа гильдии.", inline = True)
+                    main_emb.add_field(name = '🎈 | Доступность: Открыт', value = f"Минимальный уровень: {rpg_guild['lvl_enter']}\nИли по приглашению создателя / админа гильдии.", inline = True)
 
             admin_list = []
             rest_members = []
