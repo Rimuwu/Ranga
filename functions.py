@@ -517,6 +517,7 @@ class functions:
                     'log_channel': {}, #канал логирования
                     'delete_command': None, #настройка удаления команды после использования
                     'flud_ch_nor': [],
+                    'part_channels': [],
 
                    },
 

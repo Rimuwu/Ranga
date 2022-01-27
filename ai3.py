@@ -30,7 +30,6 @@ backs = db.bs
 servers = db.servers
 settings = db.settings
 
-# peoplesCD = {}
 start_time = time.time()
 
 # префикс ======================================= #
@@ -271,32 +270,6 @@ async def global_chat(message, s, server):
                     pass
     except Exception:
         pass
-
-# def cooldown(user_id, guild_id):
-#     # Возращаем True если пользователь может получить опыт, False если у пользователя есть задержка
-#     global peoplesCD
-#
-#     try: #проверка
-#         if peoplesCD[str(guild_id)][str(user_id)] <= time.time():
-#             peoplesCD[str(guild_id)].pop(str(user_id))
-#             return True
-#         else:
-#             return False
-#     except Exception:
-#         pass
-#
-#     try: #добавление при не наличии пользователя
-#         peoplesCD[str(guild_id)].update({ str(user_id): int(time.time()+60) })
-#         return True
-#     except Exception:
-#         pass
-#
-#     try: #добавление при не наличии пользователя и сервера
-#         peoplesCD.update({ str(guild_id): {str(user_id): int(time.time()+60) } })
-#         return True
-#     except Exception:
-#         pass
-
 
 async def lvl_up_image(message, user, server):
 
@@ -675,7 +648,7 @@ async def punishment_mod(message, server, p, reason, shield):
                 pass
 
 
-cooldown = commands.CooldownMapping.from_cooldown(1, 60, commands.BucketType.member)#куллдаун на 10 сек после одного отправленного сообщения
+cooldown = commands.CooldownMapping.from_cooldown(1, 60, commands.BucketType.member)#куллдаун на 60 сек после одного отправленного сообщения
 
 @bot.event
 async def on_message(message):
@@ -834,6 +807,27 @@ async def on_message(message):
                     pass
     except Exception:
         pass
+
+    if message.channel.id in server['mod']['part_channels']:
+        print(message.content.find('discord.gg/'))
+        if message.content.find('discord.gg/') != -1:
+            user = functions.user_check(message.author, message.guild)
+            try:
+                user['cache']['part']
+            except:
+                user['cache']['part'] = {'all': 0, 'daily': 0, 'day': [None,None]}
+
+            if user['cache']['part']['day'][0] != time.strftime('%j'):
+                user['cache']['part']['daily'] = 0
+
+            user['cache']['part']['all'] += 1
+            user['cache']['part']['daily'] += 1
+            user['cache']['part']['day'][0] = time.strftime('%j')
+            user['cache']['part']['day'][1] = int(time.time())
+
+            functions.user_update(message.author.id, message.guild, 'cache', user['cache'])
+
+
 
 
     if functions.user_check(message.author, message.guild) != False:

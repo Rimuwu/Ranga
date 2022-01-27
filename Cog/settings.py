@@ -12,6 +12,7 @@ import time
 import pymongo
 import os
 import sys
+import pprint
 
 sys.path.append("..")
 from functions import functions as funs
@@ -43,22 +44,6 @@ class settings(commands.Cog):
 
         server = servers.find_one({"server": ctx.guild.id})
         a = server['upsend_sett']
-
-        server['premium'] = True
-
-        if server['premium'] != True:
-            mk = 20
-            if len(a['upitems'].keys()) >= 50:
-                await ctx.send("Не имея подписки premium, вы не можете назначить больше 50 нагрда за уровень! ")
-                return
-
-        if server['premium'] == True:
-            mk = 50
-
-        if server['premium'] != True:
-            if len(a['upitems'].keys()) >= 100:
-                await ctx.send("Нельзя добавить больше 100 наград!")
-                return
 
         items = []
         for i in item:
@@ -2362,16 +2347,11 @@ class settings(commands.Cog):
 
         server = servers.find_one({'server':ctx.guild.id})
 
-        server['premium'] = True
 
         try:
             await test_msg.delete()
         except Exception:
             return
-
-        if len(list) > 2 and server['premium'] == False:
-                await ctx.send("У вас нет премиум подписки, вам доступна только 2 эмоджи!")
-                return
 
         if len(list) > 20:
             await ctx.send("Нельзя добавить больше 20-ти реакций под сообщение!")
@@ -3178,22 +3158,6 @@ class settings(commands.Cog):
         server = servers.find_one({"server": ctx.guild.id})
         a = server['voice_reward']
 
-        server['premium'] = True
-
-        if server['premium'] != True:
-            mk = 15
-            if len(a.keys()) >= 10:
-                await ctx.send("Не имея подписки premium, вы не можете назначить больше 10-ти нагрда за войс! ")
-                return
-
-        if server['premium'] == True:
-            mk = 40
-
-        if server['premium'] != True:
-            if len(a.keys()) >= 20:
-                await ctx.send("Нельзя добавить больше 20-ти наград! ")
-                return
-
         items = []
         if item == None:
             items = None
@@ -3524,6 +3488,46 @@ class settings(commands.Cog):
         await ctx.send(f"Стартовый капитал установлен!")
 
 
+    @commands.command(usage = '(#channels)', description = 'Каналы партнёрства', help = 'Партнёрки')
+    async def part_ch(self, ctx, *channel:discord.TextChannel):
+        global servers
+        if funs.roles_check(ctx.author, ctx.guild.id) == False:
+            await ctx.send("У вас недостаточно прав для использования этой команды!")
+            return
+
+        server = servers.find_one({'server':ctx.guild.id})
+        wl = []
+        for i in channel:
+            wl.append(i.id)
+
+        server['mod']['part_channels'] = wl
+        servers.update_one({'server':ctx.guild.id},{'$set':{'mod': server['mod']}})
+        await ctx.send("Каналы партнёрок были настроены!")
+
+    @commands.command(usage = '-', description = 'Лидеры по партнёркам.', help = 'Партнёрки')
+    async def ptop(self, ctx):
+        server = servers.find_one({'server':ctx.guild.id})
+        p_users = []
+        text = ''
+
+        for u in server['users'].keys():
+            us = server['users'][u]
+            if 'part' in us['cache'].keys():
+                if us['cache']['part']['day'][0] != time.strftime('%j'):
+                    us['cache']['part']['daily'] = 0
+                    us['cache']['part']['day'][0] = time.strftime('%j')
+                    funs.user_update(int(u), ctx.guild, 'cache', us['cache'])
+
+                p_users.append(u)
+
+
+        for i in p_users:
+            m = ctx.guild.get_member(int(i))
+            user = funs.user_check(m, ctx.guild)
+            text += f"**{m.mention}** >\n`За сегодня`: {user['cache']['part']['daily']} (<t:{user['cache']['part']['day'][1]}:R>)\n`Всего`: {user['cache']['part']['all']}\n"
+
+        emb = discord.Embed(title = '🕸 | Активность партнёров', description = text, color = server['embed_color'])
+        await ctx.send(embed = emb)
 
 
 
