@@ -539,124 +539,123 @@ class clubs(commands.Cog):
                 funs.user_update(member.id, ctx.guild, met, user['money'] - 5000)
 
 
-    # @commands.command(usage = '(url)', description = 'Установка баннера гильдии. Стоимость 1к', aliases = ['баннер_клуба'], usage = 'Размер изображения должен быть 1100х400')
-    # async def club_banner(self, ctx, link = None):
-    #     global users
-    #     if users.find_one({"userid": ctx.author.id}) == None:
-    #         await ctx.send(f'У данного пользователя не создан аккаунт, пропишите {ctx.prefix}help для создания!')
-    #         return
-    #
-    #     user = funs.user_check(member, member.guild)
-    #
-    #
-    #     if link is None:
-    #         emb = discord.Embed(description = 'Укажите ссылку на баннер для клуба!', color=0xf03e65)
-    #         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-    #         await ctx.send(embed = emb)
-    #         return
-    #
-    #     else:
-    #
-    #         response = requests.get(url, stream = True)
-    #         response = Image.open(io.BytesIO(response.content))
-    #
-    #         if response.size != (1100, 400):
-    #             emb = discord.Embed(description = 'Требовалось указать ссылку на изображение 1100 на 400 пикселей!', color=0xf03e65)
-    #             emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-    #             await ctx.send(embed = emb)
-    #             return
-    #
-    #
-    #
-    #         if user['guild'] != None:
-    #             guild = db.clubs.find_one({"name": user['guild']})
-    #             if guild['owner'] == ctx.author.id or ctx.author.id in guild["admins"]:
-    #                 if user['money'] > 999:
-    #                     try:
-    #                         emb = discord.Embed(description = 'Вы поменяли баннер клуба!', color=0xf03e65)
-    #                         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-    #                         emb.set_image(url = link)
-    #
-    #                         await ctx.send(embed = emb)
-    #                         await ctx.message.delete()
-    #
-    #                         name = guild['name']
-    #
-    #                         db.clubs.update_one({"name": name}, {"$set": {"flag": link}})
-    #
-    #                         newcash = user['money'] - 1000
-    #                         users.update_one({"userid": ctx.author.id}, {"$set": {"money": newcash}})
-    #
-    #                     except Exception:
-    #                         emb = discord.Embed(description = 'Укажите ссылку на изображение', color=0xf03e65)
-    #                         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-    #                         await ctx.send(embed = emb)
-    #                 else:
-    #                     emb = discord.Embed(description = 'Недостаточно монет(требуется 1.000 монет)!', color=0xf03e65)
-    #                     emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-    #                     await ctx.send(embed = emb)
-    #             else:
-    #                 emb = discord.Embed(description = 'Только глава/админ может поменять баннер клуба!', color=0xf03e65)
-    #                 emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-    #                 await ctx.send(embed = emb)
-    #
-    #                 await ctx.message.delete()
-    #         else:
-    #             emb = discord.Embed(description = 'Вы не состоите в клубе', color=0xf03e65)
-    #             emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-    #             await ctx.send(embed = emb)
-    #
-    #             await ctx.message.delete()
+    @commands.command(usage = '(url)', description = 'Установка баннера гильдии. Стоимость 1к', aliases = ['баннер_гильдии', 'gbanner'], help = 'Размер изображения должен быть 1100х400')
+    async def guild_banner(self, ctx, link = None):
+        global users
+
+        user = funs.user_check(ctx.author, ctx.author.guild)
+        server = servers.find_one({"server": ctx.guild.id})
+        rpg_guild_id = None
+
+        for i in server['rpg']['guilds'].keys():
+            g = server['rpg']['guilds'][i]
+            if str(ctx.author.id) in g['members'].keys():
+                rpg_guild_id = i
+
+        if rpg_guild_id == None:
+            emb = discord.Embed(description = 'Вы не в гильдии',color=server['embed_color'])
+            emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+            await ctx.send(embed = emb)
+            return
+
+        guild = server['rpg']['guilds'][rpg_guild_id]
+
+        if guild['members'][str(ctx.author.id)]['role'] not in ['owner', 'admin']:
+            emb = discord.Embed(description = 'Только гильдмастер / админ может поменять баннер гильдии!', color=0xf03e65)
+            emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+            await ctx.send(embed = emb)
 
 
-    # @commands.command(usage = '(bio)', description = 'Установка информации о клубе. Стоимость 200.', aliases = ['био_клуба'])
-    # async def club_bio(self, ctx, *, bio = None):
-    #     global users
-    #
-    #     if users.find_one({"userid": ctx.author.id}) == None:
-    #         await ctx.send(f'У данного пользователя не создан аккаунт, пропишите {ctx.prefix}help для создания!')
-    #         return
-    #     user = users.find_one({"userid": ctx.author.id})
-    #     if user['guild'] != None:
-    #         guild = db.clubs.find_one({"name": user['guild']})
-    #         if guild['owner'] == ctx.author.id or ctx.author.id in guild["admins"]:
-    #
-    #             if bio is None:
-    #                 emb = discord.Embed(description = 'Укажите описание!', color=0xf03e65)
-    #                 emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-    #                 await ctx.send(embed = emb)
-    #
-    #             elif len(bio) > 200:
-    #                 emb = discord.Embed(description = 'Слишком много символов(макс: 200)', color=0xf03e65)
-    #                 emb.set_author(icon_url = '{}'.format(ctx.author.avatar.url), name = '{}'.format(ctx.author))
-    #                 await ctx.send(embed = emb)
-    #
-    #             if user['money'] > 199:
-    #
-    #                 emb = discord.Embed(description = f'Вы поменяли описание вашей клуба на:\n```fix\n{bio}```', color=0xf03e65)
-    #                 emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-    #                 await ctx.send(embed = emb)
-    #
-    #                 name = guild['name']
-    #                 newcash = user['money'] - 200
-    #                 users.update_one({"userid": ctx.author.id}, {"$set": {"money": newcash}})
-    #                 db.clubs.update_one({"name": name}, {"$set": {"bio": bio}})
-    #
-    #             else:
-    #                 emb = discord.Embed(description = 'Не достаточно монет (требуется 200)!', color=0xf03e65)
-    #                 emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-    #                 await ctx.send(embed = emb)
-    #
-    #         else:
-    #             emb = discord.Embed(description = 'Только глава/админ может поменять описание клуба!', color=0xf03e65)
-    #             emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-    #             await ctx.send(embed = emb)
-    #     else:
-    #         emb = discord.Embed(description = 'Вы не состоите в клубе', color=0xf03e65)
-    #         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-    #         await ctx.send(embed = emb)
-    #         await ctx.message.delete()
-    #
+        if link is None:
+            emb = discord.Embed(description = 'Укажите ссылку на баннер для гильдии!', color=0xf03e65)
+            emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+            await ctx.send(embed = emb)
+            return
+
+        else:
+
+            try:
+                response = requests.get(url, stream = True)
+                response = Image.open(io.BytesIO(response.content))
+            except:
+                emb = discord.Embed(description = 'Требовалось указать ссылку на изображение 1100 на 400 пикселей!', color=0xf03e65)
+                emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+                await ctx.send(embed = emb)
+                return
+
+
+            if response.size != (1100, 400):
+                emb = discord.Embed(description = 'Требовалось указать ссылку на изображение 1100 на 400 пикселей!', color=0xf03e65)
+                emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+                await ctx.send(embed = emb)
+                return
+
+
+            guild = db.clubs.find_one({"name": user['guild']})
+            if guild['owner'] == ctx.author.id or ctx.author.id in guild["admins"]:
+                if user['money'] > 999:
+
+                    emb = discord.Embed(description = 'Вы поменяли баннер гильдии!', color=0xf03e65)
+                    emb.set_image(url = link)
+                    emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+                    await ctx.send(embed = emb)
+
+                    user['money'] -= 1000
+                    funs.user_update(member.id, ctx.guild, 'money', user[met] - amout)
+
+
+                else:
+                    emb = discord.Embed(description = 'Недостаточно монет (требуется 1.000 монет)!', color=0xf03e65)
+                    emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+                    await ctx.send(embed = emb)
+
+
+    @commands.command(usage = '(bio)', description = 'Установка информации о гильдии.', aliases = ['био_гильдии','gbio'])
+    async def guild_bio(self, ctx, *, bio = None):
+
+        user = funs.user_check(ctx.author, ctx.author.guild)
+        server = servers.find_one({"server": ctx.guild.id})
+        rpg_guild_id = None
+
+        for i in server['rpg']['guilds'].keys():
+            g = server['rpg']['guilds'][i]
+            if str(ctx.author.id) in g['members'].keys():
+                rpg_guild_id = i
+
+        if rpg_guild_id == None:
+            emb = discord.Embed(description = 'Вы не в гильдии',color=server['embed_color'])
+            emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+            await ctx.send(embed = emb)
+            return
+
+        guild = server['rpg']['guilds'][rpg_guild_id]
+
+        if guild['members'][str(ctx.author.id)]['role'] not in ['owner', 'admin']:
+            emb = discord.Embed(description = 'Только гильдмастер / админ может поменять описание гильдии!', color=0xf03e65)
+            emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+            await ctx.send(embed = emb)
+
+        else:
+
+            if bio is None:
+                emb = discord.Embed(description = 'Укажите описание!', color=0xf03e65)
+                emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+                await ctx.send(embed = emb)
+
+            elif len(bio) > 500:
+                emb = discord.Embed(description = 'Слишком много символов (макс: 500)', color=0xf03e65)
+                emb.set_author(icon_url = '{}'.format(ctx.author.avatar.url), name = '{}'.format(ctx.author))
+                await ctx.send(embed = emb)
+
+
+            else:
+                emb = discord.Embed(description = f'Вы поменяли описание вашей гильдии на: {bio}', color=0xf03e65)
+                emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+                await ctx.send(embed = emb)
+
+                server['rpg']['guilds'][rpg_guild_id]['bio'] = bio
+                servers.update_one( {"server": ctx.guild.id}, {"$set": {'rpg': server['rpg']}} )
+
     #
     #
     # @commands.command(usage = '(@member)', description = 'Приглашение в свой клуб.', aliases = ['пригласить'])

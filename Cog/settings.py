@@ -2472,7 +2472,7 @@ class settings(commands.Cog):
             await ctx.send("Требовалось указать существующее название команды и без префикса.")
             return
 
-        if com.name == 'reset_cooldown' or com.name == 'remove_cooldown' or com.name == 'daily':
+        if com.name == 'reset_cooldown' or com.name == 'remove_cooldown':
             await ctx.send("Для данной команды нельзя установить задержку.")
             return
 
@@ -2480,8 +2480,8 @@ class settings(commands.Cog):
             await ctx.send("Требовалось указать тип: `users`, `server`, `roles`\n`users` - задержка использования для каждого пользователя отдельно.\n`server` - задержка использования для всего сервера сразу.\n`roles` - задержка использования для ролей.")
             return
 
-        if time < 0 or time > 2592001:
-            await ctx.send("Требовалось указать число секунд задержки больше 0 и меньше 2592001 (30 дней, 1 секунда).")
+        if time < -1 or time > 2592001:
+            await ctx.send("Требовалось указать число секунд задержки больше -1 и меньше 2592001 (30 дней, 1 секунда).")
             return
 
         if type == 'users':

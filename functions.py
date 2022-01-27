@@ -396,22 +396,38 @@ class functions:
             #Выводим True если пользователю был добавлен кулдаун
 
             if cc['type'] == 'users':
-                cl[str(command)]['users'].update({str(user.id): int(time.time() + cc['time']) })
-                server['mod'].update({"cooldowns": cl})
-                servers.update_one({"server": guild.id}, {"$set": {'mod': server['mod']}})
-                return True
 
-            if cc['type'] == 'server':
-                cl[str(command)].update({'server_c': int(time.time() + cc['time']) })
-                server['mod'].update({"cooldowns": cl})
-                servers.update_one({"server": guild.id}, {"$set": {'mod': server['mod']}})
-                return True
+                if cc['time'] == 0:
+                    yday = time.localtime(time.time() + 86400)
+                    start = time.struct_time((yday.tm_year, yday.tm_mon, yday.tm_mday, 0, 0, 0, 0, 0, yday.tm_isdst))
+                    time_end = int(f"{time.mktime(start):.0f}")
+                    cl[str(command)]['users'].update({str(user.id): int(time_end) })
+                else:
+                    cl[str(command)]['users'].update({str(user.id): int(time.time() + cc['time']) })
 
-            if cc['type'] == 'roles':
-                cl[str(command)].update({'role_c': int(time.time() + cc['time']) })
-                server['mod'].update({"cooldowns": cl})
-                servers.update_one({"server": guild.id}, {"$set": {'mod': server['mod']}})
-                return True
+            elif cc['type'] == 'server':
+
+                if cc['time'] == 0:
+                    yday = time.localtime(time.time() + 86400)
+                    start = time.struct_time((yday.tm_year, yday.tm_mon, yday.tm_mday, 0, 0, 0, 0, 0, yday.tm_isdst))
+                    time_end = int(f"{time.mktime(start):.0f}")
+                    cl[str(command)].update({'server_c': int(time_end) })
+                else:
+                    cl[str(command)].update({'server_c': int(time.time() + cc['time']) })
+
+            elif cc['type'] == 'roles':
+
+                if cc['time'] == 0:
+                    yday = time.localtime(time.time() + 86400)
+                    start = time.struct_time((yday.tm_year, yday.tm_mon, yday.tm_mday, 0, 0, 0, 0, 0, yday.tm_isdst))
+                    time_end = int(f"{time.mktime(start):.0f}")
+                    cl[str(command)].update({'role_c': time_end })
+                else:
+                    cl[str(command)].update({'role_c': int(time.time() + cc['time']) })
+
+            server['mod'].update({"cooldowns": cl})
+            servers.update_one({"server": guild.id}, {"$set": {'mod': server['mod']}})
+            return True
 
         if met == 'reset':
             #Выводим True если пользователю был сброшен кулдаун, False если пользователя нет в списке
