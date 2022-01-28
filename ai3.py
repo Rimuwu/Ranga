@@ -683,7 +683,7 @@ async def on_message(message):
 
     try:
         if message.content == f'{bot.user.mention}':
-            await message.channel.send(f"Гав! Мой префикс `{server['prefix']}`")
+            await message.channel.send(f"Ууууу! Мой префикс `{server['prefix']}`")
     except Exception:
         pass
 
@@ -808,23 +808,24 @@ async def on_message(message):
     except Exception:
         pass
 
-    if message.channel.id in server['mod']['part_channels']:
-        if message.content.find('discord.gg/') != -1:
-            user = functions.user_check(message.author, message.guild)
-            try:
-                user['cache']['part']
-            except:
-                user['cache']['part'] = {'all': 0, 'daily': 0, 'day': [None,None]}
+    if ctx.guild.me.id == 847092994670067713:
+        if message.channel.id in server['mod']['part_channels']:
+            if message.content.find('discord.gg/') != -1:
+                user = functions.user_check(message.author, message.guild)
+                try:
+                    user['cache']['part']
+                except:
+                    user['cache']['part'] = {'all': 0, 'daily': 0, 'day': [None,None]}
 
-            if user['cache']['part']['day'][0] != time.strftime('%j'):
-                user['cache']['part']['daily'] = 0
+                if user['cache']['part']['day'][0] != time.strftime('%j'):
+                    user['cache']['part']['daily'] = 0
 
-            user['cache']['part']['all'] += 1
-            user['cache']['part']['daily'] += 1
-            user['cache']['part']['day'][0] = time.strftime('%j')
-            user['cache']['part']['day'][1] = int(time.time())
+                user['cache']['part']['all'] += 1
+                user['cache']['part']['daily'] += 1
+                user['cache']['part']['day'][0] = time.strftime('%j')
+                user['cache']['part']['day'][1] = int(time.time())
 
-            functions.user_update(message.author.id, message.guild, 'cache', user['cache'])
+                functions.user_update(message.author.id, message.guild, 'cache', user['cache'])
 
 
 

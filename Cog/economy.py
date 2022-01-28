@@ -112,7 +112,7 @@ class economy(commands.Cog):
         emb = discord.Embed(description=f"Экономика была полностью сброшена!", color=0x450fa8)
         await ctx.send(embed = emb)
 
-    @commands.command(aliases=['top','лидеры','топ'], usage = '(name) [number_page]', description = 'Лидеры.', help = 'Взаимодействие')
+    @commands.command(aliases=['top','лидеры','топ'], usage = '(name) [number_page]', description = 'Лидеры.\nlvl / money / voice', help = 'Взаимодействие')
     async def leaderboard(self,ctx, topname:str = 'lvl', numberpage:int = 1):
         if topname not in ['lvl', 'money', 'voice']:
             await ctx.send("Укажите действительный топ! (lvl, money, voice)")

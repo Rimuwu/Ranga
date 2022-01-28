@@ -81,7 +81,7 @@ class profile(commands.Cog):
             else:
                 await ctx.send("Такой функции как "+ str(arg) + " не существует, имеется только + или -")
 
-    @commands.command(aliases = ["я", "профиль", "p"], usage = '[@mamber]', description = 'Открыть профиль [@пользователя]')
+    @commands.command(aliases = ["я", "профиль", "p"], usage = '[@member]', description = 'Открыть профиль [@пользователя]')
     @commands.cooldown(1, 2, commands.BucketType.guild)
     async def profile(self,ctx, member: discord.Member = None):
         if member == None:
@@ -610,7 +610,7 @@ class profile(commands.Cog):
         await reackt()
 
 
-    @commands.command(usage = '(avatar character\none) (bio) ', description = 'Установить информацию о своём аватаре.')
+    @commands.command(usage = '(avatar url/none) (bio) ', description = 'Установить информацию о своём аватаре.')
     async def bio(self,ctx, avatar:str, *, bio:str):
 
         user = funs.user_check(ctx.author, ctx.author.guild)

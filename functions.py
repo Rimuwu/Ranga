@@ -724,6 +724,7 @@ class functions:
                 return 'Timeout'
             else:
                 if reaction.emoji in solutions:
+                    print(reaction.emoji)
                     if clear == False:
                         await msg.remove_reaction(str(reaction.emoji), member)
                     else:

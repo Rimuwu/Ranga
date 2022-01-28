@@ -122,12 +122,16 @@ class clubs(commands.Cog):
                 ml = rpg_guild['main_location']
 
             main_emb = discord.Embed(color=0xf03e65)
-            main_emb.set_author(icon_url = rpg_guild['flag'], name = f" | {rpg_guild['name']} #{rpg_guild['tag']} ID: {rpg_guild_id}")
             main_emb.add_field(name = '<:recipe:827221967886745600> | Информация', value =
             f"**Создатель**: <@{guild_owner}>\n"
             f"**Участников**: `{len(rpg_guild['members'].keys())}` / `{rpg_guild['max_users']}`\n"
             f"**Создан**: <t:{rpg_guild['created']}> (<t:{rpg_guild['created']}:R>)\n"
             , inline = False)
+
+            if rpg_guild['flag'] != None:
+                main_emb.set_author(icon_url = rpg_guild['flag'], name = f" | {rpg_guild['name']} #{rpg_guild['tag']} ID: {rpg_guild_id}")
+            else:
+                main_emb.set_author( name = f" | {rpg_guild['name']} #{rpg_guild['tag']} ID: {rpg_guild_id}")
 
             main_emb.add_field(name = '🏰 | Статитстика', value =
             f"**Уровень**: {rpg_guild['lvl']} <:lvl:886876034149011486>\n"
@@ -779,7 +783,7 @@ class clubs(commands.Cog):
                         r['guilds'][rpg_guild_id] = guild
                         servers.update_one( {"server": ctx.guild.id}, {"$set": {'rpg': r }} )
 
-                    elif str(eact) == '❌':
+                    elif str(react) == '❌':
 
                         emb = discord.Embed(description = f'**{member.mention}** отказался от приглашения!', color=0xf03e65)
                         emb.set_author(icon_url = guild['flag'], name = guild['name'])
@@ -837,8 +841,8 @@ class clubs(commands.Cog):
                 if str(member.id) in g['members'].keys():
                     member_guild = i
 
-            print(member_guild, rpg_guild_id)
-            if str(member_guild) == str(rpg_guild_id):
+
+            if member_guild != rpg_guild_id:
                 emb = discord.Embed(description = 'Пользователь не в вашей гильдии!', color=0xf03e65)
                 emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
                 await ctx.send(embed = emb)
@@ -851,145 +855,121 @@ class clubs(commands.Cog):
                 return
             else:
 
-                emb = discord.Embed(description = f'**{ctx.author.mention}**, вы уверены что хотите предать права на гильдию?', color=0xf03e65)
+                emb = discord.Embed(description = f'**{member.mention}** стал гильд-мастером!', color=0xf03e65)
                 emb.set_author(icon_url = guild['flag'], name = guild['name'])
-                message = await ctx.send(embed = emb)
+                await ctx.send(embed = emb)
+                server = servers.find_one({"server": ctx.guild.id})
 
-                react = await funs.reactions_check(self.bot, ['✅', '❌'], member, message, True, 120)
+                guild = server['rpg']['guilds'][rpg_guild_id]
+                guild['members'][str(member.id)] = {'role': 'owner'}
+                guild['members'][str(ctx.author.id)] = {'role': 'admin'}
+                r = server['rpg']
+                r['guilds'][rpg_guild_id] = guild
+                servers.update_one( {"server": ctx.guild.id}, {"$set": {'rpg': r }} )
 
-                if str(react) == '✅':
+    @commands.command(usage = '-', description = 'Покинулть гильдию.', aliases = ['покинуть_гильдию', 'gleave'])
+    async def guild_leave(self, ctx):
 
-                    emb = discord.Embed(description = f'**{member.mention}** стал гильд-мастером!', color=0xf03e65)
-                    emb.set_author(icon_url = guild['flag'], name = guild['name'])
-                    await message.edit(embed = emb)
-                    server = servers.find_one({"server": ctx.guild.id})
+        user = funs.user_check(ctx.author, ctx.author.guild)
+        server = servers.find_one({"server": ctx.guild.id})
+        rpg_guild_id = None
 
-                    guild = server['rpg']['guilds'][rpg_guild_id]
-                    guild['members'][str(member.id)] = {'role': 'owner'}
-                    guild['members'][str(ctx.author.id)] = {'role': 'member'}
-                    r = server['rpg']
-                    r['guilds'][rpg_guild_id] = guild
-                    servers.update_one( {"server": ctx.guild.id}, {"$set": {'rpg': r }} )
+        for i in server['rpg']['guilds'].keys():
+            g = server['rpg']['guilds'][i]
+            if str(ctx.author.id) in g['members'].keys():
+                rpg_guild_id = i
 
-                elif str(eact) == '❌':
+        if rpg_guild_id == None:
+            emb = discord.Embed(description = 'Вы не в гильдии!',color=server['embed_color'])
+            emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+            await ctx.send(embed = emb)
+            return
 
-                    emb = discord.Embed(description = f'Вы отменили передачу гильдии', color=0xf03e65)
-                    emb.set_author(icon_url = guild['flag'], name = guild['name'])
-                    await message.edit(embed = emb)
-
-                else:
-                    emb = discord.Embed(description = f'Бот не получил ответ на вопрос, передача гильдии отменена.', color=0xf03e65)
-                    emb.set_author(icon_url = guild['flag'], name = guild['name'])
-                    await message.edit(embed = emb)
+        guild = server['rpg']['guilds'][rpg_guild_id]
 
 
+        if guild['members'][str(ctx.author.id)]['role'] != 'owner':
 
-    # @commands.command(usage = '-', description = 'Покинулть клуб.', aliases = ['покинуть_клуб'])
-    # async def club_leave(self, ctx):
-    #
-    #
-    #     if users.find_one({"userid": ctx.author.id}) == None:
-    #         await ctx.send(f'У данного пользователя не создан аккаунт, пропишите {ctx.prefix}help для создания!')
-    #         return
-    #
-    #     user = users.find_one({"userid": ctx.author.id})
-    #     guild = db.clubs.find_one({"name": user['guild']})
-    #
-    #     if user['guild'] == None:
-    #         emb = discord.Embed(description = 'Вы не в клуба!', color=0xf03e65)
-    #         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-    #         await ctx.send(embed = emb)
-    #
-    #     else:
-    #
-    #         if ctx.author.id != guild['owner']:
-    #             name = user['guild']
-    #
-    #             emb = discord.Embed(description = f'Вы покинули клуб {name}!', color=0xf03e65)
-    #             emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-    #             await ctx.send(embed = emb)
-    #
-    #             users.update_one({"userid": ctx.author.id}, {"$set": {"guild": None}})
-    #
-    #             ad = guild['admins']
-    #             if ctx.author.id in ad:
-    #                 ad.remove(ctx.author.id)
-    #                 db.clubs.update_one({"name": user['guild']}, {"$set": {"admins": ad}})
-    #
-    #             members = guild['members']
-    #             members.remove(ctx.author.id)
-    #             db.clubs.update_one({"name": name}, {"$set": {"members": members}})
-    #
-    #         else:
-    #             emb = discord.Embed(description = 'Глава не может покинуть клуба!', color=0xf03e65)
-    #             emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-    #             await ctx.send(embed = emb)
-    #
-    # @commands.command(usage = '(@member)', description = 'Кикнуть пользователя из клуба.', aliases = ['пнуть_из_клуба'])
-    # async def club_kick(self, ctx, member: discord.Member = None):
-    #
-    #
-    #     if users.find_one({"userid": ctx.author.id}) == None:
-    #         await ctx.send(f'У данного пользователя не создан аккаунт, пропишите {ctx.prefix}help для создания!')
-    #         return
-    #
-    #     user = users.find_one({"userid": ctx.author.id})
-    #     guild = db.clubs.find_one({"name": user['guild']})
-    #     mem = users.find_one({"userid": member.id})
-    #
-    #     if member is None:
-    #         emb = discord.Embed(description = 'Укажите пользователя', color=0xf03e65)
-    #         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-    #         await ctx.send(embed = emb)
-    #
-    #     elif member == ctx.author:
-    #         emb = discord.Embed(description = 'Самого себя кикнуть нельзя!', color=0xf03e65)
-    #         emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-    #         await ctx.send(embed = emb)
-    #
-    #     else:
-    #         if user['guild'] == None:
-    #             emb = discord.Embed(description = 'Вы не в клубе!', color=0xf03e65)
-    #             emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-    #             await ctx.send(embed = emb)
-    #
-    #         elif mem['guild'] == None:
-    #
-    #             emb = discord.Embed(description = 'Пользователь не в клубе!', color=0xf03e65)
-    #             emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-    #             await ctx.send(embed = emb)
-    #
-    #         else:
-    #             if guild['owner'] == ctx.author.id or ctx.author.id in guild["admins"]:
-    #
-    #                 emb = discord.Embed(description = 'Только глава/админ может кикнуть участника из клуба!', color=0xf03e65)
-    #                 emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-    #                 await ctx.send(embed = emb)
-    #
-    #             else:
-    #                 clanName1 = user['guild']
-    #                 clanName2 = mem['guild']
-    #
-    #                 if clanName1 == clanName2:
-    #                     emb = discord.Embed(description = 'Вы успешно кикнули участника из клуба!', color=0xf03e65)
-    #                     emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-    #                     await ctx.send(embed = emb)
-    #
-    #                     members = guild['members']
-    #                     ad = guild['admins']
-    #                     if member.id in ad:
-    #                         ad.remove(member.id)
-    #                         db.clubs.update_one({"name": user['guild']}, {"$set": {"admins": ad}})
-    #                     members.remove(member.id)
-    #                     db.clubs.update_one({"name": user['guild']}, {"$set": {"members": members}})
-    #                     users.update_one({"userid": member.id}, {"$set": {"guild": None}})
-    #
-    #                 else:
-    #                     emb = discord.Embed(description = 'Данный человек находится в другом клубе!', color=0xf03e65)
-    #                     emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
-    #                     await ctx.send(embed = emb)
-    #
-    #
+            emb = discord.Embed(description = f"Вы покинули гильдию {guild['name']}!", color=0xf03e65)
+            emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+            await ctx.send(embed = emb)
+
+            guild['members'].pop(str(ctx.author.id))
+            r = server['rpg']
+            r['guilds'][rpg_guild_id] = guild
+            servers.update_one( {"server": ctx.guild.id}, {"$set": {'rpg': r }} )
+
+        else:
+            emb = discord.Embed(description = 'Гильд-мастер не может покинуть гильдию!', color=0xf03e65)
+            emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+            await ctx.send(embed = emb)
+
+    @commands.command(usage = '(@member)', description = 'Кикнуть пользователя из гильдии.', aliases = ['пнуть_из_гильдии', 'gkick'])
+    async def guild_kick(self, ctx, member: discord.Member = None):
+
+        user = funs.user_check(ctx.author, ctx.author.guild)
+        server = servers.find_one({"server": ctx.guild.id})
+        rpg_guild_id = None
+        member_guild = None
+
+        for i in server['rpg']['guilds'].keys():
+            g = server['rpg']['guilds'][i]
+            if str(ctx.author.id) in g['members'].keys():
+                rpg_guild_id = i
+
+        if rpg_guild_id == None:
+            emb = discord.Embed(description = 'Вы не в гильдии!',color=server['embed_color'])
+            emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+            await ctx.send(embed = emb)
+            return
+
+        guild = server['rpg']['guilds'][rpg_guild_id]
+
+        if guild['members'][str(ctx.author.id)]['role'] not in ['owner', 'admin']:
+            emb = discord.Embed(description = 'Только гильд-мастер / админ может пнуть из гильдии!', color=0xf03e65)
+            emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+            await ctx.send(embed = emb)
+
+        else:
+            if member is None:
+                emb = discord.Embed(description = 'Укажите пользователя!', color=0xf03e65)
+                emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+                await ctx.send(embed = emb)
+                return
+
+            for i in server['rpg']['guilds'].keys():
+                g = server['rpg']['guilds'][i]
+                if str(member.id) in g['members'].keys():
+                    member_guild = i
+
+            if member_guild != rpg_guild_id:
+                emb = discord.Embed(description = 'Пользователь не в вашей гильдии!', color=0xf03e65)
+                emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+                await ctx.send(embed = emb)
+                return
+
+            if guild['members'][str(ctx.author.id)]['role'] != 'owner' or guild['members'][str(member.id)]['role'] in ['owner', 'admin']:
+                emb = discord.Embed(description = 'Вы можете кикнуть только ниже себя по должности!', color=0xf03e65)
+                emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+                await ctx.send(embed = emb)
+                return
+
+            elif member == ctx.author:
+                emb = discord.Embed(description = 'Невозможно кикнуть самого себя!', color=0xf03e65)
+                emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+                await ctx.send(embed = emb)
+                return
+
+            emb = discord.Embed(description = f"Вы кикнули {member.mention} из гильдии!", color=0xf03e65)
+            emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+            await ctx.send(embed = emb)
+
+            guild['members'].pop(str(member.id))
+            r = server['rpg']
+            r['guilds'][rpg_guild_id] = guild
+            servers.update_one( {"server": ctx.guild.id}, {"$set": {'rpg': r }} )
+
+
     # @commands.command(usage = '(new_name)', description = 'Изменить название клуба. Стимость 2к', aliases = ['переименовать_клуб'])
     # async def club_rename(self, ctx, *, name = None):
     #
