@@ -776,16 +776,16 @@ class clubs(commands.Cog):
 
                     if str(react) == '✅':
 
+                        server = servers.find_one({"server": ctx.guild.id})
+                        server['rpg']['guilds'][rpg_guild_id]['members'][str(member.id)] = {'role': 'member'}
+                        servers.update_one( {"server": ctx.guild.id}, {"$set": {'rpg': server['rpg']}} )
+
                         emb = discord.Embed(description = f'**{member.mention}** принял(а) приглашение в гильдию!', color=0xf03e65)
                         if guild['flag'] != None:
                             emb.set_author(icon_url = guild['flag'], name = guild['name'])
                         else:
                             emb.set_author(name = guild['name'])
                         await message.edit(embed = emb)
-
-                        server = servers.find_one({"server": ctx.guild.id})
-                        server['rpg']['guilds'][rpg_guild_id][str(member.id)] = {'role': 'member'}
-                        servers.update_one( {"server": ctx.guild.id}, {"$set": {'rpg': server['rpg']}} )
 
                     elif str(react) == '❌':
 
