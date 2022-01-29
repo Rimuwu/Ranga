@@ -241,7 +241,7 @@ class functions:
 
         r = server['races'][race]
         a = server['users']
-        pprint.pprint(a[str(member.id)])
+
         a[str(member.id)].update({
 
         'hp': r['hp'], 'hpmax': r['hp'],
@@ -259,7 +259,6 @@ class functions:
             for i in r['items']:
                 a[str(member.id)]['inv'].append(functions.creat_item(guild.id, i))
 
-        pprint.pprint(a[str(member.id)])
 
         servers.update_one({"server": guild.id}, {"$set": {"users": a}})
         return a[str(member.id)]
@@ -724,7 +723,6 @@ class functions:
                 return 'Timeout'
             else:
                 if reaction.emoji in solutions:
-                    print(reaction.emoji)
                     if clear == False:
                         await msg.remove_reaction(str(reaction.emoji), member)
                     else:
