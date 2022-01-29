@@ -278,35 +278,22 @@ class profile(commands.Cog):
 
                 bg_img = alpha
                 fg_img = rim
-                alpha = trans_paste(fg_img, bg_img, 1.0, (710, 10, 710 + sz, 10 + sz))
+                alpha = trans_paste(fg_img, bg_img, 1.0, (670, 10, 670 + sz, 10 + sz))
 
                 tag_g = f"{g['tag']}"
-                if len(tag_g) == 1:
-                    t = (740,90)
-                elif len(tag_g) == 2:
-                    t = (730,90)
-                elif len(tag_g) == 3:
-                    t = (720,90)
-                elif len(tag_g) == 4:
-                    t = (710,90)
 
-                idraw.text(t, tag_g, font = headline)
-                idraw.text((15,360), f"{name}#{tag}", font = headline) #первое значение это отступ с лева, второе сверху
+                idraw.text((15,360), f"{name}#{tag} [{g['tag']}]", font = headline)
+
             else:
-                idraw.text((15,360), f"{name}#{tag} [{g['tag']}]", font = headline) #первое значение это отступ с лева, второе сверху
+                idraw.text((15,360), f"{name}#{tag} [{g['tag']}]", font = headline)
         else:
-            idraw.text((15,360), f"{name}#{tag}", font = headline) #первое значение это отступ с лева, второе сверху
+            idraw.text((15,360), f"{name}#{tag}", font = headline)
 
         idraw.text((60,242), f"{'{:,}'.format(user['money']).replace(',', '.')} #{topmn}", font = para)
         idraw.text((260,50), f"{len(user['rep'][0])}", font = para)
         idraw.text((260,90), str(len(user['rep'][1])), font = para)
         idraw.text((230,288), f"{user['xp']} / {expn}" , font = para)
         idraw.text((60,288), f"{user['lvl']} #{toplvl}" , font = para)
-
-
-
-        embed = discord.Embed(color=0xf03e65)
-        embed.set_author(name = ctx.author, url = ctx.author.avatar.url)
 
         s_emb = discord.Embed(description = 'Статус: Изображение получено.\nРабота над: Инвентарь',color=0xf03e65)
         s_emb.set_image(url= 'https://images-ext-2.discordapp.net/external/WP1Bq4Oy8xzNSPfCpM1lWnP3Qv_6C75lnMXwhw2XiHA/%3Ffit%3D800%252C400%26ssl%3D1/https/i0.wp.com/heisenbergreport.com/wp-content/uploads/2018/10/ezgif.com-resize-2.gif')
@@ -529,7 +516,7 @@ class profile(commands.Cog):
 
         def check(reaction, user):
             nonlocal msg
-            return user == ctx.author and str(reaction.emoji) in ['<:ch_page:886895064331202590>', '◀', '▶'] and str(reaction.message) == str(msg)
+            return user == member and str(reaction.emoji) in ['<:ch_page:886895064331202590>', '◀', '▶'] and str(reaction.message) == str(msg)
 
         async def rr():
             nonlocal reaction
@@ -539,13 +526,13 @@ class profile(commands.Cog):
             nonlocal nl
 
             if str(reaction.emoji) == '<:ch_page:886895064331202590>':
-                await msg.remove_reaction('<:ch_page:886895064331202590>', ctx.author)
+                await msg.remove_reaction('<:ch_page:886895064331202590>', member)
                 if page_s == 'inv':
                     page_s = 'stat'
 
                     for em in ['◀', '▶']:
                         try:
-                            await msg.remove_reaction(em, ctx.author)
+                            await msg.remove_reaction(em, member)
                         except:
                             pass
                         try:
@@ -569,7 +556,7 @@ class profile(commands.Cog):
 
                         if str(reaction.emoji) == '◀':
                             p_n -= 1
-                            await msg.remove_reaction('◀', ctx.author)
+                            await msg.remove_reaction('◀', member)
                             if p_n == -1:
                                 p_n = len(pages) - 1
 
@@ -577,23 +564,21 @@ class profile(commands.Cog):
 
                         if str(reaction.emoji) == '▶':
                             p_n += 1
-                            await msg.remove_reaction('▶', ctx.author)
+                            await msg.remove_reaction('▶', member)
                             if p_n == len(pages):
                                 p_n = 0
 
                             await msg.edit(embed = pages[p_n])
                 else:
                     try:
-                        await msg.remove_reaction('▶', ctx.author)
+                        await msg.remove_reaction('▶', member)
                     except:
                         pass
 
                     try:
-                        await msg.remove_reaction('◀', ctx.author)
+                        await msg.remove_reaction('◀', member)
                     except:
                         pass
-
-
 
         async def reackt():
             nonlocal reaction
