@@ -479,7 +479,6 @@ class profile(commands.Cog):
             await ctx.trigger_typing()
             fs = []
             for frame in ImageSequence.Iterator(img):
-                frame = frame.convert("RGB")
                 frame = frame.resize((800, 400), Image.ANTIALIAS)
 
                 bg_img = frame
