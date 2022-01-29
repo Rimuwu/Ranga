@@ -72,7 +72,7 @@ async def pat(Interaction:Interaction, member:discord.Member):
     author = Interaction.user
 
     if member == author:
-        msg = f'{author.mention} погладил(а) самого себя, вот чсв....'
+        msg = f'{author.mention} погладил(а) самого себя'
     else:
         msg = f'{author.mention} погладил(а) {member.mention}'
 
@@ -95,7 +95,7 @@ async def kiss(Interaction:Interaction, member:discord.Member):
     author = Interaction.user
 
     if member == author:
-        msg = f'{author.mention} поцеловал(а) самого себя, без комментариев'
+        msg = f'{author.mention} поцеловал(а) самого себя'
     else:
         msg = f'{author.mention} поцеловал(а) {member.mention}'
 
@@ -109,6 +109,168 @@ async def kiss(Interaction:Interaction, member:discord.Member):
     ]
     emb.set_image(url = random.choice(rli))
     await Interaction.response.send_message(embed=emb)
+
+@bot.slash_command(guild_ids = g_ids, description = '💔 | Совершить суицид.')
+async def suicide(Interaction:Interaction, member:discord.Member):
+    server = servers.find_one({"server": Interaction.guild.id})
+    author = Interaction.user
+
+    if member == author:
+        msg = f'{author.mention} совершил(а) суицид'
+    else:
+        msg = f'{author.mention} совершил(а) суицид из-за {member.mention}'
+
+    emb=discord.Embed(description = str(msg), title = "🍡 | Реакция: суицид", color=server['embed_color'])
+    rli = ["https://i.gifer.com/DpQV.gif",
+           "https://pa1.narvii.com/6843/d7015105f2d207190ed5cdd9be1e63fa5d86476e_hq.gif",
+           "https://pa1.narvii.com/6919/920cff9e6642eca82f8a0e5529b9b428241981c6r1-500-299_hq.gif",
+           "https://i.gifer.com/UYOF.gif"
+    ]
+
+    emb.set_image(url = random.choice(rli))
+    await Interaction.response.send_message(embed=emb)
+
+@bot.slash_command(guild_ids = g_ids, description = '😈 | Сделать кусь.')
+async def bite(Interaction:Interaction, member:discord.Member):
+    server = servers.find_one({"server": Interaction.guild.id})
+    author = Interaction.user
+
+    if member == author:
+        msg = f'{author.mention} сделал(а) кусь самому(самой) себя(e)'
+    else:
+        msg = f'{author.mention} сделал(а) кусь {member.mention}'
+
+    emb=discord.Embed(description = str(msg), title = "🍡 | Реакция: кусь", color=server['embed_color'])
+    rli = ["https://pa1.narvii.com/6930/5a613b4a946232707c5a4775d8aa9166fcf82a90r1-540-309_hq.gif",
+           "https://pa1.narvii.com/6930/639c95b3a42222dd30e83977a5ee2b69652b3afbr1-600-340_hq.gif",
+           "https://pa1.narvii.com/6930/be7e84430d835e27f3990cd47063ee51b30d3ffer1-499-281_hq.gif",
+           "https://pa1.narvii.com/6331/ae361000cc331d13b29110b407a69bf9ddb9f44e_hq.gif",
+           "https://i.gifer.com/9fjL.gif",
+           "https://pa1.narvii.com/6908/f2c102ac7f48f9bec59b86f27dffa13a144a601er1-420-240_hq.gif",
+           "https://i.pinimg.com/originals/c0/b4/a9/c0b4a94993a08d1df826e27e55dd2fb0.gif",
+           "https://img-s1.onedio.com/id-586442b636c2c8871dbaa978/rev-0/raw/s-292dc47640dde020472cac90785b140dbbd90553.gif",
+           "https://cdn.discordapp.com/attachments/604631379497713665/736236186246578296/c00c7d5bf26a8c016e3848cb936739f17a390efe_hq.gif"
+    ]
+
+    emb.set_image(url = random.choice(rli))
+    await Interaction.response.send_message(embed=emb)
+
+@bot.slash_command(guild_ids = g_ids, description = '😓 | Плакать.')
+async def cry(Interaction:Interaction, member:discord.Member):
+    server = servers.find_one({"server": Interaction.guild.id})
+    author = Interaction.user
+
+    if member == author:
+        msg = f'{author.mention} расплакался(ась)'
+    else:
+        msg = f'{author.mention} расплакался(ась) из-за {member.mention}'
+
+    emb=discord.Embed(description = str(msg), title = "🍡 | Реакция: плакать", color=server['embed_color'])
+    rli = ["https://cdn.discordapp.com/attachments/707663547928412250/736977136338075729/tenor.gif",
+           "https://cdn.discordapp.com/attachments/707663547928412250/736977152456786050/orig.gif",
+           "https://cdn.discordapp.com/attachments/707663547928412250/736977223495581777/tenor.gif",
+           "https://cdn.discordapp.com/attachments/707663547928412250/736977356501286943/orig.gif",
+           "https://i.pinimg.com/originals/74/d2/33/74d233d1a21abdcd0f59a3cb427d8c6c.gif"
+    ]
+
+    emb.set_image(url = random.choice(rli))
+    await Interaction.response.send_message(embed=emb)
+
+@bot.slash_command(guild_ids = g_ids, description = '🥟 | Обнять.')
+async def hug(Interaction:Interaction, member:discord.Member):
+    server = servers.find_one({"server": Interaction.guild.id})
+    author = Interaction.user
+
+    if member == author:
+        msg = f'{author.mention} обнял(а) <@847092994670067713>'
+    else:
+        msg = f'{author.mention} обнял(а) {member.mention}'
+
+    emb=discord.Embed(description = str(msg), title = "🍡 | Реакция: обнять", color=server['embed_color'])
+    rli = ["https://otvet.imgsmail.ru/download/67207789_49d3635feb46fda3a1c51fc0eb0800a9_800.gif",
+           "https://anime-chan.me/uploads/posts/2016-07/1468759968_tumblr_oadopsQjh91v09euno1_540.gif",
+           "http://pa1.narvii.com/6502/63f0a31cc78f6663ef8d0e194e40da0fba83a782_00.gif",
+           "https://img1.ak.crunchyroll.com/i/spire4/a35d8d2ca642fde2c5cdcb3bcf3f57941484469595_full.gif",
+           "https://i.gifer.com/3Ypn.gif"
+    ]
+
+    emb.set_image(url = random.choice(rli))
+    await Interaction.response.send_message(embed=emb)
+
+@bot.slash_command(guild_ids = g_ids, description = '💥 | Убить.')
+async def kill(Interaction:Interaction, member:discord.Member):
+    server = servers.find_one({"server": Interaction.guild.id})
+    author = Interaction.user
+
+    if member == author:
+        msg = f'{author.mention} убил(а) сам(а) себя'
+    else:
+        msg = f'{author.mention} убил(а) {member.mention}'
+
+    emb=discord.Embed(description = str(msg), title = "🍡 | Реакция: убить", color=server['embed_color'])
+    rli = ["https://pa1.narvii.com/6550/6db2f0bd45340e49c3dc7dc0d8a21b239855f978_hq.gif",
+           "https://i.gifer.com/embedded/download/DTBu.gif",
+           "https://i.gifer.com/BzlD.gif",
+           "https://pa1.narvii.com/6234/8e7ec2b3858123190128f3474b616ef5b3b9d6f2_hq.gif",
+           "https://i.pinimg.com/originals/43/d9/1a/43d91af64d4830fc9d92e8fd2ea31c97.gif"
+    ]
+
+    emb.set_image(url = random.choice(rli))
+    await Interaction.response.send_message(embed=emb)
+
+@bot.slash_command(guild_ids = g_ids, description = '👊 | Ударить.')
+async def punch(Interaction:Interaction, member:discord.Member):
+    server = servers.find_one({"server": Interaction.guild.id})
+    author = Interaction.user
+
+    if member == author:
+        msg = f'{author.mention} ударил(а) сам(а) себя'
+    else:
+        msg = f'{author.mention} ударил(а) {member.mention}'
+
+    emb=discord.Embed(description = str(msg), title = "🍡 | Реакция: ударить", color=server['embed_color'])
+    rli = ["https://media.indiedb.com/cache/images/groups/1/25/24269/thumb_620x2000/t3_56xx0a.gif",
+           "https://data.whicdn.com/images/187664188/original.gif",
+           "https://i.gifer.com/Vx5G.gif",
+           "https://i.gifer.com/embedded/download/Ua1c.gif",
+           "https://i.gifer.com/embedded/download/EHzF.gif",
+           "https://pa1.narvii.com/6866/9b0ba3ba4f29eab79ad7a8418855f7794eb912cfr1-480-360_hq.gif",
+           "https://i.gifer.com/8sWB.gif",
+           "http://blog-imgs-96.fc2.com/y/a/r/yarakan/fm64184.gif",
+           "https://i.gifer.com/7zBH.gif",
+           "https://i.gifer.com/HirD.gif",
+           "https://anime-chan.me/uploads/posts/2016-06/1466605321_tumblr_o6vl2drsqu1tndn6wo1_540.gif",
+           "https://s01.yapfiles.ru/files/1066009/TheRollingGirlsAnimegifkiAnime1831696.gif"
+    ]
+
+    emb.set_image(url = random.choice(rli))
+    await Interaction.response.send_message(embed=emb)
+
+@bot.slash_command(guild_ids = g_ids, description = '😋 | Лизнуть.')
+async def lick(Interaction:Interaction, member:discord.Member):
+    server = servers.find_one({"server": Interaction.guild.id})
+    author = Interaction.user
+
+    if member == author:
+        msg = f'{author.mention} лизнул(а) сам(а) себя'
+    else:
+        msg = f'{author.mention} лизнул(а) {member.mention}'
+
+    emb=discord.Embed(description = str(msg), title = "🍡 | Реакция: лизнуть", color=server['embed_color'])
+    rli = ["https://media.tenor.com/images/3c32c3db39c6d5d80a291a753baa9d95/tenor.gif",
+           "https://media.tenor.com/images/e045343b19f32c1fb276ddf0544e7bd8/tenor.gif",
+           "https://media.tenor.com/images/1ce96858ae1368c5c6eef23f33594f0a/tenor.gif",
+           "https://media.tenor.com/images/454ff7fc7d37fbf3482cdb8b1426103c/tenor.gif",
+           "https://media.tenor.com/images/1e8001af03ad6bb7af661cf0265f86cb/tenor.gif",
+           "https://i2.yuki.la/c/6e/977f19bf9a24f6c6c60a23d809bad2626c0faba723895dc9c6bbf507548f16ec.gif",
+           "https://i2.yuki.la/b/29/b7af0499fd98cb63df18ca9a90f1261eeee8a094c00f32d341dd4c9a152e829b.gif"
+
+    ]
+
+    emb.set_image(url = random.choice(rli))
+    await Interaction.response.send_message(embed=emb)
+
+
 
 
 # event ====================================== #
