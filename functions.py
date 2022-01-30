@@ -713,7 +713,7 @@ class functions:
 
         def check(reaction, user):
             nonlocal msg
-            return user == member and str(reaction.emoji) in solutions and reaction.message == msg
+            return user.id == member.id and str(reaction.emoji) in solutions and reaction.message.id == msg.id
 
         async def reackt():
             try:

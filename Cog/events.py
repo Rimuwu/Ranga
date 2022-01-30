@@ -667,11 +667,6 @@ class MainCog(commands.Cog):
             bg_img.paste(fg_img_trans,box,fg_img_trans)
             return bg_img
 
-        def prepare_mask(size, antialias = 2):
-            mask = Image.new('L', (size[0] * antialias, size[1] * antialias), 0)
-            ImageDraw.Draw(mask).ellipse((0, 0) + mask.size, fill=255)
-            return mask.resize(size, Image.ANTIALIAS)
-
         def crop(im, s):
             mask = Image.open('elements/elips_mask.png').convert('L').resize(s, Image.ANTIALIAS)
 
@@ -1047,26 +1042,16 @@ class MainCog(commands.Cog):
                             bg_img.paste(fg_img_trans,box,fg_img_trans)
                             return bg_img
 
-                        def prepare_mask(size, antialias = 2):
-                            mask = Image.new('L', (size[0] * antialias, size[1] * antialias), 0)
-                            ImageDraw.Draw(mask).ellipse((0, 0) + mask.size, fill=255)
-                            return mask.resize(size, Image.ANTIALIAS)
-
                         def crop(im, s):
-                            w, h = im.size
-                            k = w / s[0] - h / s[1]
+                            mask = Image.open('elements/elips_mask.png').convert('L').resize(s, Image.ANTIALIAS)
 
-                            if k > 0:
-                                im = im.crop(((w - h) / 2, 0, (w + h) / 2, h))
-                            elif k < 0:
-                                im = im.crop((0, (h - w) / 2, w, (h + w) / 2))
-
-                            return im.resize(s, Image.ANTIALIAS)
+                            output = ImageOps.fit(im, s, centering=(0.5, 0.5))
+                            output.putalpha(mask)
+                            return output
 
                         im = response1
                         im = crop(im, size)
-                        im.putalpha(prepare_mask(size, 4))
-
+                        
                         def make_ellipse_mask(size, x0, y0, x1, y1, blur_radius):
                             img = Image.new("L", size, color=0)
                             draw = ImageDraw.Draw(img)

@@ -270,6 +270,274 @@ async def lick(Interaction:Interaction, member:discord.Member):
     emb.set_image(url = random.choice(rli))
     await Interaction.response.send_message(embed=emb)
 
+@bot.slash_command(guild_ids = g_ids, description = '🍰 | Дать вкусняшку.')
+async def yummy(Interaction:Interaction, member:discord.Member):
+    server = servers.find_one({"server": Interaction.guild.id})
+    author = Interaction.user
+
+    if member == author:
+        msg = f'{author.mention} съел(а) вкусняшку'
+    else:
+        msg = f'{author.mention} дал(а) вкусняшку {member.mention}'
+
+    emb=discord.Embed(description = str(msg), title = "🍡 | Реакция: дать вкусняшку", color=server['embed_color'])
+    rli = ["https://i.gifer.com/2yNA.gif",
+           "https://i.gifer.com/32Ph.gif",
+           "https://i.kym-cdn.com/photos/images/original/001/221/161/c8e.gif",
+           "https://i.gifer.com/1yS5.gif",
+           "https://i.gifer.com/G1T3.gif",
+           "http://slinky.me/uploads/pic/8/original_fu_53f5ec85dd7d2.gif",
+           "https://i.gifer.com/Iy14.gif",
+           "https://data.whicdn.com/images/300737750/original.gif",
+           "https://i.gifer.com/embedded/download/SKP2.gif"
+    ]
+
+    emb.set_image(url = random.choice(rli))
+    await Interaction.response.send_message(embed=emb)
+
+@bot.slash_command(guild_ids = g_ids, description = '🎶 | Танцевать.')
+async def dance(Interaction:Interaction, member:discord.Member):
+    server = servers.find_one({"server": Interaction.guild.id})
+    author = Interaction.user
+
+    if member == author:
+        msg = f'{author.mention} танцует'
+    else:
+        msg = f'{author.mention} танцует с {member.mention}'
+
+    emb=discord.Embed(description = str(msg), title = "🍡 | Реакция: танцевать", color=server['embed_color'])
+    rli = ["https://cdn-ak.f.st-hatena.com/images/fotolife/p/pema/20120831/20120831223551_original.gif",
+           "https://pa1.narvii.com/6818/0bebae774b7114f10370c2d33447f68cfc355863_hq.gif",
+           "https://i.pinimg.com/originals/d0/c5/67/d0c567253ce4b83823fa11069ae0bc1b.gif",
+           "https://i.kym-cdn.com/photos/images/original/000/986/899/d51.gif"
+    ]
+
+    emb.set_image(url = random.choice(rli))
+    await Interaction.response.send_message(embed=emb)
+
+@bot.slash_command(guild_ids = g_ids, description = '💤 | Уснуть.')
+async def sleep(Interaction:Interaction, member:discord.Member):
+    server = servers.find_one({"server": Interaction.guild.id})
+    author = Interaction.user
+
+    if member == author:
+        msg = f'{author.mention} заснул(а)'
+    else:
+        msg = f'{author.mention} заснул(а) вместе с {member.mention}'
+
+    emb=discord.Embed(description = str(msg), title = "🍡 | Реакция: спать", color=server['embed_color'])
+    rli = ["https://data.whicdn.com/images/258078020/original.gif",
+           "https://pa1.narvii.com/6940/46692bcf9c716840e8350e2588745f1018793158r1-540-304_hq.gif",
+           "https://thumbs.gfycat.com/GorgeousIncompatibleJerboa-size_restricted.gif",
+           "https://thumbs.gfycat.com/DeliciousBogusImperatorangel-size_restricted.gif",
+           "https://img.gifmagazine.net/gifmagazine/images/498453/original.gif",
+           "https://data.whicdn.com/images/47921711/original.gif",
+           "https://i.pinimg.com/originals/dc/5c/d3/dc5cd3670390cb757c9f7c52591d3c09.gif"
+    ]
+
+    emb.set_image(url = random.choice(rli))
+    await Interaction.response.send_message(embed=emb)
+
+@bot.slash_command(guild_ids = g_ids, description = '💥 | Дать пощечину.')
+async def slap(Interaction:Interaction, member:discord.Member):
+    server = servers.find_one({"server": Interaction.guild.id})
+    author = Interaction.user
+
+    if member == author:
+        msg = f'{author.mention} дал(а) пощёчину сам(а) себя'
+    else:
+        msg = f'{author.mention} дал(а) пощёчину {member.mention}'
+
+    emb=discord.Embed(description = str(msg), title = "🍡 | Реакция: дать пощечину", color=server['embed_color'])
+    rli = ["https://media.tenor.com/images/79c666d38d5494bad25c5c023c0bbc44/tenor.gif",
+           "https://media.tenor.com/images/45a27dba6f60c6a8deee02335dd5f1a0/tenor.gif",
+           "https://media.tenor.com/images/c366bb3a5d7820139646d8cdce96f7a8/tenor.gif",
+           "https://media.tenor.com/images/49b0ce2032f6134c31e1313cb078fe5a/tenor.gif",
+           "https://media.tenor.com/images/a107547117e0b8f22e00a3f39c40eb2f/tenor.gif"
+    ]
+
+    emb.set_image(url = random.choice(rli))
+    await Interaction.response.send_message(embed=emb)
+
+@bot.slash_command(guild_ids = g_ids, description = '👉 | Тыкнуть.')
+async def poke(Interaction:Interaction, member:discord.Member):
+    server = servers.find_one({"server": Interaction.guild.id})
+    author = Interaction.user
+
+    if member == author:
+        msg = f'{author.mention} тыкнуть сам(а) себя'
+    else:
+        msg = f'{author.mention} тыкнуть {member.mention}'
+
+    emb=discord.Embed(description = str(msg), title = "🍡 | Реакция: тыкнуть", color=server['embed_color'])
+    rli = ["https://media.tenor.com/images/8bf3b4bec5055537dda92d86d16ea5bd/tenor.gif",
+           "https://media.tenor.com/images/88dad48943ce9f198047e8d83ca58fcb/tenor.gif",
+           "https://media.tenor.com/images/d31bb1bef6b6cfd486a9ab11be25dbcc/tenor.gif",
+           "https://media.tenor.com/images/7eeed38fd37c7dd93b93546fa12bd174/tenor.gif",
+           "https://media.tenor.com/images/1e70d4ccc02335ee194e55aaa0dc23b4/tenor.gif",
+           "https://media.tenor.com/images/5f0d2906b9fbffb020d0bb25b0666b1c/tenor.gif",
+           "https://media.tenor.com/images/e9fa94b95440f5823c73ef4154866bf8/tenor.gif",
+           "https://media.tenor.com/images/fbbf9713d5202abed4ad4f4c3306cbe9/tenor.gif"
+    ]
+
+    emb.set_image(url = random.choice(rli))
+    await Interaction.response.send_message(embed=emb)
+
+@bot.slash_command(guild_ids = g_ids, description = '✋ | Дать пять.')
+async def highfive(Interaction:Interaction, member:discord.Member):
+    server = servers.find_one({"server": Interaction.guild.id})
+    author = Interaction.user
+
+    if member == author:
+        msg = f'{author.mention} дал(а) пять сам(а) себя'
+    else:
+        msg = f'{author.mention} дал(а) пять {member.mention}'
+
+    emb=discord.Embed(description = str(msg), title = "🍡 | Реакция: дать пять", color=server['embed_color'])
+    rli = ["https://media.tenor.com/images/d5dafcce563b87bc56c95a21ce5d2a08/tenor.gif",
+           "https://media.tenor.com/images/5628f231595350b459d6bf8278cc5e59/tenor.gif",
+           "https://media.tenor.com/images/b00b1e796f9ee25bd867ffe0bc80b1be/tenor.gif",
+           "https://media.tenor.com/images/275f81b7ccacad49faf2056ad47c1519/tenor.gif",
+           "https://media.tenor.com/images/0e95047c3c3103eb894d478646e408af/tenor.gif"
+    ]
+
+    emb.set_image(url = random.choice(rli))
+    await Interaction.response.send_message(embed=emb)
+
+@bot.slash_command(guild_ids = g_ids, description = '💕 | Заняться сексом.\n18+ команда.')
+async def sex(Interaction:Interaction, member:discord.Member):
+    server = servers.find_one({"server": Interaction.guild.id})
+    author = Interaction.user
+
+    if Interaction.channel.nsfw == False:
+        await Interaction.send("Перейдите в NSFW канал!")
+
+    else:
+        if member == author:
+            await Interaction.send("Не нарушай законы этого мира")
+
+        else:
+            emb=discord.Embed(description = f'{member.mention}, вам поступило предложение от {author.mention} заняться сексом, нажмите на 💖 если вы согласны его принять.\nПредложение истекает: <t:{int(time.time()+120)}:R>', title = "💖 | Предложение заняться сексом", color=server['embed_color'])
+            await Interaction.response.send_message(content = member.mention, embed=emb)
+            message = await Interaction.original_message()
+
+            react = await functions.reactions_check(bot, ['💖', '❌'], member, message, True, 120.0)
+
+            if str(react) == '💖':
+                msg = f'{author.mention} и {member.mention} занялись сексом💖'
+
+                emb=discord.Embed(description = str(msg), title = "💖 | Реакция: секс", color=server['embed_color'])
+                rli = ['https://i.redd.it/axk663d95n741.gif',
+                'https://bb.rule-34.net/file/rule-34-images/238019-135282-300-200',
+                'https://static.hentai-img.com/upload/20140924/1/462/71.gif'
+
+                ]
+
+                emb.set_image(url = random.choice(rli))
+                await Interaction.edit_original_message(embed=emb)
+
+            else:
+                await message.delete()
+
+@bot.slash_command(guild_ids = g_ids, description = '🤣 | Посмеяться над кем-то.')
+async def ha(Interaction:Interaction, member:discord.Member):
+    server = servers.find_one({"server": Interaction.guild.id})
+    author = Interaction.user
+
+    if member == author:
+        msg = f'{author.mention} посмеялся(ась)'
+    else:
+        msg = f'{author.mention} посмеялся(ась) над {member.mention}'
+
+    emb=discord.Embed(description = str(msg), title = "🍡 | Реакция: посмеяться", color=server['embed_color'])
+    rli = ['https://media.tenor.com/images/b7dccbe27053b82434fa2419da378eba/tenor.gif',
+           'https://media.tenor.com/images/114732cc0b35c228006d734b0051b9ee/tenor.gif',
+           'https://media.tenor.com/images/0953b631d73358ecbc4d1fb2de8770a9/tenor.gif',
+           'https://media.tenor.com/images/215fc61f486486ebfc40c235e2c6b970/tenor.gif',
+           'https://media.tenor.com/images/c622cef81456cb18fbda3af23098992f/tenor.gif',
+           'https://media.tenor.com/images/fee78c6a17e907dd775bcbf4ac029e5c/tenor.gif',
+           'https://media.tenor.com/images/d441ee43d1b5f41425a3bdc99320a710/tenor.gif',
+           'https://media.tenor.com/images/36d6ca060d01c5a19fb5b4047f00d1cd/tenor.gif',
+           'https://media.tenor.com/images/e90526eed1dbdac2432bdbbc579ca825/tenor.gif']
+
+    emb.set_image(url = random.choice(rli))
+    await Interaction.response.send_message(embed=emb)
+
+@bot.slash_command(guild_ids = g_ids, description = '🎵 | Спеть.')
+async def sing(Interaction:Interaction, member:discord.Member):
+    server = servers.find_one({"server": Interaction.guild.id})
+    author = Interaction.user
+
+    if member == author:
+        msg = f'{author.mention} поёт'
+    else:
+        msg = f'{author.mention} поёт вместе с {member.mention}'
+
+    emb=discord.Embed(description = str(msg), title = "🍡 | Реакция: спеть", color=server['embed_color'])
+    rli = ['https://i.gifer.com/Clel.gif',
+           'https://pa1.narvii.com/6859/60b89bbe504ac79f5c98c875a06c908bfe7b2f0c_hq.gif',
+           'https://i.gifer.com/NBYu.gif',
+           'https://i.gifer.com/LPIu.gif',
+           'https://i.gifer.com/embedded/download/3ZZZ.gif',
+           'https://i.gifer.com/embedded/download/VpFw.gif',
+           'https://pa1.narvii.com/6115/e66f5e96b8b7d66ca49c3c74c66f5a2c0ae402a9_hq.gif',
+           'https://pa1.narvii.com/6871/7e39d811701f7687b25c2ec78c87b07c392ff60ar1-500-300_hq.gif',
+           'https://i.gifer.com/EmkU.gif']
+
+    emb.set_image(url = random.choice(rli))
+    await Interaction.response.send_message(embed=emb)
+
+@bot.slash_command(guild_ids = g_ids, description = '☠ | Записать в тетрадь смерти.')
+async def dnote(Interaction:Interaction, member:discord.Member):
+    server = servers.find_one({"server": Interaction.guild.id})
+    author = Interaction.user
+
+    rtime = random.randint(1, 666)
+    rtime2 = random.choice(["день", 'секунда', 'минута', 'неделя'])
+
+    if rtime2 == 'день':
+        tim = int(time.time()+rtime*86400)
+    if rtime2 == 'секунда':
+        tim = int(time.time()+rtime)
+    if rtime2 == 'минута':
+        tim = int(time.time()+rtime*3600)
+    if rtime2 == 'неделя':
+        tim = int(time.time()+rtime*86400*7)
+
+    if member == author:
+        msg = f'{author.mention} записал(а) себя в тетрадку, он(а) умрёт <t:{tim}:R>'
+    else:
+        msg = f'{author.mention} записал(а) {member.mention} в тетрадку, он(а) умрёт <t:{tim}:R>'
+
+    emb=discord.Embed(description = str(msg), title = "🍡 | Реакция: записать в тетрадь смерти", color=server['embed_color'])
+    rli = ['https://data.whicdn.com/images/234102919/original.gif', 'http://pa1.narvii.com/5973/77087cfb96d332d3c65a4283ff3a9cb066333e43_hq.gif'
+    ]
+
+    emb.set_image(url = random.choice(rli))
+    await Interaction.response.send_message(embed=emb)
+
+@bot.slash_command(guild_ids = g_ids, description = '🎎 | Выпить чаю.')
+async def drink_tea(Interaction:Interaction, member:discord.Member):
+    server = servers.find_one({"server": Interaction.guild.id})
+    author = Interaction.user
+
+    if member == author:
+        msg = f'{author.mention} пьёт чай сам(а) с собой'
+    else:
+        msg = f'{author.mention} пьёт чай с {member.mention}'
+
+    emb=discord.Embed(description = str(msg), title = "🍡 | Реакция: выпить чаю", color=server['embed_color'])
+    rli = ['https://data.whicdn.com/images/336042372/original.gif',
+    'https://pa1.narvii.com/7018/c33c362bc8ccfebb380f8d96b945f2a57093fa3dr1-500-281_hq.gif',
+    'https://pa1.narvii.com/6871/749ea5875cf2ef065abb0ba0fad0bd5868ac2950r1-500-281_hq.gif',
+    'https://pa1.narvii.com/6690/997dbe5e01dd0c3f5c56568b44a53672a19f5cc2_hq.gif',
+    'https://i.gifer.com/embedded/download/RdLD.gif',
+    'https://data.whicdn.com/images/329618110/original.gif',
+    'https://i.gifer.com/KDOF.gif'
+    ]
+
+    emb.set_image(url = random.choice(rli))
+    await Interaction.response.send_message(embed=emb)
 
 
 
@@ -484,22 +752,12 @@ async def lvl_up_image(message, user, server):
         bg_img.paste(fg_img_trans,box,fg_img_trans)
         return bg_img
 
-    def prepare_mask(size, antialias = 2):
-        mask = Image.new('L', (size[0] * antialias, size[1] * antialias), 0)
-        ImageDraw.Draw(mask).ellipse((0, 0) + mask.size, fill=255)
-        mask = mask.filter(ImageFilter.GaussianBlur(2.5))
-        return mask.resize(size, Image.ANTIALIAS)
-
     def crop(im, s):
-        w, h = im.size
-        k = w / s[0] - h / s[1]
+        mask = Image.open('elements/elips_mask.png').convert('L').resize(s, Image.ANTIALIAS)
 
-        if k > 0:
-            im = im.crop(((w - h) / 2, 0, (w + h) / 2, h))
-        elif k < 0:
-            im = im.crop((0, (h - w) / 2, w, (h + w) / 2))
-
-        return im.resize(s, Image.ANTIALIAS)
+        output = ImageOps.fit(im, s, centering=(0.5, 0.5))
+        output.putalpha(mask)
+        return output
 
     def bl_f(im):
         mask = Image.new('L',(720, 217))
@@ -582,15 +840,14 @@ async def lvl_up_image(message, user, server):
 
     im = response1
     im = crop(im, size)
-    im.putalpha(prepare_mask(size, 4))
 
     bg_img = alpha
     fg_img = im
     alpha = trans_paste(fg_img, bg_img, 1.0, (10, 10, 210, 210))
 
-
     if ust['type'] == "png":
         img = bl_f(img)
+        img = img.convert("RGB")
 
         bg_img = img
         fg_img = alpha
