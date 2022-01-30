@@ -268,7 +268,7 @@ class profile(commands.Cog):
                 response1 = response1.resize((sz, sz), Image.ANTIALIAS)
                 im = crop(response1, (sz, sz))
 
-                wh = Image.new(mode = 'RGB', color = 'white', size = (sz+4,sz+4))
+                wh = Image.new(mode = 'RGBA', color = 'white', size = (sz+4,sz+4))
                 wh = crop(wh, (sz+4,sz+4))
 
                 bg_img = wh
@@ -480,6 +480,7 @@ class profile(commands.Cog):
             fs = []
             for frame in ImageSequence.Iterator(img):
                 frame = frame.resize((800, 400), Image.ANTIALIAS)
+                frame = frame.convert("RGBA")
 
                 bg_img = frame
                 fg_img = alpha
@@ -633,8 +634,6 @@ class profile(commands.Cog):
             funs.user_update(ctx.author.id, ctx.author.guild, 'bio', bio)
 
             await ctx.send("Информация и картинка персонажа настроенны!")
-
-
 
 
 def setup(bot):
