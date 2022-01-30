@@ -1341,7 +1341,7 @@ class clubs(commands.Cog):
             await ctx.send(embed = emb)
 
         else:
-            emb = discord.Embed(title = 'Изменение доступности клуба', description = f'В данный момент: {guild["global_club"]}\n**Хотите изменить статус клуба?**'.replace('True', 'Открыт').replace('False', 'Закрыт'), color=0xf03e65)
+            emb = discord.Embed(title = 'Изменение доступности гильдии', description = f'В данный момент: {guild["global_club"]}\n**Хотите изменить статус гильдии?**'.replace('True', 'Открыт').replace('False', 'Закрыт'), color=0xf03e65)
 
             emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
             message = await ctx.send(embed = emb)
@@ -1354,7 +1354,7 @@ class clubs(commands.Cog):
                 else:
                     stat = True
 
-                emb = discord.Embed(title = 'Изменение доступности клуба', description = f'Статус клуба изменён на > {stat}'.replace('True', 'Открыт').replace('False', 'Закрыт'), color=0xf03e65)
+                emb = discord.Embed(title = 'Изменение доступности гильдии', description = f'Статус гильдии изменён на > {stat}'.replace('True', 'Открыт').replace('False', 'Закрыт'), color=0xf03e65)
 
                 emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
                 await message.edit(embed = emb)
@@ -1404,6 +1404,109 @@ class clubs(commands.Cog):
                 await ctx.send(embed = emb)
 
                 server['rpg']['guilds'][rpg_guild_id]['lvl_enter'] = lvl
+                servers.update_one( {"server": ctx.guild.id}, {"$set": {'rpg': server['rpg']}} )
+
+    @commands.command(usage = '[name / tag / id]', description = 'Вступить в гильдию.', aliases = ['войтив_гильдию', 'genter'])
+    async def guild_enter(self, ctx,  *, name:str):
+
+        user = funs.user_check(ctx.author, ctx.author.guild)
+        server = servers.find_one({"server": ctx.guild.id})
+        guilds = server['rpg']['guilds']
+
+        user_guild_id = None
+        rpg_guild_id = None
+        member_in_guild = False
+        member = ctx.author
+
+        try:
+            rpg_guild = server['rpg']['guilds'][name]
+            rpg_guild_id = name
+        except:
+            pass
+
+        if rpg_guild_id == None:
+
+            for i in server['rpg']['guilds'].keys():
+                g = server['rpg']['guilds'][i]
+                if str(member.id) in g['members'].keys():
+                    member_in_guild = True
+                    user_guild_id = i
+
+        if member_in_guild == True:
+            emb = discord.Embed(description = 'Вы уже в гильдии!',color=server['embed_color'])
+            emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+            await ctx.send(embed = emb)
+            return
+
+        if name == None and rpg_guild_id == None:
+            emb = discord.Embed(description = 'Введите `тег / название / id` гильдии!',color=server['embed_color'])
+            emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+            await ctx.send(embed = emb)
+            return
+
+        elif name != None and rpg_guild_id == None:
+
+            try:
+                rpg_guild = server['rpg']['guilds'][rpg_guild_id]
+
+            except:
+                name = "".join(name)
+                for i in guilds.keys():
+                    i_name = guilds[i]['name']
+                    i_tag = guilds[i]['tag']
+                    if fuzz.token_sort_ratio(i_name, name) > 80 or fuzz.ratio(i_name, name) > 80 or i_name == name:
+                        rpg_guild_id = i
+                    elif fuzz.token_sort_ratio(i_tag, name) > 80 or fuzz.ratio(i_tag, name) > 80 or i_tag == name:
+                        rpg_guild_id = i
+
+        if rpg_guild_id == None and name != None:
+            try:
+                try:
+                    member_id = int(name[2:-1])
+                    member = ctx.guild.get_member(member_id)
+
+                    for i in server['rpg']['guilds'].keys():
+                        g = server['rpg']['guilds'][i]
+                        if str(member.id) in g['members'].keys():
+                            rpg_guild_id = i
+
+                except:
+                    member_id = int(name)
+                    member = ctx.guild.get_member(member_id)
+
+                    for i in server['rpg']['guilds'].keys():
+                        g = server['rpg']['guilds'][i]
+                        if str(member.id) in g['members'].keys():
+                            rpg_guild_id = i
+            except:
+                pass
+
+        if rpg_guild_id == None:
+            emb = discord.Embed(description = 'Гильдия не была найдена!\nВведите более корректно тег / название / id гильдии!',color=server['embed_color'])
+            emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+            await ctx.send(embed = emb)
+
+        else:
+            guild = server['rpg']['guilds'][rpg_guild_id]
+
+            if guild['lvl_enter'] > user['lvl']:
+                emb = discord.Embed(description = 'Ваш уровень не соответсвтует требованиям!',color=server['embed_color'])
+                emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+                await ctx.send(embed = emb)
+                return
+
+            if guild['global_club'] == False:
+                emb = discord.Embed(description = 'В данный момент гильдия закрыта!',color=server['embed_color'])
+                emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+                await ctx.send(embed = emb)
+                return
+
+            else:
+                emb = discord.Embed(description = f'Вы вступили в гильдию {guild["name"]}!',color=server['embed_color'])
+                emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+                await ctx.send(embed = emb)
+
+                server['rpg']['guilds'][rpg_guild_id]['members'][str(member.id)] = {'role': 'member'}
                 servers.update_one( {"server": ctx.guild.id}, {"$set": {'rpg': server['rpg']}} )
 
 

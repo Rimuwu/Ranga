@@ -923,7 +923,7 @@ class MainCog(commands.Cog):
 
                 channel = await self.bot.fetch_channel(server['mod']['log_channel']['channel'])
 
-                emb = discord.Embed(description="Пользователь присоединился к серверу: <t:{int(time.time())}:R>", color=0x76E212)
+                emb = discord.Embed(description=f"Пользователь присоединился к серверу: <t:{int(time.time())}:R>", color=0x76E212)
 
                 if member.nick == None:
                     nick = f"Имя: {member.name}#{member.discriminator}\nУпоминание: {member.mention}"

@@ -636,5 +636,7 @@ class profile(commands.Cog):
             await ctx.send("Информация и картинка персонажа настроенны!")
 
 
+
+
 def setup(bot):
     bot.add_cog(profile(bot))
