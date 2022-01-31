@@ -1905,75 +1905,109 @@ class rpg(commands.Cog):
         user = funs.user_check(ctx.author, ctx.guild)
         server = servers.find_one({"server": ctx.guild.id})
 
+        async def use(dci, msg):
+            nonlocal ctx
+            nonlocal server
+            user = funs.user_check(ctx.author, ctx.guild)
+            member = ctx.author
+            item = dci['it']
+            index = dci['index']
+
+            if user['gm_status'] != False and item['type'] in ['eat','point','case','armor','weapon','pet',"material",'recipe']:
+                await msg.edit("Данный предмет требует рпг-профиль!", view = None)
+
+            else:
+                emb = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь', description = f'Вы использовали предмет: {item["emoji"]} | {item["name"]}',  color=server['embed_color'])
+                await msg.edit(embed = emb, view = None)
+
+                if item['type'] == 'prop':
+                    if item['action_m'] != None:
+                        emb = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь', description = f'Вы использовали предмет: {item["emoji"]} | {item["name"]}\nСообщение: {funs.text_replase(item["action_m"], member)}',  color=server['embed_color'])
+                        await msg.edit(embed = emb, view = None)
+
+                if item['type'] == 'role':
+                    if item['style'] == 'add':
+                        await member.add_roles(self.bot.get_guild(ctx.guild.id).get_role(item['act']))
+
+                    if item['style'] == 'remove':
+                        try:
+                            await member.remove_roles(self.bot.get_guild(ctx.guild.id).get_role(item['act']))
+                        except:
+                            pass
+
+                    if item['action_m'] != None:
+                        emb = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь', description = f'Вы использовали предмет: {item["emoji"]} | {item["name"]}\nСообщение: {funs.text_replase(item["action_m"], member)}',  color=server['embed_color'])
+                        await msg.edit(embed = emb, view = None)
+
+
+                user['inv'].pop(index)
+                funs.user_update(member.id, ctx.guild, 'inv', user['inv'] )
+
         s_i = []
 
         for i in user['inv']:
-            print(i['name'])
-            print(fuzz.token_sort_ratio(i_name, i['name']), fuzz.ratio(i_name,i['name']), i_name == i['name'])
             if fuzz.token_sort_ratio(i_name, i['name']) > 80 or fuzz.ratio(i_name,i['name']) > 80 or i_name == i['name']:
                 s_i.append(i)
 
-        if len(s_i) == 1:
-            emb = discord.Embed(description = f'Вы хотите использовать **{s_i[0]["name"]}** ?', title = '<:inventory_b:886909340550823936> | Инвентарь', color=server['embed_color'])
-            msg = await ctx.send(embed= emb)
-            r = await funs.reactions_check(self.bot, ["✅", "❌"], ctx.author, msg, True)
-            if r != 'Timeout':
-                if str(r.emoji) == "✅":
-                    print('Использование')
-                else:
-                    print('Отмена')
-            else:
-                await ctx.send('Время вышло')
+        inv = {}
 
-        if len(s_i) == 0:
+        items = []
+        for i in server['items'].keys():
+            items.append(server['items'][i])
+
+        for i in s_i:
+            u = i.copy()
+            del i['iid']
+
+            if i in items:
+                if i['name'] in list(inv.keys()):
+                    inv.update({ i['name']: { 'it':i, 'count': inv[i['name']]['count']+1, 'index': user['inv'].index(i) } })
+                else:
+                    inv.update({ i['name']: { 'it':i, 'count': 1, 'index': user['inv'].index(i)} })
+
+            if i not in items:
+                if f'{i["name"]} (#{u["iid"]})' in list(inv.keys()):
+                    inv.update({ f'{i["name"]} (#{u["iid"]})': { 'it':i, 'count': inv[i['name']]['count']+1, 'index': user['inv'].index(i) } })
+                else:
+                    inv.update({ f'{i["name"]} (#{u["iid"]})': { 'it':i, 'count': 1, 'index': user['inv'].index(i) } })
+
+
+        if len(inv) == 1:
+            emb = discord.Embed(description = '<:inventory_b:886909340550823936> | Инвентарь',  color=server['embed_color'])
+            msg = await ctx.send(embed = emb)
+
+            await use(inv[list(inv)[0]], msg)
+
+        if len(inv) == 0:
             emb = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь', description = f'В вашем инвентаре не было найдено такого предмета!\nПопробуйте указать более точное название или осмотрите свой инвентарь более подробно!', color=server['embed_color'])
             msg = await ctx.send(embed= emb)
 
-        if len(s_i) > 1:
-            inv = {}
-
-            items = []
-            for i in server['items'].keys():
-                items.append(server['items'][i])
-
-            for i in s_i:
-                u = i.copy()
-                del i['iid']
-
-                if i in items:
-                    if i['name'] in list(inv.keys()):
-                        inv.update({ i['name']: { 'it':i, 'count': inv[i['name']]['count']+1 } })
-                    else:
-                        inv.update({ i['name']: { 'it':i, 'count': 1 } })
-
-                if i not in items:
-                    if f'{i["name"]} (#{u["iid"]})' in list(inv.keys()):
-                        inv.update({ f'{i["name"]} (#{u["iid"]})': { 'it':i, 'count': inv[i['name']]['count']+1 } })
-                    else:
-                        inv.update({ f'{i["name"]} (#{u["iid"]})': { 'it':i, 'count': 1 } })
-
+        if len(inv) > 1:
 
             class Dropdown(discord.ui.Select):
-                def __init__(self, inv, ctx, msg, emb):
-                    options = []
-                    for k in inv:
-                        options.append(discord.SelectOption(label=f'{k}'))
+                def __init__(self, ctx, msg, options, placeholder, min_values, max_values:int, rem_args):
+                    #options.append(discord.SelectOption(label=f''))
 
-                    super().__init__(placeholder='Выберите используемый предмет...', min_values=1, max_values=1, options=options)
+                    super().__init__(placeholder=placeholder, min_values=min_values, max_values=min_values, options=options)
+                    inv = rem_args[0]
 
                 async def callback(self, interaction: discord.Interaction):
                     if ctx.author.id == interaction.user.id:
-                        await interaction.response.send_message(f'{self.values[0]}', ephemeral = True)
                         self.view.stop()
+                        await use(inv[self.values[0]], msg)
+
 
                     else:
                         await interaction.response.send_message(f'Откройте свой инвентарь!', ephemeral = True)
 
 
             class DropdownView(discord.ui.View):
-                def __init__(self, inv, ctx, msg, emb):
-                    super().__init__()
-                    self.add_item(Dropdown(inv, ctx, msg, emb))
+                def __init__(self, ctx, msg, options:list, placeholder:str, min_values:int = 1, max_values:int = 1, timeout: float = 20.0, rem_args:list = []):
+                    super().__init__(timeout=timeout)
+                    self.add_item(Dropdown(ctx, msg, options, placeholder, min_values, max_values, rem_args))
+
+                async def on_timeout(self):
+                    await msg.edit(view = None)
 
             text = ''
             n = 0
@@ -1982,9 +2016,14 @@ class rpg(commands.Cog):
                 n += 1
                 text += f'{n}# {k} x{i["count"]}\n'
 
+            options = []
+            for k in inv:
+                options.append(discord.SelectOption(label=f'{k}', emoji = inv[k]['it']['emoji']))
+
             emb = discord.Embed(title = '<:inventory_b:886909340550823936> | Инвентарь', description = f'В инвентаре найдено несколько совпадений:\n{text}', color=server['embed_color'])
             msg = await ctx.send(embed = emb)
-            await msg.edit(embed = emb, view=DropdownView(inv, ctx, msg, emb))
+
+            await msg.edit(view=DropdownView(ctx, msg, options = options, placeholder = 'Сделайте выбор...', min_values = 1, max_values=1, timeout = 20.0, rem_args = [inv, emb]))
 
 
 

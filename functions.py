@@ -132,7 +132,21 @@ class functions:
     @staticmethod
     def text_replase(text:str, member: discord.Member = None):
         if text == 'text':
-            text = "Доступные теги:\n`{member.mention}` - упоминает пользователя\n`{member.name}` - отображает имя пользователя\n`{member.tag}` - отображает тег пользователя (6228)\n`{member.name.tag}` - отображает имя и тег пользователя (имя#0000)\n`{guild.name}` -  отображает имя сервера\n`{members}` - отображает колличество пользователей на сервере\n`{members.ordinal}` - отображает колличество пользовталей с окончанием (668-ой)\n`{time}` - указывает время на момент события (24:61 31.02.3021)\n`{premium_subscribers}` - указывает число бустов\n`{boost.role}` - упоминает системную роль бустеров\n`{member.lvl}` - уровень пользователя\n`{member.money}` - монеты пользователя\n`{member.xp}` - опыт полльзователя"
+            text = "Доступные теги:\n"
+            text += "`{member.mention}` - упоминает пользователя\n"
+            text += "`{member.name}` - отображает имя пользователя\n"
+            text += "`{member.tag}` - отображает тег пользователя (6228)\n"
+            text += "`{member.name.tag}` - отображает имя и тег пользователя (имя#0000)\n"
+            text += "`{guild.name}` -  отображает имя сервера\n"
+            text += "`{members}` - отображает колличество пользователей на сервере\n"
+            text += "`{members.ordinal}` - отображает колличество пользовталей с окончанием (668-ой)\n"
+            text += "`{time}` - указывает время на момент события (24:61 31.02.3021)\n"
+            text += "`{utime}` - указывает время на момент события" + f"(<t:{int(time.time())}>)\n"
+            text += "`{premium_subscribers}` - указывает число бустов\n"
+            text += "`{boost.role}` - упоминает системную роль бустеров\n"
+            text += "`{member.lvl}` - уровень пользователя\n"
+            text += "`{member.money}` - монеты пользователя\n"
+            text += "`{member.xp}` - опыт полльзователя"
             return text
 
         Time = time.strftime('%H:%M %d.%m.%Y')
@@ -147,8 +161,9 @@ class functions:
                 ord = "ой"
             elif ord == 3:
                 ord = "ий"
+
             if member != None:
-                user = functions.user_check(member, member.guild)
+
                 text = text.replace('{member.mention}', f'{member.mention}')
                 text = text.replace('{member.name}', f'{member.name}')
                 text = text.replace('{member.tag}', f'{member.discriminator}')
@@ -157,10 +172,20 @@ class functions:
                 text = text.replace('{members}', f'{len(member.guild.members)}')
                 text = text.replace('{premium_subscribers}', f'{len(member.guild.premium_subscribers)}')
                 text = text.replace('{members.ordinal}', f'{len(member.guild.members)}-{ord}')
-                text = text.replace('{member.money}', f'{user["money"]}')
-                text = text.replace('{member.lvl}', f'{user["lvl"]}')
-                text = text.replace('{member.xp}', f'{user["xp"]} / { 5 * user["lvl"]*user["lvl"] + 50 * user["lvl"] + 100}')
+
+                user = functions.user_check(member, member.guild)
+                if user != None:
+
+                    text = text.replace('{member.money}', f'{user["money"]}')
+                    text = text.replace('{member.lvl}', f'{user["lvl"]}')
+                    text = text.replace('{member.xp}', f'{user["xp"]} / { 5 * user["lvl"]*user["lvl"] + 50 * user["lvl"] + 100}')
+
+                    if user['gm_status'] == True:
+                        text = text.replace('{member.hp}', f'{user["hp"]} | {user["hpmax"]}')
+                        text = text.replace('{member.mana}', f'{user["mana"]} | {user["manamax"]}')
+
             text = text.replace('{time}', f'{Time}')
+            text = text.replace('{time}', f'<t:{int(time.time())}>')
 
             if text.find('{boost.role}') != -1:
                 try:
@@ -192,7 +217,6 @@ class functions:
                                'week_act': [0, None],
                     },
 
-                    'Nitro': False,
                     'back': 0,
                     'back_inv': [0],
                     'rep': [[],[]],
@@ -919,9 +943,9 @@ class functions:
         elif item['type'] == 'role':
             ni['type'] = '<:icons8pokeball96:779718625459437608> | Роль'
             if item['style'] == f'add':
-                ni['act_title'] = f"Добавляет вам <@{item['act']}>"
-            elif item['style'] == f'remore':
-                ni['act_title'] = f"Удаляет у вас <@{item['act']}>"
+                ni['act_title'] = f"Добавляет вам <@&{item['act']}>"
+            elif item['style'] == f'remove':
+                ni['act_title'] = f"Удаляет у вас <@&{item['act']}>"
 
         elif item['type'] == 'prop':
             ni['type'] = '📦 | Проп'

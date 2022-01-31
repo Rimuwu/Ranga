@@ -365,9 +365,9 @@ async def poke(Interaction:Interaction, member:discord.Member):
     author = Interaction.user
 
     if member == author:
-        msg = f'{author.mention} тыкнуть сам(а) себя'
+        msg = f'{author.mention} тыкнул(а) сам(а) себя'
     else:
-        msg = f'{author.mention} тыкнуть {member.mention}'
+        msg = f'{author.mention} тыкнул(а) {member.mention}'
 
     emb=discord.Embed(description = str(msg), title = "🍡 | Реакция: тыкнуть", color=server['embed_color'])
     rli = ["https://media.tenor.com/images/8bf3b4bec5055537dda92d86d16ea5bd/tenor.gif",
@@ -1236,7 +1236,7 @@ async def on_message(message):
                         else:
                             tt = int(server['mod']['cooldowns'][ctx.command.name]['role_c'] - time.time())
 
-                    emb = discord.Embed(title = '⏲️ | Режим ожидания', description = f"Команда `{ctx.command}` может быть активированна повторно только через\n**{functions.time_end(tt)}**", color = server['embed_color'])
+                    emb = discord.Embed(title = '⏲️ | Режим ожидания', description = f"Команда `{ctx.command}` может быть активированна повторно <:{int(time.time())}:R>", color = server['embed_color'])
                     emb.set_footer(icon_url = ctx.message.author.avatar.url, text = ctx.message.author)
                     await message.channel.send(embed = emb)
 
