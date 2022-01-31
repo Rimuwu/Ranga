@@ -404,6 +404,30 @@ async def highfive(Interaction:Interaction, member:discord.Member):
     emb.set_image(url = random.choice(rli))
     await Interaction.response.send_message(embed=emb)
 
+@bot.slash_command(guild_ids = g_ids, description = '💕 | Изнасиловать.')
+async def fuckuse(Interaction:Interaction, member:discord.Member):
+    server = servers.find_one({"server": Interaction.guild.id})
+    author = Interaction.user
+
+    if Interaction.channel.nsfw == False:
+        await Interaction.send("Перейдите в NSFW канал!")
+
+    else:
+        if member == author:
+            await Interaction.send("Не нарушай законы этого мира")
+
+        else:
+
+            msg = f'{author.mention} изнасиловал(а) {member.mention}'
+
+            emb=discord.Embed(description = str(msg), title = "💖 | Реакция: изнасиловать", color=server['embed_color'])
+            rli = ['https://static.hentai-img.com/upload/20150527/10/9532/6.gif'
+            ]
+
+            emb.set_image(url = random.choice(rli))
+            await Interaction.response.send_message(embed=emb)
+
+
 @bot.slash_command(guild_ids = g_ids, description = '💕 | Заняться сексом.\n18+ команда.')
 async def sex(Interaction:Interaction, member:discord.Member):
     server = servers.find_one({"server": Interaction.guild.id})
@@ -428,8 +452,8 @@ async def sex(Interaction:Interaction, member:discord.Member):
 
                 emb=discord.Embed(description = str(msg), title = "💖 | Реакция: секс", color=server['embed_color'])
                 rli = ['https://i.redd.it/axk663d95n741.gif',
-                'https://bb.rule-34.net/file/rule-34-images/238019-135282-300-200',
-                'https://static.hentai-img.com/upload/20140924/1/462/71.gif'
+                        'https://3.bp.blogspot.com/-PB0FAnJ9v3M/XJS81vYmoOI/AAAAAAAAHn0/mGMVTS_bKdg5cMd9PoELGMrsYVldhcPUwCK4BGAYYCw/s1600/Unitia%2B369.gif',
+                        'https://static.hentai-img.com/upload/20111127/6/5329/28.gif'
 
                 ]
 
