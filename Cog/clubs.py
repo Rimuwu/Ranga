@@ -747,6 +747,11 @@ class clubs(commands.Cog):
             emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
             await ctx.send(embed = emb)
 
+        if guild['max_users'] >= len(guild['members'].keys()):
+            emb = discord.Embed(description = 'Достигнуто максимальное количсетво пользователей!', color=0xf03e65)
+            emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+            await ctx.send(embed = emb)
+
         else:
             if member is None:
                 emb = discord.Embed(description = 'Укажите пользователя!', color=0xf03e65)
@@ -1494,6 +1499,11 @@ class clubs(commands.Cog):
                 emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
                 await ctx.send(embed = emb)
                 return
+
+            if guild['max_users'] >= len(guild['members'].keys()):
+                emb = discord.Embed(description = 'Достигнуто максимальное количсетво пользователей!', color=0xf03e65)
+                emb.set_author(name = '{}'.format(ctx.author), icon_url = '{}'.format(ctx.author.avatar.url))
+                await ctx.send(embed = emb)
 
             if guild['global_club'] == False:
                 emb = discord.Embed(description = 'В данный момент гильдия закрыта!',color=server['embed_color'])

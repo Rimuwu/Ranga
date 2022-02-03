@@ -55,7 +55,7 @@ class info(commands.Cog):
         embed.add_field(name="Разработчик", value=f"<@323512096350535680>")
         embed.add_field(name="Пинг:",value=f"{ping_emoji} `{ping * 1000:.0f}ms`")
         embed.add_field(name="Статистика:",value=f"Пользователей: {len(self.bot.users)}\nКоманд: {len(self.bot.commands)}\n", inline=True)
-        embed.add_field(name="Библиотека", value="nextcord 2.0.0a5")
+        embed.add_field(name="Библиотека", value="nextcord 2.0.0a6")
         embed.add_field(name="Хостинг", value="heroku")
         try:
             embed.set_thumbnail(url= b.avatar.url)

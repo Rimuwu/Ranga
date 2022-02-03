@@ -1988,7 +1988,7 @@ class rpg(commands.Cog):
                 def __init__(self, ctx, msg, options, placeholder, min_values, max_values:int, rem_args):
                     #options.append(discord.SelectOption(label=f''))
 
-                    super().__init__(placeholder=placeholder, min_values=min_values, max_values=min_values, options=options)
+                    super().__init__(placeholder=placeholder, min_values=min_values, max_values=max_values, options=options)
                     inv = rem_args[0]
 
                 async def callback(self, interaction: discord.Interaction):
@@ -2093,7 +2093,7 @@ class rpg(commands.Cog):
                 def __init__(self, ctx, msg, options, placeholder, min_values, max_values:int, rem_args):
                     #options.append(discord.SelectOption(label=f''))
 
-                    super().__init__(placeholder=placeholder, min_values=min_values, max_values=min_values, options=options)
+                    super().__init__(placeholder=placeholder, min_values=min_values, max_values=max_values, options=options)
                     inv = rem_args[0]
 
                 async def callback(self, interaction: discord.Interaction):

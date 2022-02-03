@@ -1236,7 +1236,7 @@ async def on_message(message):
                         else:
                             tt = int(server['mod']['cooldowns'][ctx.command.name]['role_c'] - time.time())
 
-                    emb = discord.Embed(title = '⏲️ | Режим ожидания', description = f"Команда `{ctx.command}` может быть активированна повторно <:{int(time.time())}:R>", color = server['embed_color'])
+                    emb = discord.Embed(title = '⏲️ | Режим ожидания', description = f"Команда `{ctx.command}` может быть активированна повторно <t:{int(time.time())}:R>", color = server['embed_color'])
                     emb.set_footer(icon_url = ctx.message.author.avatar.url, text = ctx.message.author)
                     await message.channel.send(embed = emb)
 
