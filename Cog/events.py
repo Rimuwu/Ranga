@@ -2452,35 +2452,5 @@ class MainCog(commands.Cog):
         except Exception:
             pass
 
-    @commands.Cog.listener()
-    async def on_socket_raw_receive(self, data):
-        data = json.loads(data)
-
-        if not data or not data["t"]:
-                    return
-        if data["t"] == "VOICE_SERVER_UPDATE":
-            guild_id = int(data["d"]["guild_id"])
-            endpoint = data["d"]["endpoint"]
-            token = data["d"]["token"]
-
-            await lavalink.raw_voice_server_update(guild_id, endpoint, token)
-
-        elif data["t"] == "VOICE_STATE_UPDATE":
-            if not data["d"]["channel_id"]:
-                channel_id = None
-            else:
-                channel_id = int(data["d"]["channel_id"])
-
-            guild_id = int(data["d"]["guild_id"])
-            user_id = int(data["d"]["user_id"])
-            session_id = data["d"]["session_id"]
-
-            await lavalink.raw_voice_state_update(
-                guild_id,
-                user_id,
-                session_id,
-                channel_id,
-            )
-
 def setup(bot):
     bot.add_cog(MainCog(bot))
